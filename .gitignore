@@ -128,4 +128,102 @@ venv.bak/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db 
+Thumbs.db
+
+# ===== PROJECT SPECIFIC =====
+
+# Cursor AI IDE
+.cursor/
+
+# Environment and Configuration
+config/.env
+*.env
+.env.*
+
+# Data and Output Directories
+data/
+outputs/
+reports/
+temp/
+tmp/
+
+# Logs
+logs/
+*.log
+log*.txt
+
+# Vector Database and Embeddings
+chroma_db/
+*.index
+*.faiss
+embeddings/
+vectorstore/
+
+# LLM and AI Cache
+.llm_cache/
+.openai_cache/
+.deepseek_cache/
+model_cache/
+
+# Downloaded Papers and PDFs
+papers/
+pdfs/
+downloads/
+*.pdf
+
+# Research Data and Outputs
+literature_reviews/
+summaries/
+analysis/
+results/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Temporary Python files
+*.tmp
+*.temp
+
+# Large files that shouldn't be in version control
+*.gz
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# API Keys and Secrets (extra protection)
+secrets/
+keys/
+credentials/
+api_keys.txt
+*.key
+*.secret
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter notebook outputs
+*.ipynb_checkouts
+
+# pytest
+.pytest_cache/
+pytest.ini
+
+# Coverage reports
+.coverage
+htmlcov/
+coverage/
+
+# Documentation build
+docs/build/
+site/
+
+# Local development
+.local/
+local/
+dev/
+development/ 
