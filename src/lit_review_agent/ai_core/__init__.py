@@ -1,13 +1,16 @@
-"""AI Core components for literature review agent."""
+"""AI Core module for the Literature Review Agent.
 
-from .llm_manager import LLMManager
-from .summarizer import LiteratureSummarizer
-from .trend_analyzer import TrendAnalyzer
-from .report_generator import ReportGenerator
+This module contains components related to Large Language Model (LLM) interactions,
+summarization, trend analysis, and other AI-driven functionalities.
+"""
+
+# Import key classes to make them available at the package level (optional)
+# from .llm_manager import LLMManager
+# from .summarizer import Summarizer
+# from .trend_analyzer import TrendAnalyzer
 
 __all__ = [
-    "LLMManager",
-    "LiteratureSummarizer",
-    "TrendAnalyzer",
-    "ReportGenerator",
+    # "LLMManager",
+    # "Summarizer",
+    # "TrendAnalyzer",
 ]
