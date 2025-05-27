@@ -14,6 +14,7 @@ from .retrieval.pdf_processor import PDFProcessor
 from .retrieval.semantic_scholar_client import SemanticScholarClient
 from .utils.config import Config
 from .utils.logger import LoggerMixin, get_logger, setup_logger
+from .utils.display import display, print_status, print_error, print_success, print_warning
 from .ai_core.summarizer import Summarizer
 
 logger = get_logger(__name__)
@@ -88,6 +89,12 @@ class LiteratureAgent(LoggerMixin):
             A dictionary containing the review results, including retrieved papers,
             analysis, and potentially identified trends.
         """
+        # Display enhanced header
+        display.print_header(
+            f"Literature Review: {research_topic}",
+            f"Max Papers: {max_papers} | Full Text: {'Yes' if retrieve_full_text else 'No'}"
+        )
+        
         self.logger.info(f"Starting literature review for topic: '{research_topic}'")
         self.logger.debug(
             f"Parameters: max_papers={max_papers}, sources={sources}, retrieve_full_text={retrieve_full_text}, "
@@ -96,6 +103,7 @@ class LiteratureAgent(LoggerMixin):
 
         if sources is None:
             sources = self.config.default_retrieval_sources
+            print_status(f"Using default sources: {sources}")
             self.logger.info(f"No sources specified, using default sources from config: {sources}")
         
         # Ensure sources is a list, even if it's from config as a string
@@ -112,146 +120,211 @@ class LiteratureAgent(LoggerMixin):
 
         papers_per_source = max_papers // active_sources_count if active_sources_count > 0 else max_papers
         if papers_per_source == 0 and max_papers > 0 : papers_per_source = 1 
+        
+        print_status(f"Active sources: {active_sources_count}, Papers per source: {papers_per_source}")
         self.logger.debug(f"Active sources: {active_sources_count}, Papers per source: {papers_per_source}")
 
-        if "arxiv" in sources and self.arxiv_client:
-            try:
-                self.logger.info(f"Retrieving up to {papers_per_source} papers from arXiv for topic: '{research_topic}'")
-                arxiv_papers_items = await self.arxiv_client.search(
-                    query=research_topic,
-                    max_results=papers_per_source
-                )
-                retrieved_items.extend(arxiv_papers_items)
-                self.logger.info(f"Retrieved {len(arxiv_papers_items)} items from arXiv.")
-            except Exception as e:
-                self.logger.error(f"Error retrieving from arXiv: {e}", exc_info=True)
-        
-        if "semantic_scholar" in sources and self.semantic_scholar_client:
-            try:
-                self.logger.info(f"Retrieving up to {papers_per_source} papers from Semantic Scholar for topic: '{research_topic}'")
-                s2_papers_items = await self.semantic_scholar_client.search(
-                    query=research_topic,
-                    max_results=papers_per_source,
-                    year_start=year_start, 
-                    year_end=year_end
-                )
-                retrieved_items.extend(s2_papers_items) # Will deduplicate later
-                self.logger.info(f"Retrieved {len(s2_papers_items)} items from Semantic Scholar (pre-deduplication)." )
-            except Exception as e:
-                self.logger.error(f"Error retrieving from Semantic Scholar: {e}", exc_info=True)
-
-        self.logger.info(f"Total items retrieved from all sources before deduplication: {len(retrieved_items)}")
-
-        # Deduplication Stage 1: Based on unique identifiers (DOI, ArXiv ID)
-        temp_deduped_items_by_id: List[LiteratureItem] = []
-        seen_ids_for_dedup = set() 
-        for item in retrieved_items:
-            unique_id = None
-            if item.doi:
-                unique_id = item.doi.lower()
-            elif item.arxiv_id: # Ensure arxiv_id from S2 is comparable to arxiv_client's (e.g. no "arxiv:" prefix for s2's internal)
-                # ArxivClient stores arxiv_id without prefix. S2 Client also stores it without prefix after parsing.
-                unique_id = item.arxiv_id.lower()
-            # If item.id is already prefixed (e.g. "arxiv:xxxx" or "s2:yyyy"), consider using it as part of dedup key
-            # For now, DOI and ArXiv ID are primary for cross-source deduplication.
-            
-            if unique_id and unique_id in seen_ids_for_dedup:
-                self.logger.debug(f"Deduplicating item by ID ({unique_id}): '{item.title}'")
-                continue
-            if unique_id:
-                seen_ids_for_dedup.add(unique_id)
-            temp_deduped_items_by_id.append(item)
-        retrieved_items = temp_deduped_items_by_id
-        self.logger.info(f"{len(retrieved_items)} items after ID-based deduplication (DOI/ArXiv ID)." )
-
-        # Deduplication Stage 2: Softer deduplication (e.g., normalized title and first author name)
-        final_deduped_items: List[LiteratureItem] = []
-        seen_title_author_hash = set()
-        for item in retrieved_items:
-            norm_title = ''.join(e for e in item.title.lower() if e.isalnum() or e.isspace()).strip()
-            first_author_norm = item.authors[0].lower().strip() if item.authors else "unknown_author"
-            # Create a hash or tuple for the pair
-            title_author_key = hash((norm_title, first_author_norm))
-            
-            if title_author_key in seen_title_author_hash:
-                self.logger.debug(f"Deduplicating item by title/author ('{norm_title}' / '{first_author_norm}'): '{item.title}'")
-                continue
-            seen_title_author_hash.add(title_author_key)
-            final_deduped_items.append(item)
-        retrieved_items = final_deduped_items
-        self.logger.info(f"{len(retrieved_items)} items after title/author soft deduplication.")
-        
-        if len(retrieved_items) > max_papers:
-            self.logger.info(f"Limiting {len(retrieved_items)} deduplicated items to {max_papers}.")
-            # TODO: Implement sorting by relevance or date before truncating if needed.
-            # For now, just take the first N. A more sophisticated approach might involve scoring.
-            retrieved_items = retrieved_items[:max_papers]
-
+        # Create progress bar for retrieval
+        total_steps = len([s for s in sources if s in ["arxiv", "semantic_scholar"]])
         if retrieve_full_text:
-            self.logger.info(f"Attempting to retrieve full text for {len(retrieved_items)} items...")
-            for i in range(len(retrieved_items)):
-                item = retrieved_items[i]
-                if item.pdf_url:
-                    self.logger.debug(f"Processing PDF for: '{item.title}' from {item.pdf_url}")
-                    try:
-                        full_text_content = await self.pdf_processor.extract_text_from_url(item.pdf_url)
-                        if full_text_content:
-                            retrieved_items[i].full_text = full_text_content 
-                            self.logger.info(f"Extracted full text for: '{item.title}' ({len(full_text_content)} chars)")
-                        else:
-                            self.logger.warning(f"Could not extract full text for: '{item.title}' (empty content from PDF processor). URL: {item.pdf_url}")
-                    except Exception as pdf_e:
-                        self.logger.error(f"Error processing PDF for '{item.title}' from {item.pdf_url}: {pdf_e}", exc_info=False)
-                elif not item.full_text: # If full_text wasn't already populated by the retriever (e.g. arXiv summary sometimes is in full_text)
-                     self.logger.debug(f"No PDF URL for item: '{item.title}', skipping full text retrieval.")
-
-        for item in retrieved_items:
-            self.logger.debug(f"Final processing stage for item: '{item.title}' (ID: {item.id})")
-            text_for_ai = item.full_text if item.full_text else item.abstract
-            if not text_for_ai:
-                self.logger.warning(f"No text (full or abstract) available for AI processing of '{item.title}'.")
-                ai_summary = "No text content available for summarization."
-                keywords = []
-            else:
-                self.logger.debug(f"Using text (len: {len(text_for_ai)}) for AI processing of '{item.title}'. Full text used: {bool(item.full_text)}.")
+            total_steps += 1  # Add step for full text processing
+        total_steps += 1  # Add step for AI processing
+        
+        progress = display.create_progress_bar("Retrieving literature...", total=total_steps)
+        progress.start()
+        
+        try:
+            if "arxiv" in sources and self.arxiv_client:
                 try:
-                    keywords = self.text_processor.extract_research_keywords(text_for_ai, max_keywords=10)
-                except Exception as kw_e:
-                    self.logger.error(f"Error extracting keywords for {item.title}: {kw_e}", exc_info=True)
-                    keywords = [] 
-                try:
-                    summary_type_for_llm = "key_findings" if item.full_text else "abstract_enhancement"
-                    self.logger.debug(f"Requesting '{summary_type_for_llm}' summary for '{item.title}'")
-                    ai_summary = await self.summarizer.summarize_text(
-                        text=text_for_ai, 
-                        summary_type=summary_type_for_llm,
+                    display.update_progress(description="🔍 Searching arXiv...")
+                    print_status(f"Retrieving up to {papers_per_source} papers from arXiv...")
+                    self.logger.info(f"Retrieving up to {papers_per_source} papers from arXiv for topic: '{research_topic}'")
+                    
+                    arxiv_papers_items = await self.arxiv_client.search(
+                        query=research_topic,
+                        max_results=papers_per_source
                     )
-                except Exception as summ_e:
-                    self.logger.error(f"Error using Summarizer for {item.title}: {summ_e}", exc_info=True)
-                    ai_summary = "AI summary generation failed."
-                                
-            processed_papers.append({
-                "title": item.title,
-                "authors": item.authors if item.authors else [],
-                "published_date": item.publication_date.isoformat() if item.publication_date else None,
-                "url": item.url,
-                "pdf_url": item.pdf_url,
-                "original_summary": item.abstract,
-                "ai_enhanced_summary": ai_summary,
-                "full_text_retrieved": bool(item.full_text),
-                "full_text_snippet": item.full_text[:200] + "..." if item.full_text else None, 
-                "keywords": keywords,
-                "source": item.source,
-                "item_id_internal": item.id 
-            })
+                    retrieved_items.extend(arxiv_papers_items)
+                    print_success(f"Retrieved {len(arxiv_papers_items)} items from arXiv")
+                    self.logger.info(f"Retrieved {len(arxiv_papers_items)} items from arXiv.")
+                    display.update_progress(advance=1)
+                except Exception as e:
+                    print_error(f"Error retrieving from arXiv: {e}")
+                    self.logger.error(f"Error retrieving from arXiv: {e}", exc_info=True)
+            
+            if "semantic_scholar" in sources and self.semantic_scholar_client:
+                try:
+                    display.update_progress(description="🔍 Searching Semantic Scholar...")
+                    print_status(f"Retrieving up to {papers_per_source} papers from Semantic Scholar...")
+                    self.logger.info(f"Retrieving up to {papers_per_source} papers from Semantic Scholar for topic: '{research_topic}'")
+                    
+                    s2_papers_items = await self.semantic_scholar_client.search(
+                        query=research_topic,
+                        max_results=papers_per_source,
+                        year_start=year_start, 
+                        year_end=year_end
+                    )
+                    retrieved_items.extend(s2_papers_items) # Will deduplicate later
+                    print_success(f"Retrieved {len(s2_papers_items)} items from Semantic Scholar")
+                    self.logger.info(f"Retrieved {len(s2_papers_items)} items from Semantic Scholar (pre-deduplication)." )
+                    display.update_progress(advance=1)
+                except Exception as e:
+                    print_error(f"Error retrieving from Semantic Scholar: {e}")
+                    self.logger.error(f"Error retrieving from Semantic Scholar: {e}", exc_info=True)
 
-        self.logger.info(f"Literature review completed. Processed {len(processed_papers)} papers." )
-        return {
+            display.update_progress(description="🔄 Processing and deduplicating results...")
+            print_status(f"Total items retrieved from all sources: {len(retrieved_items)}")
+            self.logger.info(f"Total items retrieved from all sources before deduplication: {len(retrieved_items)}")
+
+            # Deduplication Stage 1: Based on unique identifiers (DOI, ArXiv ID)
+            temp_deduped_items_by_id: List[LiteratureItem] = []
+            seen_ids_for_dedup = set() 
+            for item in retrieved_items:
+                unique_id = None
+                if item.doi:
+                    unique_id = item.doi.lower()
+                elif item.arxiv_id: # Ensure arxiv_id from S2 is comparable to arxiv_client's (e.g. no "arxiv:" prefix for s2's internal)
+                    # ArxivClient stores arxiv_id without prefix. S2 Client also stores it without prefix after parsing.
+                    unique_id = item.arxiv_id.lower()
+                # If item.id is already prefixed (e.g. "arxiv:xxxx" or "s2:yyyy"), consider using it as part of dedup key
+                # For now, DOI and ArXiv ID are primary for cross-source deduplication.
+                
+                if unique_id and unique_id in seen_ids_for_dedup:
+                    self.logger.debug(f"Deduplicating item by ID ({unique_id}): '{item.title}'")
+                    continue
+                if unique_id:
+                    seen_ids_for_dedup.add(unique_id)
+                temp_deduped_items_by_id.append(item)
+            retrieved_items = temp_deduped_items_by_id
+            print_status(f"{len(retrieved_items)} items after ID-based deduplication")
+            self.logger.info(f"{len(retrieved_items)} items after ID-based deduplication (DOI/ArXiv ID)." )
+
+            # Deduplication Stage 2: Softer deduplication (e.g., normalized title and first author name)
+            final_deduped_items: List[LiteratureItem] = []
+            seen_title_author_hash = set()
+            for item in retrieved_items:
+                norm_title = ''.join(e for e in item.title.lower() if e.isalnum() or e.isspace()).strip()
+                first_author_norm = item.authors[0].lower().strip() if item.authors else "unknown_author"
+                # Create a hash or tuple for the pair
+                title_author_key = hash((norm_title, first_author_norm))
+                
+                if title_author_key in seen_title_author_hash:
+                    self.logger.debug(f"Deduplicating item by title/author ('{norm_title}' / '{first_author_norm}'): '{item.title}'")
+                    continue
+                seen_title_author_hash.add(title_author_key)
+                final_deduped_items.append(item)
+            retrieved_items = final_deduped_items
+            print_success(f"{len(retrieved_items)} unique items after complete deduplication")
+            self.logger.info(f"{len(retrieved_items)} items after title/author soft deduplication.")
+            
+            if len(retrieved_items) > max_papers:
+                print_status(f"Limiting {len(retrieved_items)} deduplicated items to {max_papers}")
+                self.logger.info(f"Limiting {len(retrieved_items)} deduplicated items to {max_papers}.")
+                # TODO: Implement sorting by relevance or date before truncating if needed.
+                # For now, just take the first N. A more sophisticated approach might involve scoring.
+                retrieved_items = retrieved_items[:max_papers]
+
+            if retrieve_full_text:
+                display.update_progress(description="📄 Retrieving full text content...")
+                print_status(f"Attempting to retrieve full text for {len(retrieved_items)} items...")
+                self.logger.info(f"Attempting to retrieve full text for {len(retrieved_items)} items...")
+                
+                success_count = 0
+                for i, item in enumerate(retrieved_items):
+                    display.update_progress(description=f"📄 Processing PDF {i+1}/{len(retrieved_items)}: {item.title[:25]}...")
+                    
+                    if item.pdf_url:
+                        self.logger.debug(f"Processing PDF for: '{item.title}' from {item.pdf_url}")
+                        try:
+                            full_text_content = await self.pdf_processor.extract_text_from_url(item.pdf_url)
+                            if full_text_content:
+                                retrieved_items[i].full_text = full_text_content 
+                                success_count += 1
+                                self.logger.info(f"Extracted full text for: '{item.title}' ({len(full_text_content)} chars)")
+                            else:
+                                self.logger.warning(f"Could not extract full text for: '{item.title}' (empty content from PDF processor). URL: {item.pdf_url}")
+                        except Exception as pdf_e:
+                            self.logger.error(f"Error processing PDF for '{item.title}' from {item.pdf_url}: {pdf_e}", exc_info=False)
+                    elif not item.full_text: # If full_text wasn't already populated by the retriever (e.g. arXiv summary sometimes is in full_text)
+                         self.logger.debug(f"No PDF URL for item: '{item.title}', skipping full text retrieval.")
+                
+                print_success(f"Successfully extracted full text for {success_count}/{len(retrieved_items)} papers")
+                display.update_progress(advance=1)
+
+            # AI Processing stage
+            display.update_progress(description="🤖 Processing with AI...")
+            print_status(f"Starting AI processing for {len(retrieved_items)} papers...")
+            
+            for i, item in enumerate(retrieved_items):
+                display.update_progress(description=f"🤖 AI processing {i+1}/{len(retrieved_items)}: {item.title[:25]}...")
+                self.logger.debug(f"Final processing stage for item: '{item.title}' (ID: {item.id})")
+                text_for_ai = item.full_text if item.full_text else item.abstract
+                if not text_for_ai:
+                    self.logger.warning(f"No text (full or abstract) available for AI processing of '{item.title}'.")
+                    ai_summary = "No text content available for summarization."
+                    keywords = []
+                else:
+                    self.logger.debug(f"Using text (len: {len(text_for_ai)}) for AI processing of '{item.title}'. Full text used: {bool(item.full_text)}.")
+                    try:
+                        keywords = self.text_processor.extract_research_keywords(text_for_ai, max_keywords=10)
+                    except Exception as kw_e:
+                        self.logger.error(f"Error extracting keywords for {item.title}: {kw_e}", exc_info=True)
+                        keywords = [] 
+                    try:
+                        summary_type_for_llm = "key_findings" if item.full_text else "abstract_enhancement"
+                        self.logger.debug(f"Requesting '{summary_type_for_llm}' summary for '{item.title}'")
+                        ai_summary = await self.summarizer.summarize_text(
+                            text=text_for_ai, 
+                            summary_type=summary_type_for_llm,
+                        )
+                    except Exception as summ_e:
+                        self.logger.error(f"Error using Summarizer for {item.title}: {summ_e}", exc_info=True)
+                        ai_summary = "AI summary generation failed."
+                                    
+                processed_papers.append({
+                    "title": item.title,
+                    "authors": item.authors if item.authors else [],
+                    "published_date": item.publication_date.isoformat() if item.publication_date else None,
+                    "url": item.url,
+                    "pdf_url": item.pdf_url,
+                    "original_summary": item.abstract,
+                    "ai_enhanced_summary": ai_summary,
+                    "full_text_retrieved": bool(item.full_text),
+                    "full_text_snippet": item.full_text[:200] + "..." if item.full_text else None, 
+                    "keywords": keywords,
+                    "source": item.source,
+                    "item_id_internal": item.id 
+                })
+
+            display.update_progress(advance=1)
+            
+        except Exception as e:
+            print_error(f"Error during literature review: {e}")
+            self.logger.error(f"Error during literature review: {e}", exc_info=True)
+        finally:
+            display.finish_progress()
+        
+        # Display final results
+        results = {
             "research_topic": research_topic,
-            "retrieved_items": [item.model_dump() for item in retrieved_items],  # Convert LiteratureItem objects to dicts
+            "retrieved_items": [item.model_dump() for item in retrieved_items],
             "processed_papers": processed_papers,
             "num_papers_processed": len(processed_papers)
         }
+        
+        # Show summary panel
+        summary_panel = display.create_summary_panel(results)
+        display.console.print(summary_panel)
+        
+        # Show papers table
+        if processed_papers:
+            papers_table = display.create_papers_table(processed_papers)
+            display.console.print(papers_table)
+        
+        print_success(f"Literature review completed! Processed {len(processed_papers)} papers")
+        self.logger.info(f"Literature review completed. Processed {len(processed_papers)} papers.")
+        
+        return results
     
     async def search_similar_papers(self,
                                   query: str,
@@ -547,20 +620,31 @@ if __name__ == '__main__':
     import asyncio
 
     async def main():
-        print("Testing LiteratureAgent...")
+        # Setup enhanced display
+        display.print_header(
+            "Literature Review Agent - Testing Mode",
+            "Enhanced CLI with Rich Display Support"
+        )
+        
+        print_status("Initializing Literature Agent...")
         
         custom_config = Config(
             arxiv_api_url="http://export.arxiv.org/api/", 
             spacy_model_name="en_core_web_sm",
-            log_level="DEBUG", 
+            log_level="INFO",  # Changed to INFO for cleaner demo output
             # Ensure SEMANTIC_SCHOLAR_API_KEY is set in .env or here if needed for non-mock tests
             # semantic_scholar_api_key="YOUR_S2_KEY_HERE_IF_NEEDED" 
         )
-        setup_logger(level=custom_config.log_level.upper())
+        setup_logger(log_level=custom_config.log_level.upper(), use_rich=True)
         agent = LiteratureAgent(config=custom_config)
         
+        print_success("Agent initialized successfully!")
+        
         topic = "transformers in natural language processing"
-        print(f"\nConducting review for: '{topic}' sources: {custom_config.default_retrieval_sources}")
+        print_status(f"Starting literature review for: '{topic}'")
+        print_status(f"Using sources: {custom_config.default_retrieval_sources}")
+        
+        # The conduct_literature_review method now handles all the display automatically
         review_results = await agent.conduct_literature_review(
             topic,
             max_papers=6, 
@@ -569,27 +653,26 @@ if __name__ == '__main__':
             year_start=2022,
             year_end=2023 
         )
-        print(f"\nReview results for '{topic}':")
-        print(f"Total papers processed: {review_results['num_papers_processed']}")
-
-        for i, paper in enumerate(review_results.get("papers", [])):
-            print(f"  --- Paper {i+1} ---")
-            print(f"  Title: {paper['title']}")
-            print(f"  Authors: {', '.join(paper['authors']) if paper['authors'] else 'N/A'}")
-            print(f"  Source: {paper.get('source', 'N/A')} (ID: {paper.get('item_id_internal')})")
-            print(f"  Published: {paper.get('published_date', 'N/A')}")
-            print(f"  Keywords: {paper.get('keywords', [])}")
-            print(f"  AI Summary: {paper.get('ai_enhanced_summary', 'N/A')}")
-            print(f"  Full text retrieved: {paper.get('full_text_retrieved')}")
-            if paper.get('full_text_retrieved'):
-                print(f"  Full text snippet: {paper.get('full_text_snippet', 'N/A')}")
         
-        # ... (rest of the test code if any) ...
+        # Display detailed paper information if requested
+        if review_results.get("processed_papers"):
+            display.print_rule("Detailed Paper Information")
+            
+            for i, paper in enumerate(review_results["processed_papers"][:3], 1):  # Show only first 3 in detail
+                display.print_paper_details(paper, i)
+        
+        # Show completion message
+        display.print_rule("Review Complete")
+        print_success("Literature review process completed successfully!")
 
     try:
         asyncio.run(main())
     except RuntimeError as e:
         if "cannot be called from a running event loop" in str(e):
-            logger.warning("Could not run asyncio.run(main()) directly, possibly due to existing event loop.")
+            print_error("Could not run asyncio.run(main()) directly, possibly due to existing event loop.")
         else:
+            print_error(f"Runtime error: {e}")
             raise e 
+    except Exception as e:
+        print_error(f"An unexpected error occurred: {e}")
+        raise e 

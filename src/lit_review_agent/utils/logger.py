@@ -6,12 +6,20 @@ from typing import Optional
 
 from loguru import logger
 
+# Import Rich handler if available
+try:
+    from .display import get_rich_handler
+    RICH_AVAILABLE = True
+except ImportError:
+    RICH_AVAILABLE = False
+
 
 def setup_logger(
     log_level: str = "INFO",
     log_file: Optional[str] = None,
     rotation: str = "10 MB",
     retention: str = "1 week",
+    use_rich: bool = True,
 ) -> logger:
     """
     Setup and configure the logger for the application.
@@ -21,6 +29,7 @@ def setup_logger(
         log_file: Path to the log file. If None, only console logging is used.
         rotation: Log file rotation settings
         retention: Log file retention settings
+        use_rich: Whether to use Rich formatting for console output
     
     Returns:
         Configured logger instance
@@ -28,16 +37,38 @@ def setup_logger(
     # Remove default logger
     logger.remove()
     
-    # Add console logging with formatting
-    logger.add(
-        sys.stderr,
-        level=log_level,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-               "<level>{level: <8}</level> | "
-               "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-               "<level>{message}</level>",
-        colorize=True,
-    )
+    # Configure console logging
+    if use_rich and RICH_AVAILABLE:
+        # Use Rich handler for enhanced console output
+        import logging
+        
+        # Create a standard logging logger to bridge with Rich
+        logging_logger = logging.getLogger("lit_review_agent")
+        logging_logger.setLevel(getattr(logging, log_level.upper()))
+        
+        # Add Rich handler to standard logger
+        rich_handler = get_rich_handler()
+        rich_handler.setLevel(getattr(logging, log_level.upper()))
+        logging_logger.addHandler(rich_handler)
+        
+        # Configure loguru to forward to standard logging
+        logger.add(
+            lambda message: logging_logger.info(message.rstrip('\n')),
+            level=log_level,
+            format="{message}",
+            colorize=False,
+        )
+    else:
+        # Fallback to standard loguru console formatting
+        logger.add(
+            sys.stderr,
+            level=log_level,
+            format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+                   "<level>{level: <8}</level> | "
+                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+                   "<level>{message}</level>",
+            colorize=True,
+        )
     
     # Add file logging if specified
     if log_file:
