@@ -383,6 +383,27 @@ def inject_custom_css():
         transform: translateY(-2px);
     }
 
+    /* 确保卡片内的Streamlit组件样式正确 */
+    .paper-card-modern .stMarkdown {
+        margin-bottom: 0.75rem;
+    }
+
+    .paper-card-modern .stMarkdown:last-child {
+        margin-bottom: 0;
+    }
+
+    .paper-card-modern p {
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    .paper-card-modern strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
     .paper-number-modern {
         position: absolute;
         top: 1rem;
@@ -690,7 +711,7 @@ def display_metrics(results: Dict):
 
 
 def display_paper_card(paper: Dict, index: int):
-    """显示单个论文卡片 - 现代极简风格。"""
+    """显示单个论文卡片 - 现代极简风格，使用Streamlit原生组件。"""
     # 处理作者列表
     authors = paper.get("authors", [])
     if authors:
@@ -712,65 +733,60 @@ def display_paper_card(paper: Dict, index: int):
     else:
         date_str = "未知日期"
     
-    # 处理关键词
-    keywords = paper.get("keywords", [])
-    keywords_html = ""
-    if keywords:
-        for kw in keywords[:6]:
-            keywords_html += f'<span class="keyword-tag-modern">{kw}</span>'
-    
-    # 处理链接
-    links_html = ""
-    if paper.get("url"):
-        links_html += f'<a href="{paper["url"]}" target="_blank" class="paper-link-modern">📄 查看原文</a>'
-    if paper.get("pdf_url"):
-        links_html += f'<a href="{paper["pdf_url"]}" target="_blank" class="paper-link-modern">📁 PDF下载</a>'
-    
-    # 摘要处理 - 确保HTML安全
-    summary = paper.get("ai_enhanced_summary", paper.get("original_summary", "暂无摘要"))
-    # 转义HTML字符
-    import html
-    summary = html.escape(summary) if summary else "暂无摘要"
-    if len(summary) > 250:
-        summary = summary[:250] + "..."
-    
-    # 转义标题和作者中的HTML字符
-    title = html.escape(paper.get("title", "未知标题"))
-    authors_str = html.escape(authors_str)
-    
-    # 使用容器显示卡片
+    # 使用Streamlit原生组件构建卡片
     with st.container():
-        st.markdown(f"""
-        <div class="paper-card-modern fade-in-up">
-            <div class="paper-number-modern">#{index}</div>
-            <div class="paper-title-modern">
-                {title}
-            </div>
-            <div class="paper-meta-modern">
-                <div class="paper-meta-item-modern">
-                    <span>👥</span>
-                    <span>{authors_str}</span>
-                </div>
-                <div class="paper-meta-item-modern">
-                    <span>📅</span>
-                    <span>{date_str}</span>
-                </div>
-                <div class="paper-meta-item-modern">
-                    <span>📊</span>
-                    <span>{paper.get("source", "unknown").upper()}</span>
-                </div>
-            </div>
-            <div class="paper-abstract-modern">
-                {summary}
-            </div>
-            <div class="paper-keywords-modern">
-                {keywords_html}
-            </div>
-            <div class="paper-actions-modern">
-                {links_html}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        # 开始卡片容器
+        st.markdown('<div class="paper-card-modern fade-in-up">', unsafe_allow_html=True)
+        
+        # 论文编号（右上角）
+        st.markdown(f'<div class="paper-number-modern">#{index}</div>', unsafe_allow_html=True)
+        
+        # 论文标题
+        st.markdown(f'<div class="paper-title-modern">{paper.get("title", "未知标题")}</div>', unsafe_allow_html=True)
+        
+        # 元信息行
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f"👥 **作者:** {authors_str}")
+        with col2:
+            st.markdown(f"📅 **日期:** {date_str}")
+        with col3:
+            st.markdown(f"📊 **来源:** {paper.get('source', 'unknown').upper()}")
+        
+        # 摘要
+        summary = paper.get("ai_enhanced_summary", paper.get("original_summary", "暂无摘要"))
+        if len(summary) > 300:
+            summary = summary[:300] + "..."
+        st.markdown(f"**摘要:** {summary}")
+        
+        # 关键词
+        keywords = paper.get("keywords", [])
+        if keywords:
+            st.markdown("**关键词:**")
+            # 使用columns来显示关键词标签
+            keyword_cols = st.columns(min(len(keywords[:6]), 6))
+            for i, kw in enumerate(keywords[:6]):
+                with keyword_cols[i]:
+                    st.markdown(f'<span class="keyword-tag-modern">{kw}</span>', unsafe_allow_html=True)
+        
+        # 操作按钮
+        if paper.get("url") or paper.get("pdf_url"):
+            st.markdown("**链接:**")
+            btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 4])
+            
+            if paper.get("url"):
+                with btn_col1:
+                    st.markdown(f'<a href="{paper["url"]}" target="_blank" class="paper-link-modern">📄 查看原文</a>', unsafe_allow_html=True)
+            
+            if paper.get("pdf_url"):
+                with btn_col2:
+                    st.markdown(f'<a href="{paper["pdf_url"]}" target="_blank" class="paper-link-modern">📁 PDF下载</a>', unsafe_allow_html=True)
+        
+        # 结束卡片容器
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # 添加间距
+        st.markdown("<br>", unsafe_allow_html=True)
 
 
 def main():
