@@ -114,6 +114,31 @@ class SemanticScholarClient(BaseRetriever, LoggerMixin):
             metadata=paper_data # Store raw S2 data for potential further use
         )
 
+    async def search(
+        self,
+        query: str,
+        max_results: int = 10,
+        fields: Optional[List[str]] = None,
+        year_start: Optional[int] = None,
+        year_end: Optional[int] = None,
+        **kwargs
+    ) -> List[LiteratureItem]:
+        """
+        Search for literature items (implements BaseRetriever.search).
+        
+        Args:
+            query: Search query
+            max_results: Maximum number of results to return
+            fields: List of fields to retrieve for each paper
+            year_start: Filter papers published from this year
+            year_end: Filter papers published up to this year
+            **kwargs: Additional search parameters
+        
+        Returns:
+            List of literature items
+        """
+        return await self.search_papers(query, max_results, fields, year_start, year_end)
+
     async def search_papers(
         self,
         query: str,

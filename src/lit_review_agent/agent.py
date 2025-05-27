@@ -37,8 +37,8 @@ class LiteratureAgent(LoggerMixin):
         )
         
         self.text_processor = TextProcessor(
-            spacy_model_name=self.config.spacy_model_name,
-            nltk_data_path=self.config.nltk_data_path
+            spacy_model=self.config.spacy_model_name,
+            sentence_model=self.config.sentence_transformer_model
         )
         
         self.vector_store = VectorStore(
@@ -52,10 +52,7 @@ class LiteratureAgent(LoggerMixin):
             max_results=self.config.arxiv_max_results
         )
         
-        self.pdf_processor = PDFProcessor(
-            user_agent=self.config.pdf_user_agent,
-            timeout_seconds=self.config.pdf_processing_timeout
-        )
+        self.pdf_processor = PDFProcessor()
         
         self.semantic_scholar_client = SemanticScholarClient(config=self.config)
         
@@ -120,11 +117,9 @@ class LiteratureAgent(LoggerMixin):
         if "arxiv" in sources and self.arxiv_client:
             try:
                 self.logger.info(f"Retrieving up to {papers_per_source} papers from arXiv for topic: '{research_topic}'")
-                arxiv_papers_items = await self.arxiv_client.search_papers(
+                arxiv_papers_items = await self.arxiv_client.search(
                     query=research_topic,
-                    max_results=papers_per_source,
-                    year_start=year_start, 
-                    year_end=year_end
+                    max_results=papers_per_source
                 )
                 retrieved_items.extend(arxiv_papers_items)
                 self.logger.info(f"Retrieved {len(arxiv_papers_items)} items from arXiv.")
@@ -134,7 +129,7 @@ class LiteratureAgent(LoggerMixin):
         if "semantic_scholar" in sources and self.semantic_scholar_client:
             try:
                 self.logger.info(f"Retrieving up to {papers_per_source} papers from Semantic Scholar for topic: '{research_topic}'")
-                s2_papers_items = await self.semantic_scholar_client.search_papers(
+                s2_papers_items = await self.semantic_scholar_client.search(
                     query=research_topic,
                     max_results=papers_per_source,
                     year_start=year_start, 
@@ -212,15 +207,15 @@ class LiteratureAgent(LoggerMixin):
 
         for item in retrieved_items:
             self.logger.debug(f"Final processing stage for item: '{item.title}' (ID: {item.id})")
-            text_for_ai = item.full_text if item.full_text else item.summary
+            text_for_ai = item.full_text if item.full_text else item.abstract
             if not text_for_ai:
-                self.logger.warning(f"No text (full or summary) available for AI processing of '{item.title}'.")
+                self.logger.warning(f"No text (full or abstract) available for AI processing of '{item.title}'.")
                 ai_summary = "No text content available for summarization."
                 keywords = []
             else:
                 self.logger.debug(f"Using text (len: {len(text_for_ai)}) for AI processing of '{item.title}'. Full text used: {bool(item.full_text)}.")
                 try:
-                    keywords = self.text_processor.extract_keywords(text_for_ai, top_n=10)
+                    keywords = self.text_processor.extract_research_keywords(text_for_ai, max_keywords=10)
                 except Exception as kw_e:
                     self.logger.error(f"Error extracting keywords for {item.title}: {kw_e}", exc_info=True)
                     keywords = [] 
@@ -237,11 +232,11 @@ class LiteratureAgent(LoggerMixin):
                                 
             processed_papers.append({
                 "title": item.title,
-                "authors": [author.name for author in item.authors] if item.authors else [],
+                "authors": item.authors if item.authors else [],
                 "published_date": item.publication_date.isoformat() if item.publication_date else None,
                 "url": item.url,
                 "pdf_url": item.pdf_url,
-                "original_summary": item.summary,
+                "original_summary": item.abstract,
                 "ai_enhanced_summary": ai_summary,
                 "full_text_retrieved": bool(item.full_text),
                 "full_text_snippet": item.full_text[:200] + "..." if item.full_text else None, 
@@ -253,8 +248,9 @@ class LiteratureAgent(LoggerMixin):
         self.logger.info(f"Literature review completed. Processed {len(processed_papers)} papers." )
         return {
             "research_topic": research_topic,
-            "num_papers_processed": len(processed_papers),
-            "papers": processed_papers
+            "retrieved_items": [item.model_dump() for item in retrieved_items],  # Convert LiteratureItem objects to dicts
+            "processed_papers": processed_papers,
+            "num_papers_processed": len(processed_papers)
         }
     
     async def search_similar_papers(self,

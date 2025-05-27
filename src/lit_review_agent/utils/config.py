@@ -5,12 +5,18 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Literal, List
 
 from dotenv import load_dotenv
-from pydantic import Field
+from pydantic import Field, ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Config(BaseSettings):
     """Application configuration with environment variable support."""
+    
+    model_config = ConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="allow"  # Allow extra fields that might come from .env
+    )
     
     # Core Settings
     app_name: str = "AI Literature Review Agent"
@@ -97,26 +103,30 @@ class Config(BaseSettings):
     output_dir: str = Field(default="./data/outputs", validation_alias="OUTPUT_DIR")
     report_format: str = Field(default="markdown", validation_alias="REPORT_FORMAT")
     
-    class Config:
-        """Pydantic configuration."""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-    
     def __init__(self, **kwargs):
         """Initialize configuration, loading from .env file if it exists."""
-        # Try to load from .env file in current directory first
-        env_path = Path(".env")
-        if env_path.exists():
-            load_dotenv(env_path)
-        else:
-            # Try to load from config directory
-            config_env_path = Path("config/.env")
-            if config_env_path.exists():
-                load_dotenv(config_env_path)
+        print("DEBUG: Config.__init__ called.")
+        # Pydantic's BaseSettings will automatically try to load from .env
+        # based on the inner Meta class (class Config:
+        #                               env_file = ".env"
+        #                               ...)
+        # So, explicit load_dotenv calls here might be redundant or could interfere
+        # depending on pydantic-settings version and exact behavior.
+        # We will rely on BaseSettings' own mechanism for now.
+
+        # env_path = Path(".env") # For debug printing of expected path
+        # print(f"DEBUG: Expecting .env file at: {env_path.absolute()}")
         
-        super().__init__(**kwargs)
+        super().__init__(**kwargs) # This is where Pydantic loads .env and populates fields
         
+        print(f"DEBUG: Config super().__init__() completed.")
+        print(f"DEBUG: Value of self.deepseek_api_key AFTER super init: {self.deepseek_api_key}")
+        print(f"DEBUG: Value of self.llm_provider AFTER super init: {self.llm_provider}")
+        if not self.deepseek_api_key and self.llm_provider == "deepseek":
+            print("ERROR_DEBUG: DeepSeek API key is None and provider is deepseek!")
+            # You could also check os.getenv('DEEPSEEK_API_KEY') here to see if it's in the environment
+            # print(f"DEBUG: Value of os.getenv('DEEPSEEK_API_KEY') at this point: {os.getenv('DEEPSEEK_API_KEY')}")
+
         # Ensure directories exist
         self._create_directories()
     
