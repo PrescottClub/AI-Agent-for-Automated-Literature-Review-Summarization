@@ -69,19 +69,27 @@ python -m src.lit_review_agent.cli setup
 
 ### 配置
 
-复制配置文件并设置API密钥：
+复制配置文件并根据需要设置API密钥。项目依赖 `.env` 文件进行配置。
 
 ```bash
-# 复制配置模板
-copy config\config.example.env .env
+# 如果 .env 文件不存在，从模板复制
+if not exist .env (
+    copy config\\config.example.env .env
+)
 
-# 编辑 .env 文件，添加以下配置：
-LLM_PROVIDER=deepseek
-DEEPSEEK_API_KEY=your_deepseek_api_key_here
-OPENAI_API_KEY=your_openai_api_key_here  # 用于embedding
+# 编辑 .env 文件，至少确保以下配置存在并正确设置：
+# LLM_PROVIDER=deepseek  # 或者 openai, ollama
+# DEEPSEEK_API_KEY=your_deepseek_api_key_here
+# OPENAI_API_KEY=your_openai_api_key_here # 即使使用DeepSeek作为主要LLM，OpenAI的key也可能用于embedding
+
+# 对于Semantic Scholar (可选，但推荐):
+# SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here
 ```
+**重要**: 确保 `pydantic-settings` 已经通过 `pip install -r requirements.txt` 安装，因为配置文件加载依赖此库。
 
 ### 快速体验
+
+#### 1. 命令行界面 (CLI)
 
 ```bash
 # 1. 进行文献综述
@@ -100,6 +108,59 @@ python -m src.lit_review_agent.cli generate-report ^
 # 3. 搜索知识库
 python -m src.lit_review_agent.cli search "机器学习药物发现"
 ```
+
+#### 2. Streamlit Web UI (新功能!)
+
+我们新增了一个基于 Streamlit 的图形用户界面，让文献综述过程更加直观和便捷。
+
+**运行 Streamlit 应用:**
+
+确保你已经激活了虚拟环境并且安装了所有依赖。在项目根目录下运行：
+
+```bash
+python -m streamlit run src/lit_review_agent/app.py
+```
+这会在你的默认浏览器中打开一个新的标签页，显示应用界面。
+
+**使用说明:**
+- 在主界面的文本框中输入你的研究主题或关键词。
+- 在侧边栏调整参数，例如最大检索论文数、是否获取全文等。
+- 点击 "Start Review Process" 开始文献综述。
+- 处理完成后，结果（检索到的论文列表和摘要）会显示在主界面。
+
+#### 3. MCP (Model Context Protocol) 服务器 (新功能!)
+
+为了使文献综述代理的功能可以被其他AI模型或应用通过标准协议调用，我们实现了一个 MCP 服务器。
+
+**MCP 是什么?**
+MCP (Model Context Protocol) 是由 Anthropic 推出的一个开放标准，旨在统一大模型与外部数据源和工具之间的通信协议。它使得AI应用能够安全地访问和操作本地及远程数据。
+
+**运行 MCP 服务器:**
+
+MCP 服务器基于 FastAPI 构建。你需要使用 Uvicorn 来运行它。
+
+1.  **安装 `mcp[cli]` (已包含在 `requirements.txt` 中):**
+    如果尚未安装，请确保 `mcp[cli]>=1.9.1` (或更高版本) 在你的 `requirements.txt` 中，并运行 `pip install -r requirements.txt`。
+
+2.  **启动服务器:**
+    在项目根目录下，运行以下命令：
+    ```bash
+    python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --port 8008 --reload
+    ```
+    - `--host 0.0.0.0`: 使服务器可以从本地网络中的其他设备访问。
+    - `--port 8008`: 指定服务器监听的端口 (你可以选择其他未被占用的端口)。
+    - `--reload`: 当代码文件发生变化时，服务器会自动重新加载，方便开发。
+
+3.  **检查服务器状态:**
+    服务器启动后，你可以通过访问 `http://localhost:8008/docs` 在浏览器中查看自动生成的API文档 (由FastAPI提供)。
+    你也可以使用 MCP CLI 工具来列出服务器提供的工具：
+    ```bash
+    mcp list-tools --server-url http://localhost:8008
+    ```
+    你应该能看到我们定义的 `conduct_literature_review_tool`。
+
+**MCP 服务器提供的工具:**
+目前，MCP 服务器主要暴露了 `conduct_literature_review_tool`，它允许外部调用者执行文献综述的核心功能。
 
 ## 📖 详细使用指南
 
@@ -148,7 +209,8 @@ python -m src.lit_review_agent.cli generate-report "报告标题" ^
 
 ```python
 import asyncio
-from src.lit_review_agent import LiteratureAgent, Config
+from src.lit_review_agent.agent import LiteratureAgent # 确保从 src 开始的绝对路径
+from src.lit_review_agent.utils.config import Config # 确保从 src 开始的绝对路径
 
 async def main():
     # 初始化配置
@@ -203,6 +265,8 @@ asyncio.run(main())
 └── 🖥 用户界面
     ├── CLI命令行工具
     ├── Python API
+    ├── Streamlit Web UI (新)
+    ├── MCP 服务器 (新)
     └── 配置管理系统
 ```
 

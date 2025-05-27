@@ -90,7 +90,7 @@ class SemanticScholarClient(BaseRetriever, LoggerMixin):
         journal_pages = journal_info.get("pages") if journal_info else None
 
         return LiteratureItem(
-            id=f"s2:{paper_data["paperId"]}", # Prefix with source
+            id=f"s2:{paper_data['paperId']}", # Prefix with source
             title=paper_data.get("title", "N/A"),
             authors=authors,
             abstract=paper_data.get("abstract"),
