@@ -2,50 +2,100 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Literal, List
 
 from dotenv import load_dotenv
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, EnvAlias
 
 
 class Config(BaseSettings):
     """Application configuration with environment variable support."""
     
-    # OpenAI Configuration
-    openai_api_key: str = Field(..., env="OPENAI_API_KEY")
-    openai_model: str = Field("gpt-4-turbo-preview", env="OPENAI_MODEL")
-    openai_embedding_model: str = Field("text-embedding-ada-002", env="OPENAI_EMBEDDING_MODEL")
-    openai_api_base: Optional[str] = Field(None, env="OPENAI_API_BASE")
+    # Core Settings
+    app_name: str = "AI Literature Review Agent"
+    version: str = "0.1.0"
+    log_level: str = Field(default="INFO", validation_alias=EnvAlias("LOG_LEVEL"))
+    debug: bool = Field(default=False, validation_alias=EnvAlias("DEBUG"))
+
+    # LLM Provider Settings (OpenAI, DeepSeek, Ollama, Mock)
+    llm_provider: Literal["openai", "deepseek", "ollama", "mock"] = Field(
+        default="deepseek", validation_alias=EnvAlias("LLM_PROVIDER") # Default to deepseek
+    )
+    llm_timeout_seconds: int = Field(default=60, validation_alias=EnvAlias("LLM_TIMEOUT_SECONDS"))
+    llm_max_retries: int = Field(default=3, validation_alias=EnvAlias("LLM_MAX_RETRIES"))
+    llm_rate_limit_delay: float = Field(default=5.0, validation_alias=EnvAlias("LLM_RATE_LIMIT_DELAY")) # Seconds
+    embedding_dimension_mock: int = Field(default=128, validation_alias=EnvAlias("EMBEDDING_DIMENSION_MOCK")) # For mock LLM testing
+
+    # OpenAI Specific Settings
+    openai_api_key: Optional[str] = Field(default=None, validation_alias=EnvAlias("OPENAI_API_KEY"))
+    openai_model: str = Field(default="gpt-3.5-turbo", validation_alias=EnvAlias("OPENAI_MODEL"))
+    openai_embedding_model: str = Field(default="text-embedding-ada-002", validation_alias=EnvAlias("OPENAI_EMBEDDING_MODEL"))
+    openai_api_base: Optional[str] = Field(default=None, validation_alias=EnvAlias("OPENAI_API_BASE")) # For Azure OpenAI or compatible APIs
+
+    # DeepSeek Specific Settings
+    deepseek_api_key: Optional[str] = Field(default=None, validation_alias=EnvAlias("DEEPSEEK_API_KEY"))
+    deepseek_model: str = Field(default="deepseek-chat", validation_alias=EnvAlias("DEEPSEEK_MODEL")) # Or "deepseek-coder"
+    deepseek_embedding_model: Optional[str] = Field(default=None, validation_alias=EnvAlias("DEEPSEEK_EMBEDDING_MODEL")) # If they offer one
+    deepseek_api_base: Optional[str] = Field(default="https://api.deepseek.com/v1", validation_alias=EnvAlias("DEEPSEEK_API_BASE"))
+
+    # Ollama Specific Settings (if using a local Ollama server)
+    ollama_api_base: Optional[str] = Field(default="http://localhost:11434/api", validation_alias=EnvAlias("OLLAMA_API_BASE"))
+    ollama_model: Optional[str] = Field(default="llama3", validation_alias=EnvAlias("OLLAMA_MODEL"))
+    ollama_embedding_model: Optional[str] = Field(default="nomic-embed-text", validation_alias=EnvAlias("OLLAMA_EMBEDDING_MODEL"))
+    ollama_request_timeout: int = Field(default=120, validation_alias=EnvAlias("OLLAMA_REQUEST_TIMEOUT"))
+
+    # Semantic Scholar Specific Settings
+    semantic_scholar_api_key: Optional[str] = Field(default=None, validation_alias=EnvAlias("SEMANTIC_SCHOLAR_API_KEY"))
+    semantic_scholar_timeout_seconds: int = Field(default=30, validation_alias=EnvAlias("SEMANTIC_SCHOLAR_TIMEOUT_SECONDS"))
+    # Note: Semantic Scholar API URL is usually fixed, defined in the client itself.
+
+    # Default LLM completion parameters (can be overridden per call)
+    # Structure: { "provider_name": { "param1": value1, ... } }
+    default_llm_completion_config: Dict[str, Dict[str, Any]] = Field(
+        default_factory=lambda: {
+            "openai": {"max_tokens": 1024, "temperature": 0.7},
+            "deepseek": {"max_tokens": 2048, "temperature": 0.7}, # Deepseek might support larger contexts
+            "ollama": {"max_tokens": 2048, "temperature": 0.8}, # Ollama defaults can vary by model
+            "mock": {"max_tokens": 500, "temperature": 0.5}
+        }
+    )
+
+    # Retrieval Settings
+    arxiv_api_url: str = Field(default="http://export.arxiv.org/api/", validation_alias=EnvAlias("ARXIV_API_URL"))
+    arxiv_max_results: int = Field(default=100, validation_alias=EnvAlias("ARXIV_MAX_RESULTS"))
+    arxiv_query_prefix: Optional[str] = Field(default=None, validation_alias=EnvAlias("ARXIV_QUERY_PREFIX"))
+
+    # Processing Settings
+    # PDF Processing
+    pdf_user_agent: str = Field(default="Mozilla/5.0 (compatible; AIResearchAgent/0.1; +http://example.com/bot)", validation_alias=EnvAlias("PDF_USER_AGENT"))
+    pdf_processing_timeout: int = Field(default=120, validation_alias=EnvAlias("PDF_PROCESSING_TIMEOUT"))
+
+    # Text Processing Settings
+    spacy_model_name: str = Field(default="en_core_web_sm", validation_alias=EnvAlias("SPACY_MODEL_NAME"))
+    nltk_data_path: Optional[str] = Field(default=None, validation_alias=EnvAlias("NLTK_DATA_PATH"))
     
-    # DeepSeek Configuration (Optional)
-    deepseek_api_key: Optional[str] = Field(None, env="DEEPSEEK_API_KEY")
-    deepseek_model: str = Field("deepseek-chat", env="DEEPSEEK_MODEL")
-    deepseek_api_base: Optional[str] = Field("https://api.deepseek.com", env="DEEPSEEK_API_BASE")
-    
-    # LLM Provider Selection
-    llm_provider: str = Field("openai", env="LLM_PROVIDER")
+    # Embedding Settings for Vector Store
+    sentence_transformer_model: str = Field(default="all-MiniLM-L6-v2", validation_alias=EnvAlias("SENTENCE_TRANSFORMER_MODEL"))
+
+    # Advanced Settings & Defaults
+    default_retrieval_sources: List[str] = Field(default_factory=lambda: ["arxiv", "semantic_scholar"], validation_alias=EnvAlias("DEFAULT_RETRIEVAL_SOURCES"))
     
     # Vector Database Configuration
-    chroma_persist_directory: str = Field("./data/chroma_db", env="CHROMA_PERSIST_DIRECTORY")
-    chroma_collection_name: str = Field("literature_collection", env="CHROMA_COLLECTION_NAME")
+    chroma_persist_directory: str = Field(default="./data/chroma_db", validation_alias=EnvAlias("CHROMA_PERSIST_DIRECTORY"))
+    chroma_collection_name: str = Field(default="literature_collection", validation_alias=EnvAlias("CHROMA_COLLECTION_NAME"))
     
     # Application Configuration
-    log_level: str = Field("INFO", env="LOG_LEVEL")
-    log_file: str = Field("./logs/app.log", env="LOG_FILE")
-    max_chunk_size: int = Field(1000, env="MAX_CHUNK_SIZE")
-    chunk_overlap: int = Field(200, env="CHUNK_OVERLAP")
+    log_file: str = Field(default="./logs/app.log", validation_alias=EnvAlias("LOG_FILE"))
+    max_chunk_size: int = Field(default=1000, validation_alias=EnvAlias("MAX_CHUNK_SIZE"))
+    chunk_overlap: int = Field(default=200, validation_alias=EnvAlias("CHUNK_OVERLAP"))
     
     # Rate Limiting
-    max_requests_per_minute: int = Field(60, env="MAX_REQUESTS_PER_MINUTE")
-    max_tokens_per_request: int = Field(4000, env="MAX_TOKENS_PER_REQUEST")
-    
-    # Data Sources
-    arxiv_max_results: int = Field(100, env="ARXIV_MAX_RESULTS")
-    semantic_scholar_api_key: Optional[str] = Field(None, env="SEMANTIC_SCHOLAR_API_KEY")
+    max_requests_per_minute: int = Field(default=60, validation_alias=EnvAlias("MAX_REQUESTS_PER_MINUTE"))
+    max_tokens_per_request: int = Field(default=4000, validation_alias=EnvAlias("MAX_TOKENS_PER_REQUEST"))
     
     # Output Configuration
-    output_dir: str = Field("./data/outputs", env="OUTPUT_DIR")
-    report_format: str = Field("markdown", env="REPORT_FORMAT")
+    output_dir: str = Field(default="./data/outputs", validation_alias=EnvAlias("OUTPUT_DIR"))
+    report_format: str = Field(default="markdown", validation_alias=EnvAlias("REPORT_FORMAT"))
     
     class Config:
         """Pydantic configuration."""
@@ -92,6 +142,16 @@ class Config(BaseSettings):
         for key, value in config_dict.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+    
+    def env_file_location(self) -> str:
+        """Get the location of the environment file."""
+        env_path = Path(".env")
+        if env_path.exists():
+            return str(env_path.absolute())
+        config_env_path = Path("config/.env")
+        if config_env_path.exists():
+            return str(config_env_path.absolute())
+        return "No .env file found"
     
     @property
     def is_development(self) -> bool:
