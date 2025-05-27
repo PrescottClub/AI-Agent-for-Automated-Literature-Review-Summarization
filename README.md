@@ -2,307 +2,347 @@
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![DeepSeek](https://img.shields.io/badge/Powered_by-DeepSeek-orange.svg)](https://platform.deepseek.com/)
 
-> **Revolutionize your research workflow with AI-powered literature review automation**
+> **智能化文献综述与摘要生成代理 - 让研究更高效**
 
-An intelligent agent that **automatically discovers, analyzes, and synthesizes** academic literature, saving researchers countless hours while providing comprehensive insights into any research domain.
+一个基于AI的智能代理，能够**自动发现、分析和综合**学术文献，为研究人员节省大量时间，并提供任何研究领域的全面洞察。
 
-## ✨ Key Features
+## ✨ 核心特性
 
-### 🚀 **Intelligent Literature Discovery**
-- **Multi-source retrieval** from arXiv, Semantic Scholar, and more
-- **Advanced semantic search** with vector similarity matching
-- **Smart filtering** by publication date, venue, and relevance
+### 🚀 **智能文献检索**
+- **多源检索** - 支持arXiv、Semantic Scholar等学术数据库
+- **语义搜索** - 基于向量相似度的高级语义匹配
+- **智能过滤** - 按发表日期、期刊和相关性筛选
 
-### 🧠 **AI-Powered Analysis**
-- **Multi-format summarization** (abstract, executive, bullet-point)
-- **Trend identification** and emerging topic detection
-- **Research gap analysis** and future opportunity mapping
-- **Collaboration pattern insights** and authorship analytics
+### 🧠 **AI驱动分析**
+- **多格式摘要** - 支持执行摘要、关键发现、要点总结
+- **趋势识别** - 识别新兴主题和研究热点
+- **研究缺口分析** - 发现未来研究机会
+- **合作网络洞察** - 作者和机构合作模式分析
 
-### 📊 **Comprehensive Reporting**
-- **Professional reports** in Markdown, HTML, and LaTeX formats
-- **Executive summaries** for stakeholders and decision-makers
-- **Detailed literature overviews** with statistical analysis
-- **Citation management** with multiple academic styles (APA, MLA, IEEE, Chicago)
+### 📊 **全面报告生成**
+- **专业报告** - 支持Markdown、HTML、LaTeX格式
+- **执行摘要** - 为决策者提供简洁概览
+- **详细文献综述** - 包含统计分析的深度报告
+- **引用管理** - 支持多种学术引用格式
 
-### 🔄 **Flexible LLM Integration**
-- **Multiple AI providers**: OpenAI GPT-4, DeepSeek, and more
-- **Configurable models** and API endpoints
-- **Rate limiting** and cost optimization
-- **Fallback mechanisms** for reliability
+### 🔄 **灵活的LLM集成**
+- **多AI供应商** - 默认DeepSeek，支持OpenAI、Ollama等
+- **成本优化** - DeepSeek提供高性价比解决方案
+- **智能回退** - 确保服务可靠性的多层保障
+- **速率限制** - 自动处理API限制和重试
 
-## 🎯 Who Is This For?
+## 🎯 适用人群
 
-- **🎓 Researchers & Academics** - Accelerate systematic reviews and meta-analyses
-- **📚 Graduate Students** - Quickly understand research landscapes for thesis work
-- **🏢 R&D Teams** - Stay current with technological advances and market trends
-- **📈 Market Analysts** - Track emerging technologies and scientific breakthroughs
-- **💼 Consultants** - Provide evidence-based insights to clients
+- **🎓 研究人员和学者** - 加速系统性综述和荟萃分析
+- **📚 研究生** - 快速了解研究领域现状
+- **🏢 研发团队** - 跟踪技术进展和市场趋势
+- **📈 市场分析师** - 追踪新兴技术和科学突破
+- **💼 咨询顾问** - 提供基于证据的洞察
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Installation
+### 安装
 
 ```bash
-# Clone the repository
-git clone https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization.git
+# 克隆仓库
+git clone https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.git
 cd AI-Agent-for-Automated-Literature-Review-Summarization
 
-# Create virtual environment
+# 创建虚拟环境
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Windows
+venv\Scripts\activate
+# Linux/Mac
+source venv/bin/activate
 
-# Install dependencies
+# 安装依赖
 pip install -r requirements.txt
 
-# Interactive setup
+# 下载spaCy模型
+python -m spacy download en_core_web_sm
+
+# 运行设置向导
 python -m src.lit_review_agent.cli setup
 ```
 
-### 5-Minute Demo
+### 配置
+
+复制配置文件并设置API密钥：
 
 ```bash
-# 1. Conduct a literature review
-python -m src.lit_review_agent.cli review "artificial intelligence in healthcare" \
-  --max-papers 10 \
-  --output-format json \
+# 复制配置模板
+copy config\config.example.env .env
+
+# 编辑 .env 文件，添加以下配置：
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here  # 用于embedding
+```
+
+### 快速体验
+
+```bash
+# 1. 进行文献综述
+python -m src.lit_review_agent.cli review "人工智能在医疗领域的应用" ^
+  --max-papers 15 ^
+  --output-format json ^
   --output data/ai_healthcare.json
 
-# 2. Generate a comprehensive report
-python -m src.lit_review_agent.cli generate-report \
-  "AI in Healthcare: Current Trends and Future Directions" \
-  --input data/ai_healthcare.json \
-  --output reports/ai_healthcare_report.md \
+# 2. 生成综合报告
+python -m src.lit_review_agent.cli generate-report ^
+  "AI医疗应用综述报告" ^
+  --input data/ai_healthcare.json ^
+  --output reports/ai_healthcare_report.md ^
   --format markdown
 
-# 3. Search your knowledge base
-python -m src.lit_review_agent.cli search "machine learning drug discovery"
+# 3. 搜索知识库
+python -m src.lit_review_agent.cli search "机器学习药物发现"
 ```
 
-## 🛠 Configuration
+## 📖 详细使用指南
 
-### Environment Setup
+### 命令行界面
 
-Create a `config/.env` file with your preferred AI provider:
-
+#### 设置和配置
 ```bash
-# For OpenAI
-OPENAI_API_KEY="your_openai_api_key"
-OPENAI_MODEL="gpt-4-turbo-preview"
-LLM_PROVIDER="openai"
+# 查看设置向导
+python -m src.lit_review_agent.cli setup
 
-# For DeepSeek (cost-effective alternative)
-DEEPSEEK_API_KEY="your_deepseek_api_key"  
-DEEPSEEK_MODEL="deepseek-chat"
-LLM_PROVIDER="deepseek"
-```
-
-### Advanced Configuration
-
-```bash
-# Customize retrieval and processing
-ARXIV_MAX_RESULTS=100
-MAX_TOKENS_PER_REQUEST=4000
-CHROMA_PERSIST_DIRECTORY="./data/vector_db"
-OUTPUT_DIR="./reports"
-```
-
-## 📖 Usage Guide
-
-### Command Line Interface
-
-#### Literature Review
-```bash
-python -m src.lit_review_agent.cli review "your research topic" [options]
-```
-
-**Options:**
-- `--max-papers`: Number of papers to retrieve (default: 20)
-- `--full-text`: Extract full PDF text when available
-- `--output-format`: json, markdown, or txt
-- `--output`: Custom output file path
-
-#### Report Generation
-```bash
-python -m src.lit_review_agent.cli generate-report "Report Title" \
-  --input data/review.json \
-  --output reports/report.md \
-  --format markdown
-```
-
-**Formats:**
-- `markdown`: Professional Markdown reports
-- `html`: Web-ready HTML with styling
-- `latex`: Publication-ready LaTeX documents
-
-#### Advanced Features
-```bash
-# Search existing literature database
-python -m src.lit_review_agent.cli search "query terms"
-
-# View system statistics
-python -m src.lit_review_agent.cli stats
-
-# Check configuration
+# 查看当前配置
 python -m src.lit_review_agent.cli config-info
+
+# 查看系统统计
+python -m src.lit_review_agent.cli stats
 ```
+
+#### 文献综述
+```bash
+python -m src.lit_review_agent.cli review "研究主题" [选项]
+```
+
+**主要选项：**
+- `--max-papers N`: 检索论文数量（默认：10）
+- `--sources SOURCE1,SOURCE2`: 指定数据源（arxiv,semantic_scholar）
+- `--full-text`: 尝试提取PDF全文
+- `--year-start YEAR`: 起始年份过滤
+- `--year-end YEAR`: 结束年份过滤
+- `--format FORMAT`: 输出格式（json, markdown）
+- `--output FILE`: 输出文件路径
+
+#### 报告生成
+```bash
+python -m src.lit_review_agent.cli generate-report "报告标题" ^
+  --input 输入文件.json ^
+  --output 输出文件.md ^
+  --format markdown
+```
+
+**支持格式：**
+- `markdown`: Markdown格式报告
+- `html`: HTML网页格式
+- `latex`: LaTeX学术格式
 
 ### Python API
 
 ```python
+import asyncio
 from src.lit_review_agent import LiteratureAgent, Config
 
-# Initialize with custom configuration
-config = Config()
-agent = LiteratureAgent(config)
+async def main():
+    # 初始化配置
+    config = Config()
+    agent = LiteratureAgent(config)
+    
+    # 进行文献综述
+    results = await agent.conduct_literature_review(
+        research_topic="深度学习在计算机视觉中的应用",
+        max_papers=20,
+        sources=["arxiv", "semantic_scholar"],
+        retrieve_full_text=False,
+        year_start=2020,
+        year_end=2024
+    )
+    
+    # 生成报告
+    report = await agent.generate_full_report(
+        papers=results['papers'],
+        topic="深度学习视觉应用综述",
+        output_format="markdown"
+    )
+    
+    print(f"处理了 {results['num_papers_processed']} 篇论文")
+    print(f"报告长度: {len(report.get('content', ''))} 字符")
 
-# Conduct automated review
-results = await agent.conduct_literature_review(
-    research_topic="quantum computing applications",
-    max_papers=25,
-    include_full_text=True
-)
-
-# Generate comprehensive report
-report = await agent.generate_full_report(
-    papers=results['papers'],
-    topic="Quantum Computing in Machine Learning",
-    output_format="markdown"
-)
+# 运行
+asyncio.run(main())
 ```
 
-## 🏗 Architecture
+## 🏗 系统架构
 
 ```
 📁 AI Literature Review Agent
-├── 🔍 Literature Retrieval
-│   ├── arXiv API Integration
-│   ├── Semantic Scholar Client
-│   └── PDF Text Extraction
-├── 🧠 AI Core Engine
-│   ├── Multi-LLM Manager (OpenAI, DeepSeek)
-│   ├── Literature Summarizer
-│   ├── Trend Analyzer
-│   └── Report Generator
-├── 💾 Knowledge Management
-│   ├── Vector Database (ChromaDB)
-│   ├── Embedding Generation
-│   └── Semantic Search
-└── 🖥 User Interface
-    ├── CLI Commands
+├── 🔍 文献检索层
+│   ├── ArXiv API客户端
+│   ├── Semantic Scholar客户端
+│   └── PDF文本提取器
+├── 🧠 AI核心引擎
+│   ├── 多LLM管理器 (DeepSeek, OpenAI)
+│   ├── 文献摘要生成器
+│   ├── 趋势分析器
+│   └── 报告生成器
+├── 💾 知识管理
+│   ├── 向量数据库 (ChromaDB)
+│   ├── Embedding生成
+│   └── 语义搜索
+├── 🔧 文本处理
+│   ├── spaCy NLP管道
+│   ├── 关键词提取
+│   └── 文本分块策略
+└── 🖥 用户界面
+    ├── CLI命令行工具
     ├── Python API
-    └── Configuration System
+    └── 配置管理系统
 ```
 
-## 📊 Sample Output
+## 📊 示例输出
 
-### Executive Summary
-> "This comprehensive analysis of 47 recent papers reveals three major trends in AI healthcare: (1) **Foundation models** are increasingly being adapted for medical imaging with 73% improvement in diagnostic accuracy, (2) **Federated learning** approaches are addressing privacy concerns while maintaining model performance, and (3) **Multimodal integration** of clinical data is emerging as the next frontier..."
+### 执行摘要
+> "本次对47篇AI医疗领域最新论文的综合分析显示三大趋势：(1) **基础模型**在医学影像中的应用显著提升诊断准确率73%，(2) **联邦学习**方法在保护隐私的同时维持模型性能，(3) **多模态融合**正成为临床数据整合的新前沿..."
 
-### Key Insights
-- **94% of reviewed papers** published in the last 2 years indicate rapid field acceleration
-- **Top collaboration networks** identified between Stanford, MIT, and Google Health
-- **Emerging methods**: Constitutional AI, Tool-augmented reasoning, Retrieval-augmented generation
-- **Research gaps**: Long-term safety studies, regulatory framework development
+### 关键洞察
+- **94%的综述论文**发表于近2年，表明该领域发展迅速
+- **顶级合作网络**主要在斯坦福、MIT和Google Health之间
+- **新兴方法**：宪法AI、工具增强推理、检索增强生成
+- **研究缺口**：长期安全性研究、监管框架开发
 
-## 🔬 Advanced Features
+## 🛠 高级配置
 
-### Custom Analysis Pipelines
-- **Temporal trend analysis** with publication timeline visualization
-- **Keyword co-occurrence networks** for concept mapping
-- **Author collaboration graphs** and institutional analysis
-- **Citation impact assessment** and influence tracking
-
-### Multi-language Support
-- **Automatic translation** of non-English abstracts
-- **Cross-language similarity** detection
-- **Global research perspective** integration
-
-### Integration Capabilities
-- **Reference managers**: Zotero, Mendeley, EndNote
-- **Notebook environments**: Jupyter, Google Colab
-- **Documentation tools**: Notion, Obsidian, Roam Research
-
-## 🛡 Security & Privacy
-
-- **API key encryption** and secure storage
-- **Local processing** option for sensitive research
-- **GDPR compliance** for European users
-- **No data retention** of processed papers
-- **Audit logs** for institutional compliance
-
-## 🧪 Testing
+### 环境变量配置
 
 ```bash
-# Run full test suite
-python -m pytest tests/ -v
+# 核心LLM设置
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=sk-xxx
+DEEPSEEK_MODEL=deepseek-chat
 
-# Run specific test categories
-python -m pytest tests/test_report_generator.py
-python -m pytest tests/integration/
+# OpenAI设置（embedding必需）
+OPENAI_API_KEY=sk-xxx
+OPENAI_EMBEDDING_MODEL=text-embedding-ada-002
 
-# Generate coverage report
-python -m pytest --cov=src tests/
+# 可选：Semantic Scholar API
+SEMANTIC_SCHOLAR_API_KEY=your_key
+
+# 处理限制
+ARXIV_MAX_RESULTS=100
+MAX_TOKENS_PER_REQUEST=4000
+MAX_REQUESTS_PER_MINUTE=60
+
+# 存储配置
+CHROMA_PERSIST_DIRECTORY=./data/chroma_db
+OUTPUT_DIR=./data/outputs
 ```
 
-## 🤝 Contributing
+### 自定义embedding模型
 
-We welcome contributions from the research community! See our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-### Development Setup
 ```bash
-# Development installation
+# 向量存储的sentence-transformers模型
+SENTENCE_TRANSFORMER_MODEL=all-MiniLM-L6-v2  # 默认
+# SENTENCE_TRANSFORMER_MODEL=all-mpnet-base-v2  # 更高质量
+# SENTENCE_TRANSFORMER_MODEL=paraphrase-multilingual-MiniLM-L12-v2  # 多语言
+```
+
+## 🧪 测试
+
+```bash
+# 运行设置验证
+python test_setup.py
+
+# 测试基本功能（需要API密钥）
+python -m src.lit_review_agent.cli review "test topic" --max-papers 3
+
+# 验证配置
+python -m src.lit_review_agent.cli config-info
+```
+
+## 🛡 安全与隐私
+
+- **API密钥加密存储** - 本地安全管理
+- **本地处理选项** - 敏感研究的隐私保护
+- **无数据保留** - 不存储处理过的论文内容
+- **审计日志** - 机构合规要求支持
+
+## 🚨 故障排除
+
+### 常见问题
+
+1. **配置错误**
+   ```bash
+   python -m src.lit_review_agent.cli config-info
+   ```
+
+2. **依赖缺失**
+   ```bash
+   pip install -r requirements.txt
+   python -m spacy download en_core_web_sm
+   ```
+
+3. **API限制**
+   - 检查API密钥配置
+   - 调整请求频率设置
+   - 使用备用API提供商
+
+4. **内存不足**
+   - 减少`max_papers`参数
+   - 调整`MAX_CHUNK_SIZE`配置
+   - 关闭`retrieve_full_text`选项
+
+## 📈 性能优化
+
+- **批处理优化** - 自动批量处理请求
+- **异步处理** - 并发API调用
+- **智能缓存** - 向量数据库持久化
+- **增量更新** - 避免重复处理
+
+## 🤝 贡献指南
+
+我们欢迎社区贡献！请查看[贡献指南](CONTRIBUTING.md)了解详情。
+
+### 开发环境设置
+```bash
+# 开发安装
 git clone <repository>
 cd AI-Agent-for-Automated-Literature-Review-Summarization
 pip install -e ".[dev]"
 
-# Pre-commit hooks
+# 安装预提交钩子
 pre-commit install
+
+# 运行测试
+python -m pytest tests/ -v
 ```
 
-## 📈 Roadmap
+## 📄 许可证
 
-- **Q1 2024**: Web interface with Streamlit/FastAPI
-- **Q2 2024**: Real-time collaboration features
-- **Q3 2024**: Advanced visualization dashboard
-- **Q4 2024**: Mobile app for iOS/Android
+本项目基于MIT许可证开源 - 详见[LICENSE](LICENSE)文件。
 
-## 📚 Citation
+## 🌟 Star历史
 
-If you use this tool in your research, please cite:
+如果这个项目对您有帮助，请给我们一个⭐！
 
-```bibtex
-@software{ai_literature_agent_2024,
-  title={AI Literature Review \& Summarization Agent},
-  author={PrescottClub},
-  year={2024},
-  url={https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization}
-}
-```
+## 💬 社区与支持
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization&type=Date)](https://star-history.com/#PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization&Date)
-
-## 💬 Community & Support
-
-- **📧 Email**: [support@literaturereviewai.com](mailto:support@literaturereviewai.com)
-- **💬 Discord**: [Join our community](https://discord.gg/literaturereview)
-- **🐛 Issues**: [GitHub Issues](https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
-- **📖 Documentation**: [Full Documentation](https://docs.literaturereviewai.com)
+- **🐛 问题报告**: [GitHub Issues](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
+- **💡 功能请求**: [GitHub Discussions](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/discussions)
+- **📧 邮件联系**: support@example.com
 
 ---
 
 <div align="center">
 
-**Made with ❤️ for the research community**
+**💡 为研究社区而生，用❤️打造**
 
-[⭐ Star this repo](https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization) • [🍴 Fork it](https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization/fork) • [🐛 Report Bug](https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
+[⭐ 点赞项目](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization) • [🍴 Fork项目](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/fork) • [🐛 报告Bug](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
 
 </div> 
