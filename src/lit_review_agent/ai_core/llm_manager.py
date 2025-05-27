@@ -3,307 +3,363 @@
 import asyncio
 import re
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Literal
 
 import openai
 from openai import OpenAI
+import httpx
 
-from ..utils.logger import LoggerMixin
+from ..utils.logger import LoggerMixin, get_logger
 from ..utils.helpers import estimate_tokens, truncate_text
 from ..utils.config import Config
 
+logger = get_logger(__name__)
+
+# Supported LLM providers
+LLMProvider = Literal["openai", "deepseek", "ollama", "mock"]
+
+class LLMManagerError(Exception):
+    """Custom exception for LLMManager errors."""
+    pass
 
 class LLMManager(LoggerMixin):
-    """Manager for Large Language Model interactions."""
-    
-    def __init__(self, 
-                 config: Config,
-                 max_tokens_per_request: Optional[int] = None,
-                 max_requests_per_minute: Optional[int] = None):
-        """
-        Initialize the LLM manager.
-        
-        Args:
-            config: Configuration object containing API keys and provider info.
-            max_tokens_per_request: Maximum tokens per request (overrides config if set)
-            max_requests_per_minute: Rate limit for requests (overrides config if set)
-        """
+    """
+    Manages interactions with various Large Language Models (LLMs).
+    Handles API calls, error handling, and provider-specific logic.
+    """
+    def __init__(self, config: Config):
+        super().__init__()
         self.config = config
-        self.provider = config.llm_provider.lower()
-        
-        self.max_tokens = max_tokens_per_request or config.max_tokens_per_request
-        self.max_requests_per_minute = max_requests_per_minute or config.max_requests_per_minute
-        
+        self.provider: LLMProvider = self.config.llm_provider
+        self.api_key: Optional[str] = None
+        self.base_url: Optional[str] = None
+        self.model_name: Optional[str] = None
+        self.timeout = self.config.llm_timeout_seconds
+        self.max_retries = self.config.llm_max_retries
+
+        self._configure_provider()
+        self.logger.info(f"LLMManager initialized for provider: {self.provider} with model: {self.model_name}")
+
+    def _configure_provider(self):
+        """Configures the LLM provider based on the settings."""
         if self.provider == "openai":
-            if not config.openai_api_key:
-                raise ValueError("OpenAI API key is required for OpenAI provider.")
-            self.client = OpenAI(
-                api_key=config.openai_api_key,
-                base_url=config.openai_api_base
-            )
-            self.model = config.openai_model
-            self.logger.info(f"Initialized LLM manager with OpenAI provider, model: {self.model}")
+            self.api_key = self.config.openai_api_key
+            self.base_url = self.config.openai_api_base or "https://api.openai.com/v1"
+            self.model_name = self.config.openai_model
+            if not self.api_key:
+                raise LLMManagerError("OpenAI API key is not configured.")
         elif self.provider == "deepseek":
-            if not config.deepseek_api_key:
-                raise ValueError("DeepSeek API key is required for DeepSeek provider.")
-            self.client = OpenAI(
-                api_key=config.deepseek_api_key,
-                base_url=config.deepseek_api_base
-            )
-            self.model = config.deepseek_model
-            self.logger.info(f"Initialized LLM manager with DeepSeek provider, model: {self.model}")
+            self.api_key = self.config.deepseek_api_key
+            self.base_url = self.config.deepseek_api_base or "https://api.deepseek.com/v1"
+            self.model_name = self.config.deepseek_model
+            if not self.api_key:
+                raise LLMManagerError("DeepSeek API key is not configured.")
+        elif self.provider == "ollama":
+            self.base_url = self.config.ollama_api_base or "http://localhost:11434/api"
+            self.model_name = self.config.ollama_model
+            # Ollama typically doesn't require an API key directly in headers
+            self.logger.info(f"Ollama provider configured. Ensure Ollama server is running at {self.base_url}")
+        elif self.provider == "mock":
+            self.logger.info("LLMManager configured with MOCK provider for testing.")
+            self.model_name = "mock_model"
         else:
-            raise ValueError(f"Unsupported LLM provider: {self.provider}. Choose 'openai' or 'deepseek'.")
-        
-        # Rate limiting
-        self.last_request_time = 0
-        self.request_count = 0
-        self.request_times = []
-    
-    async def generate_completion(self,
-                                prompt: str,
-                                max_tokens: Optional[int] = None,
-                                temperature: float = 0.7,
-                                system_prompt: Optional[str] = None) -> Optional[str]:
-        """
-        Generate a completion for the given prompt.
-        
-        Args:
-            prompt: Input prompt
-            max_tokens: Maximum tokens in response
-            temperature: Sampling temperature
-            system_prompt: Optional system prompt
-            
-        Returns:
-            Generated completion or None if failed
-        """
-        try:
-            # Rate limiting
-            await self._wait_for_rate_limit()
-            
-            # Prepare messages
-            messages = []
-            if system_prompt:
-                messages.append({"role": "system", "content": system_prompt})
-            messages.append({"role": "user", "content": prompt})
-            
-            # Estimate token usage and truncate if necessary
-            total_tokens = sum(estimate_tokens(msg["content"]) for msg in messages)
-            response_tokens = max_tokens or (self.max_tokens // 2)
-            
-            if total_tokens + response_tokens > self.max_tokens:
-                # Truncate the user prompt
-                available_tokens = self.max_tokens - response_tokens
-                if system_prompt:
-                    available_tokens -= estimate_tokens(system_prompt)
-                
-                truncated_prompt = truncate_text(prompt, available_tokens)
-                messages[-1]["content"] = truncated_prompt
-                self.logger.warning(f"Truncated prompt to fit token limit")
-            
-            # Make API call
-            response = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: self.client.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    max_tokens=max_tokens or (self.max_tokens // 2),
-                    temperature=temperature
+            raise LLMManagerError(f"Unsupported LLM provider: {self.provider}")
+
+    async def _make_request(
+        self,
+        endpoint: str,
+        payload: Dict[str, Any],
+        method: str = "POST",
+    ) -> Dict[str, Any]:
+        """Makes an asynchronous HTTP request to the LLM API."""
+        if not self.base_url:
+            raise LLMManagerError("LLM base URL is not configured.")
+
+        url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        headers = {"Content-Type": "application/json"}
+        if self.api_key and self.provider != "ollama": # Ollama does not use Bearer token typically
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        for attempt in range(self.max_retries):
+            try:
+                async with httpx.AsyncClient(timeout=self.timeout) as client:
+                    self.logger.debug(f"Sending {method} request to {url} with payload: {payload}")
+                    if method == "POST":
+                        response = await client.post(url, headers=headers, json=payload)
+                    elif method == "GET":
+                        response = await client.get(url, headers=headers, params=payload) # params for GET
+                    else:
+                        raise LLMManagerError(f"Unsupported HTTP method: {method}")
+
+                    response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
+                    response_data = response.json()
+                    self.logger.debug(f"Received response from {url}: {response_data}")
+                    return response_data
+            except httpx.HTTPStatusError as e:
+                self.logger.error(
+                    f"HTTP error {e.response.status_code} for {e.request.url}: {e.response.text}"
                 )
-            )
-            
-            # Track request
-            self._track_request()
-            
-            # Extract and return content
-            if response.choices and response.choices[0].message:
-                content = response.choices[0].message.content
-                self.logger.info(f"Generated completion: {len(content)} characters")
-                return content
-            
-            return None
-            
-        except Exception as e:
-            self.logger.error(f"Error generating completion: {e}")
-            return None
-    
-    async def generate_summary(self,
-                             text: str,
-                             summary_type: str = "abstract",
-                             max_length: int = 500) -> Optional[str]:
-        """
-        Generate a summary of the given text.
+                if e.response.status_code in [401, 403]: # Unauthorized or Forbidden
+                    raise LLMManagerError(f"Authentication error: {e.response.text}") from e
+                if e.response.status_code == 429: # Rate limit
+                    self.logger.warning("Rate limit exceeded. Retrying after delay...")
+                    await asyncio.sleep(self.config.llm_rate_limit_delay * (attempt + 1))
+                elif attempt == self.max_retries - 1:
+                    raise LLMManagerError(f"HTTP error after {self.max_retries} retries: {e}") from e
+                else:
+                    await asyncio.sleep(1 * (attempt + 1)) # Basic exponential backoff
+            except httpx.RequestError as e:
+                self.logger.error(f"Request error for {url}: {e}")
+                if attempt == self.max_retries - 1:
+                    raise LLMManagerError(f"Request error after {self.max_retries} retries: {e}") from e
+                await asyncio.sleep(1 * (attempt + 1))
+            except Exception as e:
+                self.logger.error(f"An unexpected error occurred during LLM request: {e}", exc_info=True)
+                raise LLMManagerError(f"Unexpected LLM error: {e}") from e
         
+        raise LLMManagerError(f"Failed to get a response from LLM after {self.max_retries} retries.")
+
+    async def generate_chat_completion(
+        self, 
+        messages: List[Dict[str, str]], 
+        max_tokens: Optional[int] = None,
+        temperature: float = 0.7,
+        stream: bool = False # Placeholder for future streaming support
+    ) -> Dict[str, Any]: # Adjust return type if streaming is implemented
+        """
+        Generates a chat completion using the configured LLM provider.
+
         Args:
-            text: Text to summarize
-            summary_type: Type of summary (abstract, executive, bullet)
-            max_length: Maximum length of summary
-            
+            messages: A list of message dictionaries, e.g.,
+                      [{"role": "user", "content": "Hello!"}].
+            max_tokens: The maximum number of tokens to generate.
+            temperature: Sampling temperature.
+            stream: Whether to stream the response (not fully implemented for all providers).
+
         Returns:
-            Generated summary or None if failed
+            The LLM's response, typically a dictionary containing the completion.
         """
-        # Prepare system prompt based on summary type
-        if summary_type == "abstract":
-            system_prompt = (
-                "You are an expert academic summarizer. Create a concise, "
-                "informative abstract that captures the key findings, methods, "
-                "and implications of the research."
-            )
-            user_prompt = f"Summarize this research paper in {max_length} words or less:\n\n{text}"
+        if self.provider == "mock":
+            self.logger.info(f"Mocking chat completion for messages: {messages}")
+            return {
+                "choices": [{
+                    "message": {"role": "assistant", "content": "This is a mock response."}
+                }],
+                "usage": {"total_tokens": 0}
+            }
+
+        if not self.model_name:
+            raise LLMManagerError("LLM model name is not configured.")
+
+        payload: Dict[str, Any] = {
+            "model": self.model_name,
+            "messages": messages,
+            "temperature": temperature,
+        }
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
         
-        elif summary_type == "executive":
-            system_prompt = (
-                "You are a professional executive summarizer. Create a "
-                "high-level summary focusing on key insights, implications, "
-                "and actionable information."
-            )
-            user_prompt = f"Create an executive summary of this research in {max_length} words or less:\n\n{text}"
-        
-        elif summary_type == "bullet":
-            system_prompt = (
-                "You are a content organizer. Create a bullet-point summary "
-                "that highlights the main points in an easy-to-read format."
-            )
-            user_prompt = f"Create a bullet-point summary of this research:\n\n{text}"
-        
+        # Provider-specific payload adjustments
+        endpoint = ""
+        if self.provider == "openai" or self.provider == "deepseek":
+            endpoint = "chat/completions"
+            if stream:
+                payload["stream"] = True # OpenAI/DeepSeek support stream
+        elif self.provider == "ollama":
+            # Ollama has a slightly different API structure
+            endpoint = "chat"
+            # Ollama payload needs `model`, `messages`, and `stream` at the top level.
+            # It might not support `temperature` or `max_tokens` in the same way directly in /api/chat
+            # Often, these are part of the Modelfile or model options when running the model.
+            # For simplicity, we pass them, but their effect depends on Ollama setup.
+            payload["stream"] = stream
+            if "max_tokens" in payload: # Ollama might use options for this
+                payload.setdefault("options", {})["num_predict"] = payload.pop("max_tokens")
+            if "temperature" in payload:
+                 payload.setdefault("options", {})["temperature"] = payload.pop("temperature")
         else:
-            system_prompt = "You are a helpful AI assistant that creates clear, concise summaries."
-            user_prompt = f"Summarize this text in {max_length} words or less:\n\n{text}"
-        
-        return await self.generate_completion(
-            prompt=user_prompt,
-            system_prompt=system_prompt,
-            temperature=0.3  # Lower temperature for summaries
-        )
-    
-    async def extract_key_insights(self, text: str) -> Optional[List[str]]:
+            raise LLMManagerError(f"Chat completion not implemented for provider: {self.provider}")
+
+        try:
+            response_data = await self._make_request(endpoint, payload)
+            # TODO: Standardize response format if providers differ significantly
+            # For now, assume OpenAI-like structure for non-streaming
+            return response_data
+        except LLMManagerError as e:
+            self.logger.error(f"Failed to generate chat completion: {e}", exc_info=True)
+            raise
+
+    async def generate_embedding(
+        self, 
+        input_texts: List[str],
+        embedding_model: Optional[str] = None
+    ) -> List[List[float]]:
         """
-        Extract key insights from text.
-        
+        Generates embeddings for a list of input texts.
+
         Args:
-            text: Input text
-            
+            input_texts: A list of strings to embed.
+            embedding_model: The specific model to use for embeddings (provider-dependent).
+
         Returns:
-            List of key insights or None if failed
+            A list of embeddings (each embedding is a list of floats).
         """
-        system_prompt = (
-            "You are an expert research analyst. Extract the most important "
-            "insights, findings, and contributions from the given text. "
-            "Return each insight as a separate line."
-        )
-        
-        user_prompt = f"Extract the key insights from this research:\n\n{text}"
-        
-        result = await self.generate_completion(
-            prompt=user_prompt,
-            system_prompt=system_prompt,
-            temperature=0.3
-        )
-        
-        if result:
-            # Split into individual insights
-            insights = [line.strip() for line in result.split('\n') if line.strip()]
-            # Remove numbered prefixes if present
-            insights = [re.sub(r'^\d+\.\s*', '', insight) for insight in insights]
-            return [insight for insight in insights if len(insight) > 10]
-        
-        return None
-    
-    async def identify_research_gaps(self, texts: List[str]) -> Optional[List[str]]:
-        """
-        Identify research gaps from multiple texts.
-        
-        Args:
-            texts: List of research texts
+        if self.provider == "mock":
+            self.logger.info(f"Mocking embeddings for texts: {input_texts[:2]}...")
+            # Return fixed-size dummy embeddings
+            return [[0.01 * i for i in range(self.config.embedding_dimension_mock or 128)] for _ in input_texts]
+
+        model_to_use = embedding_model
+        endpoint = ""
+        payload: Dict[str, Any] = {}
+
+        if self.provider == "openai":
+            endpoint = "embeddings"
+            model_to_use = model_to_use or self.config.openai_embedding_model
+            if not model_to_use:
+                 raise LLMManagerError("OpenAI embedding model not configured.")
+            payload = {"input": input_texts, "model": model_to_use}
+        elif self.provider == "ollama":
+            # Ollama's /api/embeddings endpoint
+            endpoint = "embeddings"
+            model_to_use = model_to_use or self.config.ollama_embedding_model # Use a specific embedding model for Ollama
+            if not model_to_use:
+                raise LLMManagerError("Ollama embedding model not configured (e.g., nomic-embed-text, mxbai-embed-large).")
+            # Ollama /api/embeddings expects one prompt (text) at a time, or model and prompt. Iterate if multiple.
+            # For simplicity, we'll make one call if input_texts has one item, else error or implement iteration.
+            # Let's assume for now we'll call it per text if that's the API constraint.
+            # Actually, the /api/embeddings endpoint for Ollama takes a single "prompt" string.
+            # To handle multiple texts, we would need to call it multiple times or find a batch solution if available.
+            # For now, let's raise an error if multiple texts are given for Ollama to simplify, or process one by one.
             
-        Returns:
-            List of identified research gaps or None if failed
-        """
-        # Combine texts with separators
-        combined_text = "\n\n---\n\n".join(texts)
-        
-        system_prompt = (
-            "You are an expert research analyst specializing in identifying "
-            "research gaps and future opportunities. Analyze the provided "
-            "research papers and identify areas that need further investigation."
-        )
-        
-        user_prompt = (
-            "Based on these research papers, identify the main research gaps "
-            "and opportunities for future work. Focus on limitations mentioned "
-            "by authors and areas that are underexplored:\n\n" + combined_text
-        )
-        
-        result = await self.generate_completion(
-            prompt=user_prompt,
-            system_prompt=system_prompt,
-            temperature=0.4
-        )
-        
-        if result:
-            # Split into individual gaps
-            gaps = [line.strip() for line in result.split('\n') if line.strip()]
-            # Remove numbered prefixes if present
-            gaps = [re.sub(r'^\d+\.\s*', '', gap) for gap in gaps]
-            return [gap for gap in gaps if len(gap) > 20]
-        
-        return None
-    
-    async def analyze_trends(self, texts: List[str]) -> Optional[Dict[str, Any]]:
-        """
-        Analyze trends from multiple research texts.
-        
-        Args:
-            texts: List of research texts
+            # Simplified: Process one by one (can be inefficient)
+            all_embeddings = []
+            for text in input_texts:
+                payload = {"model": model_to_use, "prompt": text}
+                response_data = await self._make_request(endpoint, payload)
+                if "embedding" not in response_data:
+                    raise LLMManagerError(f"Ollama embedding response missing 'embedding' key: {response_data}")
+                all_embeddings.append(response_data["embedding"])
+            return all_embeddings
+
+        elif self.provider == "deepseek":
+            # DeepSeek目前不提供专门的embedding API
+            # 使用回退机制：如果配置了OpenAI API key，使用OpenAI的embedding
+            # 否则建议使用本地embedding模型
+            if self.config.openai_api_key:
+                self.logger.warning("DeepSeek不支持embedding API，使用OpenAI embedding作为回退方案")
+                # 临时切换到OpenAI进行embedding
+                temp_provider = self.provider
+                temp_api_key = self.api_key
+                temp_base_url = self.base_url
+                
+                self.provider = "openai"
+                self.api_key = self.config.openai_api_key
+                self.base_url = "https://api.openai.com/v1"
+                
+                try:
+                    endpoint = "embeddings"
+                    model_to_use = self.config.openai_embedding_model
+                    payload = {"input": input_texts, "model": model_to_use}
+                    response_data = await self._make_request(endpoint, payload)
+                    
+                    # 恢复原设置
+                    self.provider = temp_provider
+                    self.api_key = temp_api_key
+                    self.base_url = temp_base_url
+                    
+                    if "data" in response_data and isinstance(response_data["data"], list):
+                        embeddings = [item["embedding"] for item in response_data["data"]]
+                        return embeddings
+                    else:
+                        raise LLMManagerError(f"Unexpected embedding response format: {response_data}")
+                except Exception as e:
+                    # 恢复原设置
+                    self.provider = temp_provider
+                    self.api_key = temp_api_key
+                    self.base_url = temp_base_url
+                    raise LLMManagerError(f"Failed to get embeddings using OpenAI fallback: {e}")
+            else:
+                raise LLMManagerError(
+                    "DeepSeek不支持embedding API。请配置OPENAI_API_KEY作为embedding回退方案，"
+                    "或使用sentence-transformers等本地embedding模型。"
+                )
+        else:
+            raise LLMManagerError(f"Embedding generation not implemented for provider: {self.provider}")
+
+        try:
+            response_data = await self._make_request(endpoint, payload)
             
-        Returns:
-            Dictionary with trend analysis or None if failed
-        """
-        combined_text = "\n\n---\n\n".join(texts)
+            # Standardize response for OpenAI-like embedding APIs
+            if "data" in response_data and isinstance(response_data["data"], list):
+                embeddings = [item["embedding"] for item in response_data["data"]]
+                return embeddings
+            else:
+                raise LLMManagerError(f"Unexpected embedding response format: {response_data}")
+        except LLMManagerError as e:
+            self.logger.error(f"Failed to generate embeddings: {e}", exc_info=True)
+            raise
+
+
+if __name__ == '__main__':
+    # Basic test for LLMManager
+    import asyncio
+
+    async def test_llm_manager():
+        print("Testing LLMManager...")
         
-        system_prompt = (
-            "You are an expert research trend analyst. Identify emerging "
-            "themes, methodological trends, and technological developments "
-            "from the provided research papers."
+        # Test with MOCK provider first (no API keys needed)
+        print("\n--- Testing MOCK Provider ---")
+        mock_config = Config(llm_provider="mock", openai_api_key="") # Ensure other keys aren't accidentally used
+        mock_llm = LLMManager(config=mock_config)
+        
+        completion = await mock_llm.generate_chat_completion(
+            messages=[{"role": "user", "content": "Hello Mock!"}]
         )
-        
-        user_prompt = (
-            "Analyze these research papers and identify:\n"
-            "1. Emerging themes and topics\n"
-            "2. Popular methodologies and approaches\n"
-            "3. Technology trends\n"
-            "4. Collaboration patterns\n\n" + combined_text
-        )
-        
-        result = await self.generate_completion(
-            prompt=user_prompt,
-            system_prompt=system_prompt,
-            temperature=0.4
-        )
-        
-        if result:
-            return {"analysis": result}
-        
-        return None
-    
-    async def _wait_for_rate_limit(self):
-        """Wait if necessary to respect rate limits."""
-        current_time = time.time()
-        
-        # Clean old request times (older than 1 minute)
-        self.request_times = [
-            t for t in self.request_times 
-            if current_time - t < 60
-        ]
-        
-        # Check if we need to wait
-        if len(self.request_times) >= self.max_requests_per_minute:
-            wait_time = 60 - (current_time - self.request_times[0])
-            if wait_time > 0:
-                self.logger.info(f"Rate limit reached, waiting {wait_time:.1f} seconds")
-                await asyncio.sleep(wait_time)
-    
-    def _track_request(self):
-        """Track a request for rate limiting."""
-        self.request_times.append(time.time())
-        self.request_count += 1 
+        print(f"Mock Completion: {completion['choices'][0]['message']['content']}")
+
+        embeddings = await mock_llm.generate_embedding(input_texts=["Test text 1", "Test text 2"])
+        print(f"Mock Embeddings (first item, first 5 dims): {embeddings[0][:5]}...")
+        print(f"Number of mock embeddings: {len(embeddings)}")
+
+        # --- Test with OpenAI (requires OPENAI_API_KEY in .env or config) ---
+        # Be cautious running this part if you don't want to use API credits.
+        # It will only run if llm_provider is explicitly set to 'openai' in a Config object for testing.
+        # And an API key is present.
+        print("\n--- Testing OpenAI Provider (SKIPPED if API key not found or provider not OpenAI) ---")
+        try:
+            # Create a config that explicitly tries to use OpenAI for testing
+            # It will read from .env or default values in Config
+            openai_test_config = Config() # This will load from .env
+            if openai_test_config.llm_provider == "openai" and openai_test_config.openai_api_key:
+                print(f"OpenAI API Key found, proceeding with OpenAI test using model {openai_test_config.openai_model}...")
+                openai_llm = LLMManager(config=openai_test_config)
+                
+                # Test Chat Completion
+                # print("Testing OpenAI Chat Completion...")
+                # try:
+                #     openai_completion = await openai_llm.generate_chat_completion(
+                #         messages=[{"role": "user", "content": "What is the capital of France?"}],
+                #         max_tokens=50
+                #     )
+                #     print(f"OpenAI Completion: {openai_completion['choices'][0]['message']['content']}")
+                # except LLMManagerError as e:
+                #     print(f"OpenAI Chat Completion failed: {e}")
+
+                # Test Embedding
+                print("Testing OpenAI Embedding...")
+                try:
+                    openai_embeddings = await openai_llm.generate_embedding(
+                        input_texts=["Hello world", "Another test"])
+                    print(f"OpenAI Embeddings (first item, first 5 dims): {openai_embeddings[0][:5]}...")
+                    print(f"Number of OpenAI embeddings: {len(openai_embeddings)}")
+                except LLMManagerError as e:
+                    print(f"OpenAI Embedding failed: {e}")
+            else:
+                print("Skipping OpenAI tests: Provider is not 'openai' or API key not found in config.")
+        except LLMManagerError as e:
+            print(f"Could not initialize OpenAI LLMManager for test: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred during OpenAI test setup: {e}")
+
+    asyncio.run(test_llm_manager()) 
