@@ -11,461 +11,315 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import track
 from rich.table import Table
+from rich.prompt import Prompt
 
 from .agent import LiteratureAgent
 from .utils.config import Config
-from .retrieval.base_retriever import LiteratureItem
+from .utils.logger import get_logger, setup_logger
+from .__init__ import __version__ as agent_version
+
+# Setup initial logger for CLI specific messages before agent might reconfigure
+setup_logger(level="INFO") # Default to INFO for CLI startup
+logger = get_logger(__name__)
 
 app = typer.Typer(
-    name="lit-review",
-    help="AI Agent for Automated Literature Review & Summarization"
+    name="lit-review-agent",
+    help="🤖 AI Agent for Automated Literature Review & Summarization",
+    add_completion=False,
+    no_args_is_help=True,
 )
 console = Console()
 
+@app.callback(invoke_without_command=True)
+def main_callback(ctx: typer.Context, version: bool = typer.Option(None, "--version", "-v", help="Show application version and exit.")):
+    """
+    AI Literature Review Agent CLI
+    """
+    if version:
+        console.print(f"[bold green]AI Literature Review Agent[/bold green] version: [yellow]{agent_version}[/yellow]")
+        raise typer.Exit()
+    if ctx.invoked_subcommand is None:
+        # console.print("Welcome to the AI Literature Review Agent! Use --help for options.")
+        pass # Typer will show help by default if no_args_is_help=True
+
+@app.command()
+def setup():
+    """
+    Guides you through the initial setup and configuration of the agent.
+    """
+    console.print("[bold cyan]🚀 AI Literature Review Agent Setup Wizard[/bold cyan]")
+    console.print("This wizard will help you configure your API keys and preferences.\n")
+    
+    try:
+        config = Config()
+        
+        # Check current configuration
+        console.print("[bold yellow]Current Configuration Status:[/bold yellow]")
+        
+        # Check LLM Provider
+        console.print(f"LLM Provider: [cyan]{config.llm_provider}[/cyan]")
+        
+        # Check API Keys
+        if config.llm_provider == "deepseek":
+            if config.deepseek_api_key:
+                console.print("✅ DeepSeek API Key: Configured")
+            else:
+                console.print("❌ DeepSeek API Key: Not configured")
+                console.print("   Get your key from: https://platform.deepseek.com/api_keys")
+        
+        if config.openai_api_key:
+            console.print("✅ OpenAI API Key: Configured (for embeddings)")
+        else:
+            console.print("❌ OpenAI API Key: Not configured (needed for embeddings)")
+            console.print("   Get your key from: https://platform.openai.com/api-keys")
+        
+        if config.semantic_scholar_api_key:
+            console.print("✅ Semantic Scholar API Key: Configured")
+        else:
+            console.print("⚠️  Semantic Scholar API Key: Not configured (optional)")
+            console.print("   Get your key from: https://www.semanticscholar.org/product/api")
+        
+        console.print(f"\n[bold green]Setup Instructions:[/bold green]")
+        console.print("1. Copy config/config.example.env to .env")
+        console.print("2. Edit .env file with your API keys")
+        console.print("3. Install spaCy model: python -m spacy download en_core_web_sm")
+        console.print("4. Run: python -m src.lit_review_agent.cli config-info to verify")
+        
+    except Exception as e:
+        logger.error(f"Error during setup: {e}", exc_info=True)
+        console.print(f"[bold red]Setup error:[/bold red] {e}")
+
+@app.command()
+def config_info():
+    """
+    Displays the current configuration of the agent.
+    """
+    console.print("[bold cyan]📋 Current Agent Configuration:[/bold cyan]")
+    try:
+        config = Config()
+        table = Table(title="Configuration Details", show_header=True, header_style="bold magenta")
+        table.add_column("Setting", style="dim", width=30)
+        table.add_column("Value")
+
+        config_dict = config.model_dump()
+        for key, value in config_dict.items():
+            display_value = str(value)
+            if "api_key" in key and value: # Mask API keys
+                display_value = "********" + str(value)[-4:]
+            if value is None:
+                display_value = "[italic gray]Not set[/italic gray]"
+            table.add_row(key, display_value)
+        
+        console.print(table)
+        console.print(f"\nConfig loaded from: [yellow]{config.env_file_location()}[/yellow]")
+
+    except Exception as e:
+        logger.error(f"Error loading or displaying configuration: {e}", exc_info=True)
+        console.print(f"[bold red]Error loading configuration:[/bold red] {e}")
 
 @app.command()
 def review(
-    topic: str = typer.Argument(..., help="Research topic to review"),
-    max_papers: int = typer.Option(20, "--max-papers", "-n", help="Maximum number of papers to retrieve"),
-    full_text: bool = typer.Option(False, "--full-text", "-f", help="Extract full text from PDFs"),
-    output_format: str = typer.Option("markdown", "--format", "-o", help="Output format (markdown, json, txt)"),
-    output_file: Optional[str] = typer.Option(None, "--output", help="Output file path"),
-    config_file: Optional[str] = typer.Option(None, "--config", "-c", help="Configuration file path")
+    ctx: typer.Context,
+    research_topic: str = typer.Argument(..., help="The research topic to review."),
+    max_papers: int = typer.Option(10, "--max-papers", "-n", help="Maximum number of papers to retrieve."),
+    sources: Optional[str] = typer.Option(None, "--sources", "-s", help="Comma-separated list of sources (e.g., arxiv,semantic_scholar). Defaults to config."),
+    retrieve_full_text: bool = typer.Option(False, "--full-text", "-f", help="Attempt to retrieve full text of papers."),
+    year_start: Optional[int] = typer.Option(None, "--year-start", "--ys", help="Filter papers published FROM this year (inclusive)."),
+    year_end: Optional[int] = typer.Option(None, "--year-end", "--ye", help="Filter papers published UP TO this year (inclusive)."),
+    output_format: str = typer.Option("json", "--format", help="Output format for the results (json, markdown)."),
+    output_file: Optional[str] = typer.Option(None, "--output", "-o", help="File path to save the review results.")
 ):
-    """Conduct a comprehensive literature review on a research topic."""
-    
-    console.print(Panel.fit(
-        f"🔬 Literature Review Agent\n\n"
-        f"Topic: {topic}\n"
-        f"Max Papers: {max_papers}\n"
-        f"Full Text: {'Yes' if full_text else 'No'}\n"
-        f"Output Format: {output_format}",
-        title="Starting Literature Review",
-        border_style="blue"
-    ))
+    """
+    Conducts a literature review for a specified topic.
+    """
+    console.print(f"[bold cyan]📚 Starting Literature Review for:[/bold cyan] '{research_topic}'")
+    logger.info(f"CLI review command called for topic: {research_topic}")
+
+    try:
+        # Initialize agent
+        agent_config = Config()
+        agent = LiteratureAgent(config=agent_config)
+
+        source_list = sources.split(',') if sources else agent_config.default_retrieval_sources
+
+        console.print(f"Retrieving up to {max_papers} papers from sources: {source_list}...")
+
+        # Run the literature review
+        review_results = asyncio.run(agent.conduct_literature_review(
+            research_topic=research_topic,
+            max_papers=max_papers,
+            sources=source_list,
+            retrieve_full_text=retrieve_full_text,
+            year_start=year_start,
+            year_end=year_end
+        ))
+
+        console.print("\n[bold green]✅ Review Process Completed.[/bold green]")
+        
+        if review_results and review_results.get("papers"):
+            console.print(f"Successfully processed [bold]{review_results['num_papers_processed']}[/bold] papers.")
+            
+            # Display results table
+            table = Table(title=f"Retrieved Papers for '{research_topic}'", show_lines=True)
+            table.add_column("Title", style="cyan", min_width=40, overflow="fold")
+            table.add_column("Authors", style="green", min_width=20, overflow="fold")
+            table.add_column("Published", style="magenta", width=12)
+            table.add_column("Source", style="blue", width=10)
+
+            for paper in review_results["papers"]:
+                authors_str = ", ".join(paper.get("authors", []))
+                table.add_row(
+                    paper.get("title", "N/A"),
+                    authors_str,
+                    paper.get("published_date", "N/A")[:10] if paper.get("published_date") else "N/A",
+                    paper.get("source", "N/A")
+                )
+            console.print(table)
+            
+            # Save results if output file specified
+            if output_file:
+                output_path = Path(output_file)
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                if output_format.lower() == "json":
+                    with open(output_path, 'w', encoding='utf-8') as f:
+                        json.dump(review_results, f, indent=2, ensure_ascii=False)
+                elif output_format.lower() == "markdown":
+                    # Generate markdown report
+                    report = asyncio.run(agent.generate_full_report(
+                        papers=review_results["papers"],
+                        topic=research_topic,
+                        output_format="markdown"
+                    ))
+                    with open(output_path, 'w', encoding='utf-8') as f:
+                        f.write(report.get("content", ""))
+                
+                console.print(f"Results saved to: [yellow]{output_path}[/yellow]")
+        else:
+            console.print("[yellow]No papers were processed or found.[/yellow]")
+
+    except Exception as e:
+        logger.error(f"Error during literature review command: {e}", exc_info=True)
+        console.print(f"[bold red]An error occurred during the review:[/bold red] {e}")
+        console.print("Check the logs for more details.")
+
+@app.command()
+def generate_report(
+    title: str = typer.Argument(..., help="Title for the report"),
+    input_file: str = typer.Option(..., "--input", "-i", help="Input JSON file with review results"),
+    output_file: str = typer.Option(..., "--output", "-o", help="Output file path for the report"),
+    format: str = typer.Option("markdown", "--format", "-f", help="Report format (markdown, html, latex)")
+):
+    """
+    Generate a comprehensive report from literature review results.
+    """
+    console.print(f"[bold cyan]📄 Generating Report:[/bold cyan] '{title}'")
     
     try:
-        # Load configuration
-        if config_file and Path(config_file).exists():
-            # Load from custom config file
-            import os
-            os.environ["CONFIG_FILE"] = config_file
-        
-        config = Config()
-        
-        # Initialize agent
-        agent = LiteratureAgent(config)
-        
-        # Run literature review
-        with console.status("[bold blue]Conducting literature review..."):
-            results = asyncio.run(
-                agent.conduct_literature_review(
-                    research_topic=topic,
-                    max_papers=max_papers,
-                    include_full_text=full_text
-                )
-            )
-        
-        if "error" in results:
-            console.print(f"[red]Error: {results['error']}[/red]")
+        # Load input data
+        input_path = Path(input_file)
+        if not input_path.exists():
+            console.print(f"[bold red]Error:[/bold red] Input file not found: {input_file}")
             raise typer.Exit(1)
         
-        # Display results summary
-        display_results_summary(results)
+        with open(input_path, 'r', encoding='utf-8') as f:
+            review_data = json.load(f)
         
-        # Export results
-        if asyncio.run(agent.export_results(results, output_format, output_file)):
-            console.print(f"[green]✅ Results exported successfully![/green]")
-        else:
-            console.print(f"[red]❌ Failed to export results[/red]")
+        # Initialize agent
+        agent_config = Config()
+        agent = LiteratureAgent(config=agent_config)
+        
+        # Generate report
+        report = asyncio.run(agent.generate_full_report(
+            papers=review_data.get("papers", []),
+            topic=title,
+            output_format=format
+        ))
+        
+        # Save report
+        output_path = Path(output_file)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(report.get("content", ""))
+        
+        console.print(f"[bold green]✅ Report generated successfully![/bold green]")
+        console.print(f"Report saved to: [yellow]{output_path}[/yellow]")
         
     except Exception as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        raise typer.Exit(1)
-
+        logger.error(f"Error generating report: {e}", exc_info=True)
+        console.print(f"[bold red]Error generating report:[/bold red] {e}")
 
 @app.command()
 def search(
-    query: str = typer.Argument(..., help="Search query"),
-    max_results: int = typer.Option(10, "--max-results", "-n", help="Maximum number of results"),
-    config_file: Optional[str] = typer.Option(None, "--config", "-c", help="Configuration file path")
+    query: str = typer.Argument(..., help="Search query for the knowledge base"),
+    n_results: int = typer.Option(10, "--results", "-n", help="Number of results to return")
 ):
-    """Search for similar papers in the vector store."""
-    
-    console.print(f"🔍 Searching for papers similar to: [bold]{query}[/bold]")
+    """
+    Search the existing knowledge base for similar papers.
+    """
+    console.print(f"[bold cyan]🔍 Searching knowledge base for:[/bold cyan] '{query}'")
     
     try:
-        # Load configuration
-        if config_file and Path(config_file).exists():
-            import os
-            os.environ["CONFIG_FILE"] = config_file
+        # Initialize agent
+        agent_config = Config()
+        agent = LiteratureAgent(config=agent_config)
         
-        config = Config()
-        agent = LiteratureAgent(config)
+        # Search
+        results = asyncio.run(agent.search_similar_papers(query, n_results))
         
-        # Search for similar papers
-        with console.status("[bold blue]Searching vector store..."):
-            results = asyncio.run(
-                agent.search_similar_papers(query, max_results)
-            )
-        
-        if not results:
-            console.print("[yellow]No similar papers found in the vector store.[/yellow]")
-            return
-        
-        # Display results
-        display_search_results(results)
-        
+        if results:
+            console.print(f"[bold green]Found {len(results)} similar papers:[/bold green]")
+            
+            table = Table(title="Search Results", show_lines=True)
+            table.add_column("Title", style="cyan", min_width=40)
+            table.add_column("Similarity", style="yellow", width=10)
+            table.add_column("Authors", style="green", min_width=20)
+            
+            for result in results:
+                table.add_row(
+                    result.get("title", "N/A"),
+                    f"{result.get('similarity', 0):.3f}",
+                    ", ".join(result.get("authors", []))
+                )
+            
+            console.print(table)
+        else:
+            console.print("[yellow]No similar papers found in the knowledge base.[/yellow]")
+            
     except Exception as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        raise typer.Exit(1)
-
+        logger.error(f"Error during search: {e}", exc_info=True)
+        console.print(f"[bold red]Error during search:[/bold red] {e}")
 
 @app.command()
-def stats(
-    config_file: Optional[str] = typer.Option(None, "--config", "-c", help="Configuration file path")
-):
-    """Display agent statistics."""
+def stats():
+    """
+    Display system statistics and status.
+    """
+    console.print("[bold cyan]📊 System Statistics[/bold cyan]")
     
     try:
-        # Load configuration
-        if config_file and Path(config_file).exists():
-            import os
-            os.environ["CONFIG_FILE"] = config_file
-        
-        config = Config()
-        agent = LiteratureAgent(config)
+        # Initialize agent
+        agent_config = Config()
+        agent = LiteratureAgent(config=agent_config)
         
         # Get statistics
         stats = agent.get_statistics()
         
-        # Display statistics
-        display_statistics(stats)
+        table = Table(title="Agent Statistics", show_header=True, header_style="bold magenta")
+        table.add_column("Metric", style="dim", width=30)
+        table.add_column("Value")
+        
+        for key, value in stats.items():
+            table.add_row(key.replace("_", " ").title(), str(value))
+        
+        console.print(table)
         
     except Exception as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        raise typer.Exit(1)
-
-
-@app.command()
-def config_info(
-    config_file: Optional[str] = typer.Option(None, "--config", "-c", help="Configuration file path")
-):
-    """Display current configuration."""
-    
-    try:
-        # Load configuration
-        if config_file and Path(config_file).exists():
-            import os
-            os.environ["CONFIG_FILE"] = config_file
-        
-        config = Config()
-        
-        # Display configuration
-        display_configuration(config)
-        
-    except Exception as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        raise typer.Exit(1)
-
-
-@app.command()
-def setup():
-    """Interactive setup for configuration."""
-    
-    console.print(Panel.fit(
-        "🚀 Literature Review Agent Setup\n\n"
-        "This will help you configure the agent with your API keys and preferences.",
-        title="Setup",
-        border_style="green"
-    ))
-    
-    # Check if .env file exists
-    env_file = Path(".env")
-    config_env = Path("config/.env")
-    
-    if env_file.exists() or config_env.exists():
-        overwrite = typer.confirm("Configuration file already exists. Overwrite?")
-        if not overwrite:
-            console.print("[yellow]Setup cancelled.[/yellow]")
-            return
-    
-    # Collect configuration
-    config_data = {}
-    
-    # OpenAI API Key
-    console.print("\n[bold blue]OpenAI Configuration[/bold blue]")
-    openai_key = typer.prompt("OpenAI API Key (leave blank if using another provider)", default="", show_default=False)
-    if openai_key:
-        config_data["OPENAI_API_KEY"] = openai_key
-    
-    openai_model = typer.prompt("OpenAI Model (if using OpenAI)", default="gpt-4-turbo-preview", type=str)
-    if openai_key: # Only ask for model if key is provided
-        config_data["OPENAI_MODEL"] = openai_model
-    openai_api_base = typer.prompt("OpenAI API Base URL (optional, for custom OpenAI-compatible APIs)", default="", show_default=False)
-    if openai_api_base:
-        config_data["OPENAI_API_BASE"] = openai_api_base
-
-    # DeepSeek API Key
-    console.print("\n[bold magenta]DeepSeek Configuration[/bold magenta]")
-    deepseek_key = typer.prompt("DeepSeek API Key (leave blank if not using)", default="", show_default=False)
-    if deepseek_key:
-        config_data["DEEPSEEK_API_KEY"] = deepseek_key
-
-    deepseek_model = typer.prompt("DeepSeek Model (if using DeepSeek)", default="deepseek-chat", type=str)
-    if deepseek_key:
-        config_data["DEEPSEEK_MODEL"] = deepseek_model
-    deepseek_api_base = typer.prompt("DeepSeek API Base URL (optional)", default="https://api.deepseek.com", show_default=True)
-    if deepseek_key: # Only save if Deepseek is being configured
-      config_data["DEEPSEEK_API_BASE"] = deepseek_api_base
-
-    # LLM Provider Choice
-    console.print("\n[bold green]LLM Provider Choice[/bold green]")
-    llm_provider_choices = ["openai", "deepseek"]
-    default_provider = "openai"
-    if deepseek_key and not openai_key:
-        default_provider = "deepseek"
-    elif openai_key and not deepseek_key:
-        default_provider = "openai"
-    
-    llm_provider = typer.prompt(
-        f"Choose LLM Provider ({', '.join(llm_provider_choices)})", 
-        default=default_provider, 
-        type=str
-    )
-    if llm_provider not in llm_provider_choices:
-        console.print(f"[red]Invalid provider. Defaulting to '{default_provider}'.[/red]")
-        llm_provider = default_provider
-    config_data["LLM_PROVIDER"] = llm_provider
-
-    # Other settings
-    console.print("\n[bold blue]Application Settings[/bold blue]")
-    max_papers = typer.prompt("Default max papers", default=100, type=int)
-    config_data["ARXIV_MAX_RESULTS"] = str(max_papers)
-    
-    log_level = typer.prompt("Log level", default="INFO", type=str)
-    config_data["LOG_LEVEL"] = log_level
-    
-    # Write configuration
-    config_content = "\n".join([f"{key}={value}" for key, value in config_data.items()])
-    
-    try:
-        # Create config directory if it doesn't exist
-        config_dir = Path("config")
-        config_dir.mkdir(exist_ok=True)
-        
-        # Write to config/.env
-        with open(config_dir / ".env", "w") as f:
-            f.write(config_content)
-        
-        console.print(f"[green]✅ Configuration saved to {config_dir / '.env'}[/green]")
-        console.print("\n[yellow]You can now run literature reviews![/yellow]")
-        console.print("Example: [bold]lit-review review 'machine learning in healthcare'[/bold]")
-        
-    except Exception as e:
-        console.print(f"[red]Error saving configuration: {str(e)}[/red]")
-        raise typer.Exit(1)
-
-
-@app.command()
-def generate_report(
-    topic: str = typer.Argument(..., help="Research topic for the report"),
-    input_file: str = typer.Option(..., "--input", "-i", help="Path to JSON file containing literature items from a previous review"),
-    output_format: str = typer.Option("markdown", "--format", "-f", help="Output format for the report (markdown, html, latex)"),
-    output_file: str = typer.Option(..., "--output", "-o", help="File path to save the generated report"),
-    config_file: Optional[str] = typer.Option(None, "--config", "-c", help="Configuration file path")
-):
-    """Generate a comprehensive report from a list of literature items."""
-    console.print(Panel.fit(
-        f"📚 Generating Literature Report\n\n"
-        f"Topic: {topic}\n"
-        f"Input File: {input_file}\n"
-        f"Output Format: {output_format}\n"
-        f"Output File: {output_file}",
-        title="Report Generation",
-        border_style="green"
-    ))
-
-    try:
-        # Load configuration
-        if config_file and Path(config_file).exists():
-            import os
-            os.environ["CONFIG_FILE"] = config_file
-        
-        config_instance = Config()
-        agent = LiteratureAgent(config_instance)
-
-        # Load literature items from input file
-        console.print(f"[cyan]Loading literature items from {input_file}...[/cyan]")
-        if not Path(input_file).exists():
-            console.print(f"[red]Error: Input file '{input_file}' not found.[/red]")
-            raise typer.Exit(1)
-        
-        with open(input_file, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            # Assuming the papers are stored under a key like 'papers' 
-            # and need to be converted to LiteratureItem objects
-            paper_dicts = data.get('papers', []) 
-            if not paper_dicts and isinstance(data, list): # if the root is a list of papers
-                paper_dicts = data
-            elif not paper_dicts and isinstance(data.get('results', {}).get('papers'), list):
-                 paper_dicts = data.get('results', {}).get('papers', [])
-
-        if not paper_dicts:
-            console.print(f"[red]Error: No papers found in input file '{input_file}'. Expected a JSON list of papers or a JSON object with a 'papers' key.[/red]")
-            raise typer.Exit(1)
-
-        papers = []
-        for p_dict in paper_dicts:
-            # Minimal conversion, assuming p_dict has the necessary fields for LiteratureItem
-            # This might need adjustment based on the actual structure of review output
-            item = LiteratureItem(
-                id=p_dict.get('id', p_dict.get('entry_id', 'unknown')),
-                title=p_dict.get('title', 'N/A'),
-                authors=p_dict.get('authors', []),
-                abstract=p_dict.get('abstract', p_dict.get('summary')),
-                publication_date=datetime.fromisoformat(p_dict['publication_date']) if p_dict.get('publication_date') else None,
-                url=p_dict.get('url', p_dict.get('pdf_url')),
-                venue=p_dict.get('journal', p_dict.get('journal_ref')),
-                keywords=p_dict.get('keywords', []), # Ensure keywords are present
-                categories=p_dict.get('categories', []) # Ensure categories are present
-            )
-            papers.append(item)
-        
-        console.print(f"[cyan]Loaded {len(papers)} literature items.[/cyan]")
-
-        # Generate report
-        with console.status("[bold green]Generating report..."):
-            report_data = asyncio.run(
-                agent.generate_full_report(
-                    papers=papers,
-                    topic=topic,
-                    output_format=output_format
-                )
-            )
-
-        if "error" in report_data:
-            console.print(f"[red]Error generating report: {report_data['error']}[/red]")
-            raise typer.Exit(1)
-
-        # Save report to file
-        output_path = Path(output_file)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(report_data["content"])
-        
-        console.print(f"[green]✅ Report generated and saved to {output_path}[/green]")
-
-    except Exception as e:
-        console.print(f"[red]An unexpected error occurred: {str(e)}[/red]")
-        import traceback
-        console.print(traceback.format_exc())
-        raise typer.Exit(1)
-
-
-def display_results_summary(results: dict):
-    """Display a summary of literature review results."""
-    
-    console.print("\n" + "="*80)
-    console.print(f"[bold green]📊 Literature Review Results[/bold green]")
-    console.print("="*80)
-    
-    # Basic info
-    console.print(f"[bold]Topic:[/bold] {results.get('topic', 'Unknown')}")
-    console.print(f"[bold]Papers Found:[/bold] {len(results.get('papers', []))}")
-    
-    # Statistics
-    if results.get("statistics"):
-        stats = results["statistics"]
-        console.print(f"[bold]Date Range:[/bold] {stats.get('date_range', {}).get('earliest', 'Unknown')} - {stats.get('date_range', {}).get('latest', 'Unknown')}")
-    
-    # Executive Summary
-    if results.get("summary"):
-        console.print(f"\n[bold blue]📋 Executive Summary[/bold blue]")
-        console.print(Panel(results["summary"], border_style="blue"))
-    
-    # Key Insights
-    if results.get("key_insights"):
-        console.print(f"\n[bold green]💡 Key Insights[/bold green]")
-        for i, insight in enumerate(results["key_insights"][:5], 1):
-            console.print(f"{i}. {insight}")
-    
-    # Research Gaps
-    if results.get("research_gaps"):
-        console.print(f"\n[bold yellow]🔍 Research Gaps[/bold yellow]")
-        for i, gap in enumerate(results["research_gaps"][:3], 1):
-            console.print(f"{i}. {gap}")
-    
-    # Top Categories
-    if results.get("statistics", {}).get("top_categories"):
-        console.print(f"\n[bold magenta]📈 Top Categories[/bold magenta]")
-        for category, count in results["statistics"]["top_categories"][:5]:
-            console.print(f"• {category}: {count} papers")
-
-
-def display_search_results(results: list):
-    """Display search results in a table."""
-    
-    table = Table(title="Similar Papers")
-    table.add_column("Rank", style="cyan", width=6)
-    table.add_column("Title", style="green")
-    table.add_column("Distance", style="yellow", width=10)
-    table.add_column("Source", style="blue", width=10)
-    
-    for i, result in enumerate(results, 1):
-        metadata = result.get("metadata", {})
-        title = metadata.get("title", "Unknown Title")
-        distance = f"{result.get('distance', 0):.3f}" if result.get('distance') else "N/A"
-        source = metadata.get("source", "Unknown")
-        
-        # Truncate long titles
-        if len(title) > 60:
-            title = title[:57] + "..."
-        
-        table.add_row(str(i), title, distance, source)
-    
-    console.print(table)
-
-
-def display_statistics(stats: dict):
-    """Display agent statistics."""
-    
-    console.print(Panel.fit(
-        f"📊 Agent Statistics\n\n"
-        f"Vector Store Items: {stats.get('vector_store', {}).get('total_items', 0)}\n"
-        f"LLM Requests Made: {stats.get('llm_requests', 0)}\n"
-        f"Current Model: {stats.get('config', {}).get('model', 'Unknown')}\n"
-        f"Max Papers Setting: {stats.get('config', {}).get('max_papers', 'Unknown')}",
-        title="Statistics",
-        border_style="cyan"
-    ))
-
-
-def display_configuration(config: Config):
-    """Display current configuration."""
-    
-    # Create a table for configuration
-    table = Table(title="Current Configuration")
-    table.add_column("Setting", style="cyan")
-    table.add_column("Value", style="green")
-    
-    # Add configuration items (hide sensitive data)
-    config_items = [
-        ("OpenAI Model", config.openai_model),
-        ("Max Tokens/Request", str(config.max_tokens_per_request)),
-        ("Max Requests/Minute", str(config.max_requests_per_minute)),
-        ("ArXiv Max Results", str(config.arxiv_max_results)),
-        ("Log Level", config.log_level),
-        ("Output Directory", config.output_dir),
-        ("Vector DB Directory", config.chroma_persist_directory),
-        ("API Key", "***" + config.openai_api_key[-4:] if len(config.openai_api_key) > 4 else "Not Set"),
-    ]
-    
-    for setting, value in config_items:
-        table.add_row(setting, str(value))
-    
-    console.print(table)
-
+        logger.error(f"Error getting statistics: {e}", exc_info=True)
+        console.print(f"[bold red]Error getting statistics:[/bold red] {e}")
 
 if __name__ == "__main__":
+    # This allows running the CLI directly with `python -m src.lit_review_agent.cli`
+    # or just `python src/lit_review_agent/cli.py`
     app() 

@@ -11,188 +11,251 @@ from .processing.vector_store import VectorStore
 from .retrieval.arxiv_client import ArxivClient
 from .retrieval.base_retriever import LiteratureItem
 from .retrieval.pdf_processor import PDFProcessor
+from .retrieval.semantic_scholar_client import SemanticScholarClient
 from .utils.config import Config
-from .utils.logger import LoggerMixin
-from .ai_core.summarizer import LiteratureSummarizer
-from .ai_core.trend_analyzer import TrendAnalyzer
-from .ai_core.report_generator import ReportGenerator
+from .utils.logger import LoggerMixin, get_logger, setup_logger
+from .ai_core.summarizer import Summarizer
 
+logger = get_logger(__name__)
 
 class LiteratureAgent(LoggerMixin):
     """Main agent for automated literature review and summarization."""
     
-    def __init__(self, config: Optional[Config] = None):
+    def __init__(self, config: Config | None = None):
         """
         Initialize the Literature Agent.
         
         Args:
             config: Configuration object (uses default if None)
         """
-        self.config = config or Config()
+        super().__init__()
+        self.config = config if config else Config()
         
         # Initialize components
         self.llm_manager = LLMManager(
             config=self.config
         )
         
-        self.text_processor = TextProcessor()
+        self.text_processor = TextProcessor(
+            spacy_model_name=self.config.spacy_model_name,
+            nltk_data_path=self.config.nltk_data_path
+        )
         
         self.vector_store = VectorStore(
             persist_directory=self.config.chroma_persist_directory,
             collection_name=self.config.chroma_collection_name,
-            embedding_model=self.config.openai_embedding_model
+            embedding_model=self.config.sentence_transformer_model
         )
         
         self.arxiv_client = ArxivClient(
+            api_url=self.config.arxiv_api_url,
             max_results=self.config.arxiv_max_results
         )
         
-        self.pdf_processor = PDFProcessor()
+        self.pdf_processor = PDFProcessor(
+            user_agent=self.config.pdf_user_agent,
+            timeout_seconds=self.config.pdf_processing_timeout
+        )
         
-        # Initialize AI Core components needed for ReportGenerator
-        self.summarizer = LiteratureSummarizer(
-            llm_manager=self.llm_manager, 
-            text_processor=self.text_processor
-        )
-        self.trend_analyzer = TrendAnalyzer(
-            llm_manager=self.llm_manager, 
-            text_processor=self.text_processor
-        )
-        self.report_generator = ReportGenerator(
+        self.semantic_scholar_client = SemanticScholarClient(config=self.config)
+        
+        self.summarizer = Summarizer(
             llm_manager=self.llm_manager,
-            summarizer=self.summarizer,
-            trend_analyzer=self.trend_analyzer
+            config=self.config
         )
         
         self.logger.info("Initialized Literature Agent")
     
-    async def conduct_literature_review(self,
-                                      research_topic: str,
-                                      max_papers: int = 50,
-                                      include_full_text: bool = False) -> Dict[str, Any]:
+    async def conduct_literature_review(
+        self,
+        research_topic: str,
+        max_papers: int = 20,
+        sources: Optional[List[str]] = None,
+        retrieve_full_text: bool = False,
+        year_start: Optional[int] = None, 
+        year_end: Optional[int] = None    
+    ) -> dict:
         """
-        Conduct a comprehensive literature review on a topic.
-        
+        Conducts a comprehensive literature review for a given research topic.
+
         Args:
-            research_topic: Research topic or query
-            max_papers: Maximum number of papers to retrieve
-            include_full_text: Whether to download and process full text
-            
+            research_topic: The topic to search for.
+            max_papers: Maximum number of papers to retrieve and process overall.
+            sources: A list of sources to use (e.g., ['arxiv', 'semantic_scholar']).
+                     Defaults to sources defined in config if None.
+            retrieve_full_text: Whether to attempt to download and process full PDF texts.
+            year_start: Optional start year for filtering publications.
+            year_end: Optional end year for filtering publications.
+
         Returns:
-            Dictionary with literature review results
+            A dictionary containing the review results, including retrieved papers,
+            analysis, and potentially identified trends.
         """
-        self.logger.info(f"Starting literature review for: {research_topic}")
+        self.logger.info(f"Starting literature review for topic: '{research_topic}'")
+        self.logger.debug(
+            f"Parameters: max_papers={max_papers}, sources={sources}, retrieve_full_text={retrieve_full_text}, "
+            f"year_start={year_start}, year_end={year_end}"
+        )
+
+        if sources is None:
+            sources = self.config.default_retrieval_sources
+            self.logger.info(f"No sources specified, using default sources from config: {sources}")
         
-        results = {
-            "topic": research_topic,
-            "timestamp": datetime.utcnow().isoformat(),
-            "papers": [],
-            "summary": None,
-            "key_insights": [],
-            "research_gaps": [],
-            "trends": {},
-            "statistics": {}
-        }
-        
-        try:
-            # Step 1: Search for papers
-            self.logger.info("Searching for papers...")
-            papers = await self.arxiv_client.search(research_topic, max_papers)
-            
-            if not papers:
-                self.logger.warning("No papers found for the given topic")
-                return results
-            
-            # Step 2: Process papers and extract full text if requested
-            if include_full_text:
-                self.logger.info("Processing full text of papers...")
-                papers = await self._process_full_text(papers)
-            
-            # Step 3: Add papers to vector store
-            self.logger.info("Adding papers to vector store...")
-            added_count = self.vector_store.add_literature_items(papers)
-            self.logger.info(f"Added {added_count} papers to vector store")
-            
-            # Step 4: Generate summaries and insights
-            self.logger.info("Generating summaries and insights...")
-            paper_texts = []
-            processed_papers = []
-            
-            for paper in papers[:max_papers]:
-                # Process paper text
-                text_content = self._get_paper_text(paper)
-                if text_content:
-                    paper_texts.append(text_content)
-                
-                # Extract additional information
-                paper_data = {
-                    "id": paper.id,
-                    "title": paper.title,
-                    "authors": paper.authors,
-                    "abstract": paper.abstract,
-                    "publication_date": paper.publication_date.isoformat() if paper.publication_date else None,
-                    "journal": paper.journal,
-                    "categories": paper.categories,
-                    "url": paper.url,
-                    "summary": None,
-                    "keywords": [],
-                    "entities": {}
-                }
-                
-                # Generate summary for individual paper
-                if text_content:
-                    summary = await self.llm_manager.generate_summary(
-                        text_content,
-                        summary_type="abstract",
-                        max_length=200
-                    )
-                    paper_data["summary"] = summary
-                    
-                    # Extract keywords and entities
-                    paper_data["keywords"] = self.text_processor.extract_research_keywords(text_content)
-                    paper_data["entities"] = self.text_processor.extract_entities(text_content)
-                
-                processed_papers.append(paper_data)
-            
-            results["papers"] = processed_papers
-            
-            # Step 5: Generate overall summary
-            if paper_texts:
-                self.logger.info("Generating overall literature review summary...")
-                combined_text = "\n\n".join(paper_texts[:10])  # Limit for token constraints
-                
-                overall_summary = await self.llm_manager.generate_summary(
-                    combined_text,
-                    summary_type="executive",
-                    max_length=1000
+        # Ensure sources is a list, even if it's from config as a string
+        if isinstance(sources, str):
+            sources = [s.strip().lower() for s in sources.split(',') if s.strip()]
+
+        retrieved_items: List[LiteratureItem] = [] 
+        processed_papers = []
+
+        active_sources_count = 0
+        if "arxiv" in sources and self.arxiv_client: active_sources_count +=1
+        if "semantic_scholar" in sources and self.semantic_scholar_client: active_sources_count += 1
+        # Add other sources here when they are implemented
+
+        papers_per_source = max_papers // active_sources_count if active_sources_count > 0 else max_papers
+        if papers_per_source == 0 and max_papers > 0 : papers_per_source = 1 
+        self.logger.debug(f"Active sources: {active_sources_count}, Papers per source: {papers_per_source}")
+
+        if "arxiv" in sources and self.arxiv_client:
+            try:
+                self.logger.info(f"Retrieving up to {papers_per_source} papers from arXiv for topic: '{research_topic}'")
+                arxiv_papers_items = await self.arxiv_client.search_papers(
+                    query=research_topic,
+                    max_results=papers_per_source,
+                    year_start=year_start, 
+                    year_end=year_end
                 )
-                results["summary"] = overall_summary
-                
-                # Step 6: Extract key insights
-                self.logger.info("Extracting key insights...")
-                insights = await self.llm_manager.extract_key_insights(combined_text)
-                results["key_insights"] = insights or []
-                
-                # Step 7: Identify research gaps
-                self.logger.info("Identifying research gaps...")
-                gaps = await self.llm_manager.identify_research_gaps(paper_texts[:5])
-                results["research_gaps"] = gaps or []
-                
-                # Step 8: Analyze trends
-                self.logger.info("Analyzing trends...")
-                trends = await self.llm_manager.analyze_trends(paper_texts[:5])
-                results["trends"] = trends or {}
+                retrieved_items.extend(arxiv_papers_items)
+                self.logger.info(f"Retrieved {len(arxiv_papers_items)} items from arXiv.")
+            except Exception as e:
+                self.logger.error(f"Error retrieving from arXiv: {e}", exc_info=True)
+        
+        if "semantic_scholar" in sources and self.semantic_scholar_client:
+            try:
+                self.logger.info(f"Retrieving up to {papers_per_source} papers from Semantic Scholar for topic: '{research_topic}'")
+                s2_papers_items = await self.semantic_scholar_client.search_papers(
+                    query=research_topic,
+                    max_results=papers_per_source,
+                    year_start=year_start, 
+                    year_end=year_end
+                )
+                retrieved_items.extend(s2_papers_items) # Will deduplicate later
+                self.logger.info(f"Retrieved {len(s2_papers_items)} items from Semantic Scholar (pre-deduplication)." )
+            except Exception as e:
+                self.logger.error(f"Error retrieving from Semantic Scholar: {e}", exc_info=True)
+
+        self.logger.info(f"Total items retrieved from all sources before deduplication: {len(retrieved_items)}")
+
+        # Deduplication Stage 1: Based on unique identifiers (DOI, ArXiv ID)
+        temp_deduped_items_by_id: List[LiteratureItem] = []
+        seen_ids_for_dedup = set() 
+        for item in retrieved_items:
+            unique_id = None
+            if item.doi:
+                unique_id = item.doi.lower()
+            elif item.arxiv_id: # Ensure arxiv_id from S2 is comparable to arxiv_client's (e.g. no "arxiv:" prefix for s2's internal)
+                # ArxivClient stores arxiv_id without prefix. S2 Client also stores it without prefix after parsing.
+                unique_id = item.arxiv_id.lower()
+            # If item.id is already prefixed (e.g. "arxiv:xxxx" or "s2:yyyy"), consider using it as part of dedup key
+            # For now, DOI and ArXiv ID are primary for cross-source deduplication.
             
-            # Step 9: Generate statistics
-            results["statistics"] = self._generate_statistics(papers)
+            if unique_id and unique_id in seen_ids_for_dedup:
+                self.logger.debug(f"Deduplicating item by ID ({unique_id}): '{item.title}'")
+                continue
+            if unique_id:
+                seen_ids_for_dedup.add(unique_id)
+            temp_deduped_items_by_id.append(item)
+        retrieved_items = temp_deduped_items_by_id
+        self.logger.info(f"{len(retrieved_items)} items after ID-based deduplication (DOI/ArXiv ID)." )
+
+        # Deduplication Stage 2: Softer deduplication (e.g., normalized title and first author name)
+        final_deduped_items: List[LiteratureItem] = []
+        seen_title_author_hash = set()
+        for item in retrieved_items:
+            norm_title = ''.join(e for e in item.title.lower() if e.isalnum() or e.isspace()).strip()
+            first_author_norm = item.authors[0].lower().strip() if item.authors else "unknown_author"
+            # Create a hash or tuple for the pair
+            title_author_key = hash((norm_title, first_author_norm))
             
-            self.logger.info("Literature review completed successfully")
-            return results
-            
-        except Exception as e:
-            self.logger.error(f"Error conducting literature review: {e}")
-            results["error"] = str(e)
-            return results
+            if title_author_key in seen_title_author_hash:
+                self.logger.debug(f"Deduplicating item by title/author ('{norm_title}' / '{first_author_norm}'): '{item.title}'")
+                continue
+            seen_title_author_hash.add(title_author_key)
+            final_deduped_items.append(item)
+        retrieved_items = final_deduped_items
+        self.logger.info(f"{len(retrieved_items)} items after title/author soft deduplication.")
+        
+        if len(retrieved_items) > max_papers:
+            self.logger.info(f"Limiting {len(retrieved_items)} deduplicated items to {max_papers}.")
+            # TODO: Implement sorting by relevance or date before truncating if needed.
+            # For now, just take the first N. A more sophisticated approach might involve scoring.
+            retrieved_items = retrieved_items[:max_papers]
+
+        if retrieve_full_text:
+            self.logger.info(f"Attempting to retrieve full text for {len(retrieved_items)} items...")
+            for i in range(len(retrieved_items)):
+                item = retrieved_items[i]
+                if item.pdf_url:
+                    self.logger.debug(f"Processing PDF for: '{item.title}' from {item.pdf_url}")
+                    try:
+                        full_text_content = await self.pdf_processor.extract_text_from_url(item.pdf_url)
+                        if full_text_content:
+                            retrieved_items[i].full_text = full_text_content 
+                            self.logger.info(f"Extracted full text for: '{item.title}' ({len(full_text_content)} chars)")
+                        else:
+                            self.logger.warning(f"Could not extract full text for: '{item.title}' (empty content from PDF processor). URL: {item.pdf_url}")
+                    except Exception as pdf_e:
+                        self.logger.error(f"Error processing PDF for '{item.title}' from {item.pdf_url}: {pdf_e}", exc_info=False)
+                elif not item.full_text: # If full_text wasn't already populated by the retriever (e.g. arXiv summary sometimes is in full_text)
+                     self.logger.debug(f"No PDF URL for item: '{item.title}', skipping full text retrieval.")
+
+        for item in retrieved_items:
+            self.logger.debug(f"Final processing stage for item: '{item.title}' (ID: {item.id})")
+            text_for_ai = item.full_text if item.full_text else item.summary
+            if not text_for_ai:
+                self.logger.warning(f"No text (full or summary) available for AI processing of '{item.title}'.")
+                ai_summary = "No text content available for summarization."
+                keywords = []
+            else:
+                self.logger.debug(f"Using text (len: {len(text_for_ai)}) for AI processing of '{item.title}'. Full text used: {bool(item.full_text)}.")
+                try:
+                    keywords = self.text_processor.extract_keywords(text_for_ai, top_n=10)
+                except Exception as kw_e:
+                    self.logger.error(f"Error extracting keywords for {item.title}: {kw_e}", exc_info=True)
+                    keywords = [] 
+                try:
+                    summary_type_for_llm = "key_findings" if item.full_text else "abstract_enhancement"
+                    self.logger.debug(f"Requesting '{summary_type_for_llm}' summary for '{item.title}'")
+                    ai_summary = await self.summarizer.summarize_text(
+                        text=text_for_ai, 
+                        summary_type=summary_type_for_llm,
+                    )
+                except Exception as summ_e:
+                    self.logger.error(f"Error using Summarizer for {item.title}: {summ_e}", exc_info=True)
+                    ai_summary = "AI summary generation failed."
+                                
+            processed_papers.append({
+                "title": item.title,
+                "authors": [author.name for author in item.authors] if item.authors else [],
+                "published_date": item.publication_date.isoformat() if item.publication_date else None,
+                "url": item.url,
+                "pdf_url": item.pdf_url,
+                "original_summary": item.summary,
+                "ai_enhanced_summary": ai_summary,
+                "full_text_retrieved": bool(item.full_text),
+                "full_text_snippet": item.full_text[:200] + "..." if item.full_text else None, 
+                "keywords": keywords,
+                "source": item.source,
+                "item_id_internal": item.id 
+            })
+
+        self.logger.info(f"Literature review completed. Processed {len(processed_papers)} papers." )
+        return {
+            "research_topic": research_topic,
+            "num_papers_processed": len(processed_papers),
+            "papers": processed_papers
+        }
     
     async def search_similar_papers(self,
                                   query: str,
@@ -329,12 +392,12 @@ class LiteratureAgent(LoggerMixin):
             A dictionary containing the report content and metadata.
         """
         self.logger.info(f"Generating full report for topic '{topic}' in {output_format} format.")
-        if not self.report_generator:
-            self.logger.error("ReportGenerator is not initialized.")
-            return {"error": "ReportGenerator not initialized."}
+        if not self.summarizer:
+            self.logger.error("Summarizer is not initialized.")
+            return {"error": "Summarizer not initialized."}
         
         try:
-            report_data = await self.report_generator.generate_comprehensive_report(
+            report_data = await self.summarizer.generate_comprehensive_report(
                 papers=papers,
                 topic=topic,
                 output_format=output_format
@@ -366,74 +429,6 @@ class LiteratureAgent(LoggerMixin):
         except Exception as e:
             self.logger.error(f"Error getting statistics: {e}")
             return {}
-    
-    async def _process_full_text(self, papers: List[LiteratureItem]) -> List[LiteratureItem]:
-        """Process full text for papers with PDF URLs."""
-        processed_papers = []
-        
-        for paper in papers:
-            if paper.pdf_url:
-                try:
-                    full_text = await self.pdf_processor.extract_text_from_url(paper.pdf_url)
-                    if full_text:
-                        paper.full_text = full_text
-                        self.logger.info(f"Extracted full text for: {paper.title}")
-                except Exception as e:
-                    self.logger.warning(f"Failed to extract full text for {paper.title}: {e}")
-            
-            processed_papers.append(paper)
-        
-        return processed_papers
-    
-    def _get_paper_text(self, paper: LiteratureItem) -> str:
-        """Get the best available text content for a paper."""
-        if paper.full_text:
-            return paper.full_text
-        elif paper.abstract:
-            title_and_abstract = f"Title: {paper.title}\n\nAbstract: {paper.abstract}"
-            return title_and_abstract
-        else:
-            return paper.title or ""
-    
-    def _generate_statistics(self, papers: List[LiteratureItem]) -> Dict[str, Any]:
-        """Generate statistics about the retrieved papers."""
-        if not papers:
-            return {}
-        
-        # Year distribution
-        years = [p.year for p in papers if p.year]
-        year_counts = {}
-        for year in years:
-            year_counts[year] = year_counts.get(year, 0) + 1
-        
-        # Author analysis
-        all_authors = []
-        for paper in papers:
-            all_authors.extend(paper.authors)
-        
-        author_counts = {}
-        for author in all_authors:
-            author_counts[author] = author_counts.get(author, 0) + 1
-        
-        # Category analysis
-        all_categories = []
-        for paper in papers:
-            all_categories.extend(paper.categories)
-        
-        category_counts = {}
-        for category in all_categories:
-            category_counts[category] = category_counts.get(category, 0) + 1
-        
-        return {
-            "total_papers": len(papers),
-            "date_range": {
-                "earliest": min(years) if years else None,
-                "latest": max(years) if years else None
-            },
-            "top_authors": sorted(author_counts.items(), key=lambda x: x[1], reverse=True)[:10],
-            "top_categories": sorted(category_counts.items(), key=lambda x: x[1], reverse=True)[:10],
-            "year_distribution": year_counts
-        }
     
     def _generate_markdown_report(self, results: Dict[str, Any]) -> str:
         """Generate a markdown report from results."""
@@ -551,3 +546,54 @@ class LiteratureAgent(LoggerMixin):
             lines.append("")
         
         return "\n".join(lines) 
+
+if __name__ == '__main__':
+    import asyncio
+
+    async def main():
+        print("Testing LiteratureAgent...")
+        
+        custom_config = Config(
+            arxiv_api_url="http://export.arxiv.org/api/", 
+            spacy_model_name="en_core_web_sm",
+            log_level="DEBUG", 
+            # Ensure SEMANTIC_SCHOLAR_API_KEY is set in .env or here if needed for non-mock tests
+            # semantic_scholar_api_key="YOUR_S2_KEY_HERE_IF_NEEDED" 
+        )
+        setup_logger(level=custom_config.log_level.upper())
+        agent = LiteratureAgent(config=custom_config)
+        
+        topic = "transformers in natural language processing"
+        print(f"\nConducting review for: '{topic}' sources: {custom_config.default_retrieval_sources}")
+        review_results = await agent.conduct_literature_review(
+            topic,
+            max_papers=6, 
+            retrieve_full_text=False, # Set to True to test PDF processing too
+            sources=custom_config.default_retrieval_sources, # Test with default sources (arxiv, s2)
+            year_start=2022,
+            year_end=2023 
+        )
+        print(f"\nReview results for '{topic}':")
+        print(f"Total papers processed: {review_results['num_papers_processed']}")
+
+        for i, paper in enumerate(review_results.get("papers", [])):
+            print(f"  --- Paper {i+1} ---")
+            print(f"  Title: {paper['title']}")
+            print(f"  Authors: {', '.join(paper['authors']) if paper['authors'] else 'N/A'}")
+            print(f"  Source: {paper.get('source', 'N/A')} (ID: {paper.get('item_id_internal')})")
+            print(f"  Published: {paper.get('published_date', 'N/A')}")
+            print(f"  Keywords: {paper.get('keywords', [])}")
+            print(f"  AI Summary: {paper.get('ai_enhanced_summary', 'N/A')}")
+            print(f"  Full text retrieved: {paper.get('full_text_retrieved')}")
+            if paper.get('full_text_retrieved'):
+                print(f"  Full text snippet: {paper.get('full_text_snippet', 'N/A')}")
+        
+        # ... (rest of the test code if any) ...
+
+    try:
+        asyncio.run(main())
+    except RuntimeError as e:
+        if "cannot be called from a running event loop" in str(e):
+            logger.warning("Could not run asyncio.run(main()) directly, possibly due to existing event loop.")
+        else:
+            raise e 
