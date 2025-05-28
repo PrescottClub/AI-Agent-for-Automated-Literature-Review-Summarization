@@ -8,7 +8,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.svg?style=social&label=Star&maxAge=2592000)](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/stargazers/)
 [![GitHub forks](https://img.shields.io/github/forks/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.svg?style=social&label=Fork&maxAge=2592000)](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/network/members)
 
-> **智能化文献综述与摘要生成代理 - 让学术研究更高效**
+> **智能化文献综述与摘要生成代理 - 让学术研究更高效**  
+> **Created by Terence Qin | 由 Terence Qin 创建**
 
 一个基于人工智能的智能代理系统，能够**自动发现、分析和综合**学术文献，为研究人员节省大量时间，并提供任何研究领域的全面洞察。
 
@@ -392,6 +393,7 @@ node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package
 
 ## 🙏 致谢
 
+*   感谢项目创始人 **Terence Qin** 的开创性工作和持续维护。
 *   感谢所有为本项目贡献代码和想法的开发者。
 *   感谢 DeepSeek 提供的强大且经济高效的 LLM 服务。
 *   感谢 LangChain, FastAPI, Vue.js 等开源社区提供的优秀工具。
@@ -403,8 +405,7 @@ node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package
 
 ## 📞 联系我们
 
-- 📧 邮箱: your-email@example.com
-- 🐦 Twitter: [@your-twitter](https://twitter.com/your-twitter)
+- 📧 邮箱: jger8276@gmail.com
 - 💬 讨论: [GitHub Discussions](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/discussions)
 
 ---
@@ -413,6 +414,6 @@ node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package
 
 **如果这个项目对您有帮助，请给我们一个 ⭐️ Star！**
 
-Made with ❤️ by the AI Literature Review Team
+Made with ❤️ by **Terence Qin**
 
 </div> 
