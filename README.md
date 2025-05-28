@@ -5,6 +5,8 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-red.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![DeepSeek](https://img.shields.io/badge/Powered_by-DeepSeek-orange.svg)](https://platform.deepseek.com/)
+[![GitHub stars](https://img.shields.io/github/stars/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.svg?style=social&label=Star&maxAge=2592000)](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/stargazers/)
+[![GitHub forks](https://img.shields.io/github/forks/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.svg?style=social&label=Fork&maxAge=2592000)](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/network/members)
 
 > **智能化文献综述与摘要生成代理 - 让学术研究更高效**
 
@@ -116,10 +118,13 @@ python -m spacy download en_core_web_sm
 #### 配置环境变量
 ```bash
 # 复制环境变量模板
+# Windows
 copy config\config.example.env .env
+# Linux/Mac
+cp config/config.example.env .env
 
 # 编辑 .env 文件，设置以下配置：
-# LLM_PROVIDER=deepseek
+# LLM_PROVIDER=deepseek # 支持 deepseek, openai, ollama
 # DEEPSEEK_API_KEY=your_deepseek_api_key_here
 # OPENAI_API_KEY=your_openai_api_key_here
 # SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here
@@ -157,7 +162,7 @@ python -m http.server 8080
 ```bash
 # 在 frontend/literature-review-frontend 目录
 cd frontend/literature-review-frontend
-node_modules\.bin\vite.cmd
+node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package.json 中有配置)
 ```
 前端将在 `http://localhost:5173` 启动
 
@@ -241,176 +246,160 @@ python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --po
 
 ```
 AI-Agent-for-Automated-Literature-Review-Summarization/
-├── 📁 src/                          # Python 核心代码
-│   └── 📁 lit_review_agent/
-│       ├── 📄 agent.py              # 主要代理类
-│       ├── 📄 cli.py                # 命令行界面
-│       ├── 📄 app.py                # Streamlit 应用
-│       ├── 📄 mcp_server.py         # MCP 服务器
-│       ├── 📁 retrievers/           # 文献检索器
-│       ├── 📁 processors/           # 文档处理器
-│       ├── 📁 analyzers/            # 分析器
-│       └── 📁 utils/                # 工具函数
-├── 📁 frontend/                     # Vue3 前端
-│   └── 📁 literature-review-frontend/
-│       ├── 📁 src/
-│       │   ├── 📁 components/       # Vue 组件
-│       │   ├── 📁 views/            # 页面视图
-│       │   ├── 📁 api/              # API 接口
-│       │   └── 📁 assets/           # 静态资源
-│       ├── 📄 package.json          # 前端依赖
-│       └── 📄 vite.config.ts        # Vite 配置
-├── 📁 config/                       # 配置文件
-├── 📁 data/                         # 数据存储
-├── 📁 logs/                         # 日志文件
-├── 📁 tests/                        # 测试文件
-├── 📄 api_server.py                 # FastAPI 服务器
-├── 📄 requirements.txt              # Python 依赖
-├── 📄 .env                          # 环境变量
-└── 📄 README.md                     # 项目说明
+├── .vscode/            # VSCode 编辑器配置
+├── .streamlit/         # Streamlit 应用配置 (如果使用)
+├── config/             # 配置文件和模板
+│   └── config.example.env # 环境变量模板
+├── data/               # 存储原始数据、处理后的数据 (可被 .gitignore 忽略)
+├── docs/               # 项目文档
+├── frontend/           # 前端应用代码
+│   ├── simple-frontend/ # 简单的 HTML/JS 前端示例
+│   └── literature-review-frontend/ # Vue3 前端应用
+├── logs/               # 日志文件 (可被 .gitignore 忽略)
+├── reports/            # 生成的报告 (可被 .gitignore 忽略)
+├── scripts/            # 辅助脚本 (例如：启动脚本、数据处理脚本)
+├── src/                # 主要的 Python 源代码
+│   ├── lit_review_agent/ # 文献综述代理核心逻辑
+│   │   ├── __init__.py
+│   │   ├── agent.py      # Agent 核心实现
+│   │   ├── cli.py        # 命令行界面
+│   │   ├── llm_provider.py # LLM 服务提供者接口
+│   │   ├── paper_downloader.py # 论文下载模块
+│   │   ├── paper_parser.py   # 论文解析模块
+│   │   └── report_generator.py # 报告生成模块
+│   └── utils/            # 通用工具函数
+├── tests/              # 测试代码
+├── venv/               # Python 虚拟环境 (被 .gitignore 忽略)
+├── .gitignore          # 指定 Git 忽略的文件和目录
+├── api_server.py       # FastAPI 后端服务入口
+├── README.md           # 项目介绍和使用指南
+├── requirements.txt    # Python 依赖包列表
+├── start_backend.bat   # Windows 启动后端脚本 (建议移至 scripts/)
+├── start_frontend.bat  # Windows 启动 Vue 前端脚本 (建议移至 scripts/)
+└── start_simple_frontend.bat # Windows 启动简单前端脚本 (建议移至 scripts/)
 ```
 
-## 🔌 API 接口
+## 🚀 快速开始
 
-### 文献检索 API
+### 环境要求
 
-```http
-POST /api/search
-Content-Type: application/json
+- **Python**: 3.8 或更高版本
+- **Node.js**: 16.0 或更高版本
+- **npm**: 8.0 或更高版本
 
-{
-  "query": "人工智能在医疗领域的应用",
-  "sources": ["arxiv", "semantic_scholar"],
-  "maxPapers": 20,
-  "yearStart": 2020,
-  "yearEnd": 2024,
-  "retrieveFullText": false,
-  "enableAIAnalysis": true
-}
-```
-
-### 报告生成 API
-
-```http
-POST /api/generate-report
-Content-Type: application/json
-
-{
-  "title": "AI医疗应用综述报告",
-  "papers": [...]
-}
-```
-
-### 系统状态 API
-
-```http
-GET /api/status
-```
-
-## 🧪 测试
-
-### 运行单元测试
-```bash
-pytest tests/
-```
-
-### 运行集成测试
-```bash
-python test_setup.py
-```
-
-### 前端测试
-```bash
-cd frontend/literature-review-frontend
-npm run test
-```
-
-## 🚀 部署
-
-### Docker 部署（推荐）
+### 1. 克隆项目
 
 ```bash
-# 构建镜像
-docker build -t ai-literature-review .
-
-# 运行容器
-docker run -p 8000:8000 -p 5173:5173 ai-literature-review
+git clone https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.git
+cd AI-Agent-for-Automated-Literature-Review-Summarization
 ```
 
-### 传统部署
+### 2. 后端设置
 
-#### 后端部署
+#### 创建虚拟环境
 ```bash
-# 使用 Gunicorn
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker api_server:app --bind 0.0.0.0:8000
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# Linux/Mac
+source venv/bin/activate
 ```
 
-#### 前端部署
+#### 安装依赖
+```bash
+pip install -r requirements.txt
+```
+
+#### 下载 spaCy 模型
+```bash
+python -m spacy download en_core_web_sm
+```
+
+#### 配置环境变量
+```bash
+# 复制环境变量模板
+# Windows
+copy config\config.example.env .env
+# Linux/Mac
+cp config/config.example.env .env
+
+# 编辑 .env 文件，设置以下配置：
+# LLM_PROVIDER=deepseek # 支持 deepseek, openai, ollama
+# DEEPSEEK_API_KEY=your_deepseek_api_key_here
+# OPENAI_API_KEY=your_openai_api_key_here
+# SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here
+```
+
+### 3. 前端设置
+
 ```bash
 cd frontend/literature-review-frontend
-npm run build
-# 将 dist/ 目录部署到 Web 服务器
+npm install
 ```
+
+### 4. 启动服务
+
+#### 启动后端 API 服务器
+```bash
+# 在项目根目录
+python api_server.py
+```
+服务器将在 `http://localhost:8000` 启动
+
+#### 启动前端界面
+
+**方式一：简单HTML界面（推荐）**
+```bash
+# 直接在浏览器中打开
+start frontend/simple-frontend/index.html
+# 或者使用Python简单服务器
+cd frontend/simple-frontend
+python -m http.server 8080
+```
+然后访问 `http://localhost:8080`
+
+**方式二：Vue3开发界面**
+```bash
+# 在 frontend/literature-review-frontend 目录
+cd frontend/literature-review-frontend
+node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package.json 中有配置)
+```
+前端将在 `http://localhost:5173` 启动
+
+## 🛠️ 技术栈
+
+*   **后端**: Python, FastAPI, LangChain, ChromaDB
+*   **前端**: Vue3, TypeScript, Element Plus, Tailwind CSS
+*   **核心 AI**: DeepSeek (默认), OpenAI, Ollama
+*   **数据处理**: spaCy, PDF处理库 (如 PyMuPDF)
+*   **文献源**: arXiv, Semantic Scholar
 
 ## 🤝 贡献指南
 
-我们欢迎所有形式的贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详细信息。
+我们欢迎各种形式的贡献！如果您有任何改进建议或发现了 Bug，请随时提出 Issue 或提交 Pull Request。
 
-### 开发流程
+1.  Fork 本仓库
+2.  创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
+3.  提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
+4.  推送到分支 (`git push origin feature/AmazingFeature`)
+5.  打开一个 Pull Request
 
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
+## 📝 许可证
 
-### 代码规范
-
-- Python: 遵循 PEP 8 规范
-- TypeScript: 使用 ESLint 和 Prettier
-- 提交信息: 使用 [Conventional Commits](https://conventionalcommits.org/)
-
-## 📝 更新日志
-
-### v1.2.0 (2024-05-28)
-- ✨ 新增 Vue3 现代化前端界面
-- 🚀 添加 FastAPI 后端 API 服务
-- 🎨 重新设计用户界面，提升用户体验
-- 🔧 优化文献检索算法
-- 📱 添加响应式设计支持
-
-### v1.1.0 (2024-05-27)
-- ✨ 添加 MCP (Model Context Protocol) 支持
-- 🔧 改进 Streamlit 界面设计
-- 🐛 修复多个已知问题
-- 📚 完善文档和使用指南
-
-### v1.0.0 (2024-05-26)
-- 🎉 首次发布
-- 🔍 支持 arXiv 和 Semantic Scholar 检索
-- 🤖 集成 DeepSeek 和 OpenAI LLM
-- 📊 基础报告生成功能
-
-## 🐛 问题反馈
-
-如果您遇到任何问题或有功能建议，请：
-
-1. 查看 [FAQ](docs/FAQ.md)
-2. 搜索现有的 [Issues](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
-3. 创建新的 Issue
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+本项目采用 MIT 许可证。详情请见 [LICENSE](LICENSE) 文件。
 
 ## 🙏 致谢
 
-- [LangChain](https://langchain.com/) - 强大的 LLM 应用框架
-- [DeepSeek](https://platform.deepseek.com/) - 高性价比的 LLM 服务
-- [arXiv](https://arxiv.org/) - 开放的学术预印本库
-- [Semantic Scholar](https://www.semanticscholar.org/) - 学术搜索引擎
-- [Vue.js](https://vuejs.org/) - 渐进式 JavaScript 框架
-- [FastAPI](https://fastapi.tiangolo.com/) - 现代 Python Web 框架
+*   感谢所有为本项目贡献代码和想法的开发者。
+*   感谢 DeepSeek 提供的强大且经济高效的 LLM 服务。
+*   感谢 LangChain, FastAPI, Vue.js 等开源社区提供的优秀工具。
+
+---
+
+*如果您觉得这个项目对您有帮助，请给一个 ⭐ Star！*
+*如有任何问题，欢迎通过 Issue 与我们联系。*
 
 ## 📞 联系我们
 
