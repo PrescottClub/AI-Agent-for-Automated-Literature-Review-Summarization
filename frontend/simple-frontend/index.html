@@ -394,12 +394,14 @@
                     window.open(url, '_blank');
                 }
             }
-        }).use(ElementPlus).mount('#app');
+        });
         
         // 注册图标
         for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
             app.component(key, component);
         }
+        
+        app.use(ElementPlus).mount('#app');
     </script>
 </body>
 </html> 
