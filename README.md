@@ -141,10 +141,23 @@ python api_server.py
 ```
 服务器将在 `http://localhost:8000` 启动
 
-#### 启动前端开发服务器
+#### 启动前端界面
+
+**方式一：简单HTML界面（推荐）**
+```bash
+# 直接在浏览器中打开
+start frontend/simple-frontend/index.html
+# 或者使用Python简单服务器
+cd frontend/simple-frontend
+python -m http.server 8080
+```
+然后访问 `http://localhost:8080`
+
+**方式二：Vue3开发界面**
 ```bash
 # 在 frontend/literature-review-frontend 目录
-npm run dev
+cd frontend/literature-review-frontend
+node_modules\.bin\vite.cmd
 ```
 前端将在 `http://localhost:5173` 启动
 

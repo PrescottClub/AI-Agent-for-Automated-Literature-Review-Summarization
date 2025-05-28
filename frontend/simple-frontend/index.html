@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智能文献综述系统</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <script src="https://unpkg.com/@element-plus/icons-vue/dist/index.iife.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            font-size: 1.2rem;
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .paper-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 0;
+        }
+        
+        .paper-item:last-child {
+            border-bottom: none;
+        }
+        
+        .paper-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .paper-authors {
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+        
+        .paper-summary {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .paper-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <!-- 头部 -->
+            <div class="header">
+                <h1 class="title">🔬 AI 智能文献综述系统</h1>
+                <p class="subtitle">基于人工智能的智能文献检索、分析与总结服务</p>
+            </div>
+            
+            <!-- 搜索区域 -->
+            <div class="search-card">
+                <h3 style="margin-bottom: 20px; color: #1f2937;">开始您的文献综述</h3>
+                
+                <el-form @submit.prevent="startSearch">
+                    <el-form-item label="研究主题">
+                        <el-input 
+                            v-model="searchQuery" 
+                            placeholder="请输入您的研究主题，例如：人工智能在医疗领域的应用"
+                            size="large"
+                            style="width: 100%;">
+                            <template #prefix>
+                                <el-icon><Search /></el-icon>
+                            </template>
+                        </el-input>
+                    </el-form-item>
+                    
+                    <el-row :gutter="20">
+                        <el-col :span="6">
+                            <el-form-item label="数据源">
+                                <el-select v-model="selectedSources" multiple placeholder="选择数据源" style="width: 100%;">
+                                    <el-option label="arXiv" value="arxiv" />
+                                    <el-option label="Semantic Scholar" value="semantic_scholar" />
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="论文数量">
+                                <el-input-number v-model="maxPapers" :min="5" :max="50" style="width: 100%;" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="获取全文">
+                                <el-switch v-model="retrieveFullText" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-form-item label="AI 分析">
+                                <el-switch v-model="enableAIAnalysis" />
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <el-button 
+                            type="primary" 
+                            size="large" 
+                            :loading="isSearching"
+                            @click="startSearch"
+                            style="padding: 12px 40px; font-size: 16px;">
+                            <el-icon style="margin-right: 8px;"><Search /></el-icon>
+                            {{ isSearching ? '正在检索...' : '开始检索' }}
+                        </el-button>
+                    </div>
+                </el-form>
+            </div>
+            
+            <!-- 统计信息 -->
+            <div v-if="searchResults.length > 0" class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ searchResults.length }}</div>
+                    <div class="stat-label">检索到的论文</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ fullTextCount }}</div>
+                    <div class="stat-label">获取全文</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ totalKeywords }}</div>
+                    <div class="stat-label">关键词总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ uniqueSources }}</div>
+                    <div class="stat-label">数据源</div>
+                </div>
+            </div>
+            
+            <!-- 加载状态 -->
+            <div v-if="isSearching" class="loading">
+                <el-icon class="is-loading" style="font-size: 2rem; color: #3b82f6;"><Loading /></el-icon>
+                <p style="margin-top: 10px; color: #6b7280;">正在检索文献，请稍候...</p>
+            </div>
+            
+            <!-- 搜索结果 -->
+            <div v-if="searchResults.length > 0 && !isSearching">
+                <h3 style="margin-bottom: 20px; color: #1f2937;">检索结果 ({{ searchResults.length }} 篇)</h3>
+                
+                <div class="results-card" v-for="(paper, index) in searchResults" :key="index">
+                    <div class="paper-item">
+                        <div style="display: flex; justify-content: between; align-items: start;">
+                            <div style="flex: 1;">
+                                <h4 class="paper-title">{{ paper.title }}</h4>
+                                <div class="paper-authors">
+                                    <el-icon style="margin-right: 5px;"><User /></el-icon>
+                                    {{ formatAuthors(paper.authors) }}
+                                </div>
+                                <div class="paper-summary">{{ paper.summary }}</div>
+                                <div class="paper-meta">
+                                    <span>
+                                        <el-icon><Calendar /></el-icon>
+                                        {{ formatDate(paper.publishedDate) }}
+                                    </span>
+                                    <span>
+                                        <el-icon><DataBoard /></el-icon>
+                                        {{ paper.source.toUpperCase() }}
+                                    </span>
+                                    <span v-if="paper.fullTextRetrieved">
+                                        <el-icon style="color: #10b981;"><CircleCheck /></el-icon>
+                                        全文已获取
+                                    </span>
+                                </div>
+                                <div v-if="paper.keywords && paper.keywords.length > 0" style="margin-top: 10px;">
+                                    <el-tag 
+                                        v-for="keyword in paper.keywords.slice(0, 5)" 
+                                        :key="keyword"
+                                        size="small"
+                                        style="margin-right: 8px; margin-bottom: 5px;">
+                                        {{ keyword }}
+                                    </el-tag>
+                                </div>
+                            </div>
+                            <div style="margin-left: 20px;">
+                                <el-tag type="info" size="large">#{{ index + 1 }}</el-tag>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <el-button v-if="paper.url" type="primary" size="small" @click="openLink(paper.url)">
+                                查看原文
+                            </el-button>
+                            <el-button v-if="paper.pdfUrl" type="success" size="small" @click="openLink(paper.pdfUrl)">
+                                下载PDF
+                            </el-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 空状态 -->
+            <div v-if="!isSearching && hasSearched && searchResults.length === 0" style="text-align: center; padding: 60px;">
+                <el-icon style="font-size: 4rem; color: #d1d5db; margin-bottom: 20px;"><DocumentRemove /></el-icon>
+                <h3 style="color: #6b7280; margin-bottom: 10px;">未找到相关文献</h3>
+                <p style="color: #9ca3af;">请尝试调整搜索关键词或扩大搜索范围</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        const { ElMessage } = ElementPlus;
+        
+        createApp({
+            data() {
+                return {
+                    searchQuery: '',
+                    selectedSources: ['arxiv', 'semantic_scholar'],
+                    maxPapers: 20,
+                    retrieveFullText: false,
+                    enableAIAnalysis: true,
+                    isSearching: false,
+                    hasSearched: false,
+                    searchResults: []
+                }
+            },
+            computed: {
+                fullTextCount() {
+                    return this.searchResults.filter(paper => paper.fullTextRetrieved).length;
+                },
+                totalKeywords() {
+                    return this.searchResults.reduce((total, paper) => total + (paper.keywords?.length || 0), 0);
+                },
+                uniqueSources() {
+                    return new Set(this.searchResults.map(paper => paper.source)).size;
+                }
+            },
+            methods: {
+                async startSearch() {
+                    if (!this.searchQuery.trim()) {
+                        ElMessage.warning('请输入搜索关键词');
+                        return;
+                    }
+
+                    this.isSearching = true;
+                    this.hasSearched = true;
+
+                    try {
+                        const searchParams = {
+                            query: this.searchQuery,
+                            sources: this.selectedSources,
+                            maxPapers: this.maxPapers,
+                            retrieveFullText: this.retrieveFullText,
+                            enableAIAnalysis: this.enableAIAnalysis
+                        };
+
+                        const response = await fetch('http://localhost:8000/api/search', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(searchParams)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        this.searchResults = result.papers || [];
+
+                        ElMessage.success(`成功检索到 ${this.searchResults.length} 篇相关文献`);
+                    } catch (error) {
+                        console.error('Search error:', error);
+                        ElMessage.error('检索失败，请确保后端服务器正在运行');
+                        
+                        // 使用模拟数据
+                        this.searchResults = [
+                            {
+                                title: `人工智能在${this.searchQuery}领域的应用研究`,
+                                authors: ['张三', '李四', '王五'],
+                                publishedDate: '2024-01-15',
+                                source: 'arxiv',
+                                summary: `本文深入研究了人工智能技术在${this.searchQuery}领域的最新应用，包括机器学习、深度学习和自然语言处理等前沿技术的实际应用案例。`,
+                                keywords: ['人工智能', '机器学习', '深度学习', this.searchQuery],
+                                url: 'https://arxiv.org/abs/2401.12345',
+                                fullTextRetrieved: true
+                            },
+                            {
+                                title: `${this.searchQuery}中的机器学习方法综述`,
+                                authors: ['赵六', '钱七'],
+                                publishedDate: '2023-12-20',
+                                source: 'semantic_scholar',
+                                summary: `本综述分析了${this.searchQuery}领域中机器学习方法的发展现状、主要挑战和未来趋势，为相关研究提供了重要参考。`,
+                                keywords: ['机器学习', '数据分析', '算法优化'],
+                                url: 'https://example.com/paper2',
+                                fullTextRetrieved: false
+                            }
+                        ];
+                        ElMessage.info('已切换到演示模式');
+                    } finally {
+                        this.isSearching = false;
+                    }
+                },
+                
+                formatAuthors(authors) {
+                    if (!authors || authors.length === 0) return '未知作者';
+                    if (authors.length <= 3) return authors.join(', ');
+                    return `${authors.slice(0, 3).join(', ')} 等`;
+                },
+                
+                formatDate(dateString) {
+                    if (!dateString) return '未知日期';
+                    try {
+                        const date = new Date(dateString);
+                        return date.toLocaleDateString('zh-CN');
+                    } catch {
+                        return dateString;
+                    }
+                },
+                
+                openLink(url) {
+                    window.open(url, '_blank');
+                }
+            }
+        }).use(ElementPlus).mount('#app');
+        
+        // 注册图标
+        for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+            app.component(key, component);
+        }
+    </script>
+</body>
+</html> 
