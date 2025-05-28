@@ -189,7 +189,7 @@ import {
   DataAnalysis,
   DocumentRemove
 } from '@element-plus/icons-vue'
-import PaperCard from '../components/PaperCard.vue'
+import PaperCard from '@/components/PaperCard.vue'
 
 // 响应式数据
 const searchQuery = ref('')
