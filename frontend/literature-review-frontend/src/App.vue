@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Warning, CircleCheck } from '@element-plus/icons-vue'
 
 // 检查后端连接状态
 const backendStatus = ref<'checking' | 'connected' | 'disconnected'>('checking')

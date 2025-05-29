@@ -343,7 +343,7 @@
                         ElMessage.success(`成功检索到 ${this.searchResults.length} 篇相关文献`);
                     } catch (error) {
                         console.error('Search error:', error);
-                        ElMessage.error('检索失败，请确保后端服务器正在运行');
+                        ElMessage.error('检索失败，后端服务器可能未在运行。已切换到演示模式并加载示例数据。');
                         
                         // 使用模拟数据
                         this.searchResults = [
@@ -368,7 +368,6 @@
                                 fullTextRetrieved: false
                             }
                         ];
-                        ElMessage.info('已切换到演示模式');
                     } finally {
                         this.isSearching = false;
                     }
