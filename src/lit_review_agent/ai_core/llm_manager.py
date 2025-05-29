@@ -116,12 +116,12 @@ class LLMManager(LoggerMixin):
             except Exception as e:
                 self.logger.error(f"An unexpected error occurred during LLM request: {e}", exc_info=True)
                 raise LLMManagerError(f"Unexpected LLM error: {e}") from e
-        
+
         raise LLMManagerError(f"Failed to get a response from LLM after {self.max_retries} retries.")
 
     async def generate_chat_completion(
-        self, 
-        messages: List[Dict[str, str]], 
+        self,
+        messages: List[Dict[str, str]],
         max_tokens: Optional[int] = None,
         temperature: float = 0.7,
         stream: bool = False # Placeholder for future streaming support
@@ -158,7 +158,7 @@ class LLMManager(LoggerMixin):
         }
         if max_tokens is not None:
             payload["max_tokens"] = max_tokens
-        
+
         # Provider-specific payload adjustments
         endpoint = ""
         if self.provider == "openai" or self.provider == "deepseek":
@@ -190,7 +190,7 @@ class LLMManager(LoggerMixin):
             raise
 
     async def generate_embedding(
-        self, 
+        self,
         input_texts: List[str],
         embedding_model: Optional[str] = None
     ) -> List[List[float]]:
@@ -231,7 +231,7 @@ class LLMManager(LoggerMixin):
             # Actually, the /api/embeddings endpoint for Ollama takes a single "prompt" string.
             # To handle multiple texts, we would need to call it multiple times or find a batch solution if available.
             # For now, let's raise an error if multiple texts are given for Ollama to simplify, or process one by one.
-            
+
             # Simplified: Process one by one (can be inefficient)
             all_embeddings = []
             for text in input_texts:
@@ -252,22 +252,22 @@ class LLMManager(LoggerMixin):
                 temp_provider = self.provider
                 temp_api_key = self.api_key
                 temp_base_url = self.base_url
-                
+
                 self.provider = "openai"
                 self.api_key = self.config.openai_api_key
                 self.base_url = "https://api.openai.com/v1"
-                
+
                 try:
                     endpoint = "embeddings"
                     model_to_use = self.config.openai_embedding_model
                     payload = {"input": input_texts, "model": model_to_use}
                     response_data = await self._make_request(endpoint, payload)
-                    
+
                     # 恢复原设置
                     self.provider = temp_provider
                     self.api_key = temp_api_key
                     self.base_url = temp_base_url
-                    
+
                     if "data" in response_data and isinstance(response_data["data"], list):
                         embeddings = [item["embedding"] for item in response_data["data"]]
                         return embeddings
@@ -289,7 +289,7 @@ class LLMManager(LoggerMixin):
 
         try:
             response_data = await self._make_request(endpoint, payload)
-            
+
             # Standardize response for OpenAI-like embedding APIs
             if "data" in response_data and isinstance(response_data["data"], list):
                 embeddings = [item["embedding"] for item in response_data["data"]]
@@ -300,6 +300,47 @@ class LLMManager(LoggerMixin):
             self.logger.error(f"Failed to generate embeddings: {e}", exc_info=True)
             raise
 
+    async def generate_completion(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        max_tokens: Optional[int] = None,
+        temperature: Optional[float] = None
+    ) -> Optional[str]:
+        """
+        Generate a text completion using the configured LLM.
+
+        Args:
+            prompt: The user prompt
+            system_prompt: Optional system prompt
+            max_tokens: Maximum tokens to generate
+            temperature: Sampling temperature
+
+        Returns:
+            Generated text completion or None if failed
+        """
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        try:
+            response = await self.generate_chat_completion(
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+
+            if response and response.get("choices") and response["choices"][0].get("message"):
+                return response["choices"][0]["message"].get("content", "").strip()
+            else:
+                self.logger.error(f"Invalid response format: {response}")
+                return None
+
+        except Exception as e:
+            self.logger.error(f"Error generating completion: {e}")
+            return None
+
 
 if __name__ == '__main__':
     # Basic test for LLMManager
@@ -307,12 +348,12 @@ if __name__ == '__main__':
 
     async def test_llm_manager():
         print("Testing LLMManager...")
-        
+
         # Test with MOCK provider first (no API keys needed)
         print("\n--- Testing MOCK Provider ---")
         mock_config = Config(llm_provider="mock", openai_api_key="") # Ensure other keys aren't accidentally used
         mock_llm = LLMManager(config=mock_config)
-        
+
         completion = await mock_llm.generate_chat_completion(
             messages=[{"role": "user", "content": "Hello Mock!"}]
         )
@@ -334,7 +375,7 @@ if __name__ == '__main__':
             if openai_test_config.llm_provider == "openai" and openai_test_config.openai_api_key:
                 print(f"OpenAI API Key found, proceeding with OpenAI test using model {openai_test_config.openai_model}...")
                 openai_llm = LLMManager(config=openai_test_config)
-                
+
                 # Test Chat Completion
                 # print("Testing OpenAI Chat Completion...")
                 # try:
@@ -362,4 +403,4 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"An unexpected error occurred during OpenAI test setup: {e}")
 
-    asyncio.run(test_llm_manager()) 
+    asyncio.run(test_llm_manager())
