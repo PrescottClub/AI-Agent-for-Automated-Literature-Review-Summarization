@@ -85,7 +85,7 @@
           <el-icon class="text-green-500"><CircleCheck /></el-icon>
         </el-tooltip>
         <el-tooltip content="收藏">
-          <el-button type="info" size="small" :icon="Star" circle />
+          <el-button type="info" size="small" :icon="Star" circle @click="selectPaper(paper)" />
         </el-tooltip>
         <el-tooltip content="分享">
           <el-button type="info" size="small" :icon="Share" circle />
@@ -117,6 +117,7 @@ export interface Paper {
   url?: string
   pdfUrl?: string
   fullTextRetrieved?: boolean
+  citations?: number
 }
 
 interface Props {
@@ -124,7 +125,12 @@ interface Props {
   index: number
 }
 
-defineProps<Props>()
+interface Emits {
+  (e: 'select', paper: Paper): void
+}
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 // 格式化作者列表
 const formatAuthors = (authors: string[]) => {
@@ -153,6 +159,11 @@ const truncateSummary = (summary: string) => {
 // 打开链接
 const openLink = (url: string) => {
   window.open(url, '_blank')
+}
+
+// 选择论文
+const selectPaper = (paper: Paper) => {
+  emit('select', paper)
 }
 </script>
 

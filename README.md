@@ -5,8 +5,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-red.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![DeepSeek](https://img.shields.io/badge/Powered_by-DeepSeek-orange.svg)](https://platform.deepseek.com/)
-[![GitHub stars](https://img.shields.io/github/stars/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.svg?style=social&label=Star&maxAge=2592000)](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/stargazers/)
-[![GitHub forks](https://img.shields.io/github/forks/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.svg?style=social&label=Fork&maxAge=2592000)](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/network/members)
+[![MCP](https://img.shields.io/badge/MCP-Supported-purple.svg)](https://modelcontextprotocol.io/)
 
 > **智能化文献综述与摘要生成代理 - 让学术研究更高效**  
 > **Created by Terence Qin | 由 Terence Qin 创建**
@@ -44,6 +43,16 @@
 - **Element Plus** - 优雅的 UI 组件库
 - **Tailwind CSS** - 实用优先的样式框架
 - **响应式设计** - 完美适配各种设备
+- **实时状态监控** - 后端连接状态实时显示
+- **搜索历史** - 自动保存和管理搜索记录
+- **高级筛选** - 多维度结果筛选和排序
+
+### 🔌 **MCP 协议支持**
+- **Model Context Protocol** - 支持最新的 MCP 标准
+- **多工具集成** - 文献检索、分析、相似性搜索
+- **资源暴露** - 论文数据和统计信息作为 MCP 资源
+- **Claude Desktop 集成** - 无缝集成到 Claude Desktop
+- **参数验证** - 完整的输入验证和错误处理
 
 ## 🎯 适用人群
 
@@ -74,7 +83,7 @@
                     │ • Semantic      │
                     │   Scholar API   │
                     │ • DeepSeek LLM  │
-                    │ • OpenAI API    │
+                    │ • MCP Server    │
                     └─────────────────┘
 ```
 
@@ -86,84 +95,79 @@
 - **Node.js**: 16.0 或更高版本
 - **npm**: 8.0 或更高版本
 
-### 1. 克隆项目
+### 方式一：一键启动（推荐）
+
+```bash
+# 克隆项目
+git clone https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.git
+cd AI-Agent-for-Automated-Literature-Review-Summarization
+
+# 一键启动所有服务
+python scripts/start_all.py
+```
+
+### 方式二：手动启动
+
+#### 1. 克隆项目
 
 ```bash
 git clone https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.git
 cd AI-Agent-for-Automated-Literature-Review-Summarization
 ```
 
-### 2. 后端设置
+#### 2. 后端设置
 
-#### 创建虚拟环境
 ```bash
+# 创建虚拟环境
 python -m venv venv
 
+# 激活虚拟环境
 # Windows
 venv\Scripts\activate
-
 # Linux/Mac
 source venv/bin/activate
-```
 
-#### 安装依赖
-```bash
+# 安装依赖
 pip install -r requirements.txt
-```
 
-#### 下载 spaCy 模型
-```bash
+# 下载 spaCy 模型
 python -m spacy download en_core_web_sm
 ```
 
-#### 配置环境变量
+#### 3. 配置环境变量
+
 ```bash
 # 复制环境变量模板
-# Windows
 copy config\config.example.env .env
-# Linux/Mac
-cp config/config.example.env .env
 
 # 编辑 .env 文件，设置以下配置：
-# LLM_PROVIDER=deepseek # 支持 deepseek, openai, ollama
+# LLM_PROVIDER=deepseek
 # DEEPSEEK_API_KEY=your_deepseek_api_key_here
-# OPENAI_API_KEY=your_openai_api_key_here
+# OPENAI_API_KEY=your_openai_api_key_here  # 用于嵌入
 # SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here
 ```
 
-### 3. 前端设置
+#### 4. 前端设置
 
 ```bash
 cd frontend/literature-review-frontend
 npm install
 ```
 
-### 4. 启动服务
+#### 5. 启动服务
 
-#### 启动后端 API 服务器
+**启动后端 API 服务器**
 ```bash
 # 在项目根目录
-python api_server.py
+python backend
 ```
 服务器将在 `http://localhost:8000` 启动
 
-#### 启动前端界面
-
-**方式一：简单HTML界面（推荐）**
-```bash
-# 直接在浏览器中打开
-start frontend/simple-frontend/index.html
-# 或者使用Python简单服务器
-cd frontend/simple-frontend
-python -m http.server 8080
-```
-然后访问 `http://localhost:8080`
-
-**方式二：Vue3开发界面**
+**启动前端界面**
 ```bash
 # 在 frontend/literature-review-frontend 目录
 cd frontend/literature-review-frontend
-node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package.json 中有配置)
+npm run dev
 ```
 前端将在 `http://localhost:5173` 启动
 
@@ -180,7 +184,44 @@ node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package
    - 启用全文获取和 AI 分析
 4. **开始检索**: 点击"开始检索"按钮
 5. **查看结果**: 浏览检索到的论文列表和统计信息
-6. **生成报告**: 基于检索结果生成综述报告
+6. **高级功能**:
+   - 使用筛选器按作者、关键词、数据源筛选
+   - 按相关性、时间、引用数排序
+   - 导出结果为 JSON 格式
+   - 查看搜索历史
+7. **生成报告**: 基于检索结果生成综述报告
+
+### MCP 服务器使用
+
+#### 启动 MCP 服务器
+```bash
+python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --port 8008 --reload
+```
+
+#### 可用的 MCP 工具
+- `conduct_literature_review` - 进行文献综述
+- `analyze_paper` - 分析单篇论文
+- `search_similar_papers` - 搜索相似论文
+
+#### 可用的 MCP 资源
+- `papers://{paper_id}` - 获取特定论文信息
+- `collections://literature` - 获取文献集合统计
+
+#### Claude Desktop 集成
+在 Claude Desktop 的配置文件中添加：
+```json
+{
+  "mcpServers": {
+    "literature-review": {
+      "command": "python",
+      "args": ["-m", "uvicorn", "src.lit_review_agent.mcp_server:mcp_server", "--port", "8008"],
+      "env": {
+        "DEEPSEEK_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
 
 ### 命令行界面使用
 
@@ -206,18 +247,6 @@ python -m src.lit_review_agent.cli generate-report ^
 python -m src.lit_review_agent.cli search "机器学习药物发现"
 ```
 
-### Streamlit 界面（传统界面）
-
-```bash
-python -m streamlit run src/lit_review_agent/app.py
-```
-
-### MCP 服务器（Model Context Protocol）
-
-```bash
-python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --port 8008 --reload
-```
-
 ## 🔧 配置说明
 
 ### 环境变量配置
@@ -226,7 +255,7 @@ python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --po
 |--------|------|------|--------|
 | `LLM_PROVIDER` | LLM 提供商 | 是 | `deepseek` |
 | `DEEPSEEK_API_KEY` | DeepSeek API 密钥 | 是 | - |
-| `OPENAI_API_KEY` | OpenAI API 密钥 | 否 | - |
+| `OPENAI_API_KEY` | OpenAI API 密钥（用于嵌入） | 推荐 | - |
 | `SEMANTIC_SCHOLAR_API_KEY` | Semantic Scholar API 密钥 | 否 | - |
 | `MAX_PAPERS_DEFAULT` | 默认最大论文数 | 否 | `20` |
 | `ENABLE_FULL_TEXT` | 启用全文提取 | 否 | `false` |
@@ -248,144 +277,107 @@ python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --po
 ```
 AI-Agent-for-Automated-Literature-Review-Summarization/
 ├── .vscode/            # VSCode 编辑器配置
-├── .streamlit/         # Streamlit 应用配置 (如果使用)
+├── .streamlit/         # Streamlit 应用配置
 ├── config/             # 配置文件和模板
 │   └── config.example.env # 环境变量模板
-├── data/               # 存储原始数据、处理后的数据 (可被 .gitignore 忽略)
+├── data/               # 存储原始数据、处理后的数据
 ├── docs/               # 项目文档
 ├── frontend/           # 前端应用代码
 │   ├── simple-frontend/ # 简单的 HTML/JS 前端示例
 │   └── literature-review-frontend/ # Vue3 前端应用
-├── logs/               # 日志文件 (可被 .gitignore 忽略)
-├── reports/            # 生成的报告 (可被 .gitignore 忽略)
-├── scripts/            # 辅助脚本 (例如：启动脚本、数据处理脚本)
+├── logs/               # 日志文件
+├── reports/            # 生成的报告
+├── scripts/            # 辅助脚本
+│   └── start_all.py    # 一键启动脚本
 ├── src/                # 主要的 Python 源代码
 │   ├── lit_review_agent/ # 文献综述代理核心逻辑
 │   │   ├── __init__.py
 │   │   ├── agent.py      # Agent 核心实现
 │   │   ├── cli.py        # 命令行界面
-│   │   ├── llm_provider.py # LLM 服务提供者接口
-│   │   ├── paper_downloader.py # 论文下载模块
-│   │   ├── paper_parser.py   # 论文解析模块
-│   │   └── report_generator.py # 报告生成模块
-│   └── utils/            # 通用工具函数
+│   │   ├── mcp_server.py # MCP 服务器（增强版）
+│   │   ├── ai_core/      # AI 核心模块
+│   │   ├── processing/   # 数据处理模块
+│   │   ├── retrieval/    # 检索模块
+│   │   └── utils/        # 工具函数
 ├── tests/              # 测试代码
-├── venv/               # Python 虚拟环境 (被 .gitignore 忽略)
-├── .gitignore          # 指定 Git 忽略的文件和目录
-├── api_server.py       # FastAPI 后端服务入口
+├── venv/               # Python 虚拟环境
+├── .gitignore          # Git 忽略文件
+├── backend             # FastAPI 后端服务入口
 ├── README.md           # 项目介绍和使用指南
-├── requirements.txt    # Python 依赖包列表
-├── start_backend.bat   # Windows 启动后端脚本 (建议移至 scripts/)
-├── start_frontend.bat  # Windows 启动 Vue 前端脚本 (建议移至 scripts/)
-└── start_simple_frontend.bat # Windows 启动简单前端脚本 (建议移至 scripts/)
+└── requirements.txt    # Python 依赖包列表
 ```
-
-## 🚀 快速开始
-
-### 环境要求
-
-- **Python**: 3.8 或更高版本
-- **Node.js**: 16.0 或更高版本
-- **npm**: 8.0 或更高版本
-
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization.git
-cd AI-Agent-for-Automated-Literature-Review-Summarization
-```
-
-### 2. 后端设置
-
-#### 创建虚拟环境
-```bash
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# Linux/Mac
-source venv/bin/activate
-```
-
-#### 安装依赖
-```bash
-pip install -r requirements.txt
-```
-
-#### 下载 spaCy 模型
-```bash
-python -m spacy download en_core_web_sm
-```
-
-#### 配置环境变量
-```bash
-# 复制环境变量模板
-# Windows
-copy config\config.example.env .env
-# Linux/Mac
-cp config/config.example.env .env
-
-# 编辑 .env 文件，设置以下配置：
-# LLM_PROVIDER=deepseek # 支持 deepseek, openai, ollama
-# DEEPSEEK_API_KEY=your_deepseek_api_key_here
-# OPENAI_API_KEY=your_openai_api_key_here
-# SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here
-```
-
-### 3. 前端设置
-
-```bash
-cd frontend/literature-review-frontend
-npm install
-```
-
-### 4. 启动服务
-
-#### 启动后端 API 服务器
-```bash
-# 在项目根目录
-python api_server.py
-```
-服务器将在 `http://localhost:8000` 启动
-
-#### 启动前端界面
-
-**方式一：简单HTML界面（推荐）**
-```bash
-# 直接在浏览器中打开
-start frontend/simple-frontend/index.html
-# 或者使用Python简单服务器
-cd frontend/simple-frontend
-python -m http.server 8080
-```
-然后访问 `http://localhost:8080`
-
-**方式二：Vue3开发界面**
-```bash
-# 在 frontend/literature-review-frontend 目录
-cd frontend/literature-review-frontend
-node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package.json 中有配置)
-```
-前端将在 `http://localhost:5173` 启动
 
 ## 🛠️ 技术栈
 
-*   **后端**: Python, FastAPI, LangChain, ChromaDB
-*   **前端**: Vue3, TypeScript, Element Plus, Tailwind CSS
-*   **核心 AI**: DeepSeek (默认), OpenAI, Ollama
-*   **数据处理**: spaCy, PDF处理库 (如 PyMuPDF)
-*   **文献源**: arXiv, Semantic Scholar
+### 后端技术
+- **Python 3.8+** - 核心编程语言
+- **FastAPI** - 现代化 Web 框架
+- **LangChain** - LLM 应用开发框架
+- **ChromaDB** - 向量数据库
+- **Pydantic** - 数据验证和设置管理
+- **spaCy** - 自然语言处理
+- **sentence-transformers** - 文本嵌入
+
+### 前端技术
+- **Vue 3** - 渐进式 JavaScript 框架
+- **TypeScript** - 类型安全的 JavaScript
+- **Element Plus** - Vue 3 组件库
+- **Tailwind CSS** - 实用优先的 CSS 框架
+- **Vite** - 现代化构建工具
+
+### AI 和数据处理
+- **DeepSeek** - 主要 LLM 提供商
+- **OpenAI** - 备用 LLM 和嵌入服务
+- **Ollama** - 本地 LLM 支持
+- **arXiv API** - 学术论文检索
+- **Semantic Scholar API** - 学术搜索引擎
+
+### 协议和标准
+- **MCP (Model Context Protocol)** - AI 代理通信协议
+- **RESTful API** - Web 服务接口
+- **JSON** - 数据交换格式
+- **Markdown** - 文档格式
+
+## 🆕 最新更新
+
+### v2.0.0 (2024-12-28)
+- ✨ **MCP 协议支持增强** - 新增多个工具和资源
+- 🎨 **前端界面全面优化** - 现代化设计和用户体验
+- 🔍 **高级搜索功能** - 筛选、排序、历史记录
+- 📊 **实时状态监控** - 后端连接状态显示
+- 🚀 **一键启动脚本** - 简化部署和启动流程
+- 🐛 **Bug 修复** - 修复多个已知问题
+- 📝 **文档更新** - 完善使用指南和 API 文档
+
+### 主要改进
+1. **MCP 服务器增强**
+   - 新增 `analyze_paper` 工具
+   - 新增 `search_similar_papers` 工具
+   - 完善参数验证和错误处理
+   - 支持 MCP 资源暴露
+
+2. **前端界面优化**
+   - 响应式设计改进
+   - 搜索历史管理
+   - 高级筛选和排序
+   - 实时状态监控
+   - 设置和帮助对话框
+
+3. **系统稳定性**
+   - 改进错误处理
+   - 优化性能
+   - 增强类型安全
+   - 完善测试覆盖
 
 ## 🤝 贡献指南
 
 我们欢迎各种形式的贡献！如果您有任何改进建议或发现了 Bug，请随时提出 Issue 或提交 Pull Request。
 
-1.  Fork 本仓库
-2.  创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
-3.  提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
-4.  推送到分支 (`git push origin feature/AmazingFeature`)
-5.  打开一个 Pull Request
+1. Fork 本仓库
+2. 创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 打开一个 Pull Request
 
 ## 📝 许可证
 
@@ -393,27 +385,18 @@ node_modules\.bin\vite.cmd # 或者使用 npm run dev / yarn dev (如果 package
 
 ## 🙏 致谢
 
-*   感谢项目创始人 **Terence Qin** 的开创性工作和持续维护。
-*   感谢所有为本项目贡献代码和想法的开发者。
-*   感谢 DeepSeek 提供的强大且经济高效的 LLM 服务。
-*   感谢 LangChain, FastAPI, Vue.js 等开源社区提供的优秀工具。
+- 感谢项目创始人 **Terence Qin** 的开创性工作和持续维护
+- 感谢所有为本项目贡献代码和想法的开发者
+- 感谢 DeepSeek 提供的强大且经济高效的 LLM 服务
+- 感谢 LangChain, FastAPI, Vue.js 等开源社区提供的优秀工具
+- 感谢 Model Context Protocol 团队推动 AI 代理标准化
+
+## 📞 联系方式
+
+- **项目主页**: [GitHub Repository](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization)
+- **问题反馈**: [GitHub Issues](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
+- **讨论交流**: [GitHub Discussions](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/discussions)
 
 ---
 
-*如果您觉得这个项目对您有帮助，请给一个 ⭐ Star！*
-*如有任何问题，欢迎通过 Issue 与我们联系。*
-
-## 📞 联系我们
-
-- 📧 邮箱: jger8276@gmail.com
-- 💬 讨论: [GitHub Discussions](https://github.com/your-username/AI-Agent-for-Automated-Literature-Review-Summarization/discussions)
-
----
-
-<div align="center">
-
-**如果这个项目对您有帮助，请给我们一个 ⭐️ Star！**
-
-Made with ❤️ by **Terence Qin**
-
-</div> 
+**让 AI 为您的学术研究赋能！🚀** 

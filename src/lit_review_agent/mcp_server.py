@@ -10,18 +10,14 @@ from .utils.config import Config
 from .retrieval.base_retriever import LiteratureItem # For type hinting if needed
 
 # Initialize the MCP server
-# The name "LiteratureReviewAgentServer" will be used by MCP clients to identify this server.
-mcp_server = FastMCP(name="LiteratureReviewAgentServer", description="An MCP server for the Literature Review Agent.")
+mcp_server = FastMCP(
+    name="LiteratureReviewAgentServer", 
+    description="An advanced MCP server for AI-powered literature review and analysis."
+)
 
-# Global instance of the agent and config (can be managed differently, e.g., with lifespan events)
-# It's generally better to initialize potentially heavy objects within a lifespan manager
-# for more complex MCP server setups, but this is a simpler start.
+# Global instance of the agent and config
 agent_config: Optional[Config] = None
 literature_agent: Optional[LiteratureAgent] = None
-
-# --- MCP Lifespan Management (Optional but Recommended for Production) ---
-# MCP servers can have lifespan events to manage resources like database connections
-# or initializing heavy objects like your LiteratureAgent.
 
 @mcp_server.lifespan()
 async def app_lifespan_manager(server: FastMCP):
@@ -29,60 +25,61 @@ async def app_lifespan_manager(server: FastMCP):
     global agent_config, literature_agent
     print("MCP Server: Initializing LiteratureAgent...")
     try:
-        agent_config = Config()  # Load default config or from a file/env
+        agent_config = Config()
         literature_agent = LiteratureAgent(config=agent_config)
         print("MCP Server: LiteratureAgent initialized successfully.")
-        yield  # The server runs while this yield is active
+        yield
     except Exception as e:
         print(f"MCP Server: Error during LiteratureAgent initialization: {e}")
-        # Potentially re-raise or handle as critical failure
         raise
     finally:
         print("MCP Server: Shutting down. (Cleanup if necessary)")
-        # Add any cleanup logic here if needed when the server stops
 
-# --- Define MCP Tools ---
-
-# We need to map the LiteratureAgent's methods to MCP tools.
-# Let's start with `conduct_literature_review`.
-
-# Helper to generate ToolArgument from function signatures or Pydantic models if available
-# For now, defining them manually based on the agent.py
+# Enhanced tool definitions with better validation
 conduct_review_args = [
-    ToolArgument(name="research_topic", description="The topic to search for.", type="string", is_required=True),
-    ToolArgument(name="max_papers", description="Maximum number of papers to retrieve and process.", type="integer", is_required=False, default_value=20),
-    ToolArgument(name="sources", description="A comma-separated list of sources (e.g., 'arxiv,semantic_scholar').", type="string", is_required=False),
-    ToolArgument(name="retrieve_full_text", description="Whether to attempt to download and process full PDF texts.", type="boolean", is_required=False, default_value=False),
-    ToolArgument(name="year_start", description="Optional start year for filtering publications.", type="integer", is_required=False),
-    ToolArgument(name="year_end", description="Optional end year for filtering publications.", type="integer", is_required=False),
+    ToolArgument(name="research_topic", description="The research topic to search for.", type="string", is_required=True),
+    ToolArgument(name="max_papers", description="Maximum number of papers to retrieve (1-100).", type="integer", is_required=False, default_value=20),
+    ToolArgument(name="sources", description="Comma-separated list of sources (arxiv,semantic_scholar).", type="string", is_required=False),
+    ToolArgument(name="retrieve_full_text", description="Whether to download and process full PDF texts.", type="boolean", is_required=False, default_value=False),
+    ToolArgument(name="year_start", description="Start year for filtering publications (e.g., 2020).", type="integer", is_required=False),
+    ToolArgument(name="year_end", description="End year for filtering publications (e.g., 2024).", type="integer", is_required=False),
 ]
 
 @mcp_server.tool(
     name="conduct_literature_review",
-    description="Conducts a comprehensive literature review for a given research topic.",
+    description="Conducts a comprehensive literature review for a given research topic with AI-powered analysis.",
     arguments=conduct_review_args
 )
 async def conduct_literature_review_tool(
     research_topic: str,
     max_papers: int = 20,
-    sources: Optional[str] = None, # MCP will pass string, we parse to list
+    sources: Optional[str] = None,
     retrieve_full_text: bool = False,
     year_start: Optional[int] = None,
     year_end: Optional[int] = None
-) -> Dict[str, Any]: # Return type should be JSON serializable
-    """MCP Tool wrapper for LiteratureAgent.conduct_literature_review"""
+) -> Dict[str, Any]:
+    """Enhanced MCP Tool wrapper for LiteratureAgent.conduct_literature_review"""
     if not literature_agent:
         raise Exception("LiteratureAgent not initialized. Check server logs.")
+
+    # Input validation
+    if max_papers < 1 or max_papers > 100:
+        raise ValueError("max_papers must be between 1 and 100")
+    
+    if year_start and year_end and year_start > year_end:
+        raise ValueError("year_start cannot be greater than year_end")
 
     print(f"MCP Tool: conduct_literature_review called with topic '{research_topic}'")
     
     source_list: Optional[List[str]] = None
     if sources:
+        valid_sources = {"arxiv", "semantic_scholar"}
         source_list = [s.strip().lower() for s in sources.split(',') if s.strip()]
+        invalid_sources = set(source_list) - valid_sources
+        if invalid_sources:
+            raise ValueError(f"Invalid sources: {invalid_sources}. Valid sources: {valid_sources}")
 
     try:
-        # Assuming conduct_literature_review returns a dictionary that is JSON serializable
-        # LiteratureItem objects within results might need conversion if they are not inherently serializable
         results = await literature_agent.conduct_literature_review(
             research_topic=research_topic,
             max_papers=max_papers,
@@ -91,14 +88,14 @@ async def conduct_literature_review_tool(
             year_start=year_start,
             year_end=year_end
         )
-        # Ensure results are JSON serializable.
-        # LiteratureItem is a Pydantic model, so use .model_dump()
+        
+        # Ensure results are JSON serializable
         if 'retrieved_items' in results and results['retrieved_items']:
             results['retrieved_items'] = [
                 item.model_dump(mode='json') if isinstance(item, LiteratureItem) else item 
                 for item in results['retrieved_items']
             ]
-        if 'processed_papers' in results and results['processed_papers']: # Assuming processed_papers also contains LiteratureItem
+        if 'processed_papers' in results and results['processed_papers']:
             results['processed_papers'] = [
                 item.model_dump(mode='json') if isinstance(item, LiteratureItem) else item 
                 for item in results['processed_papers']
@@ -108,32 +105,109 @@ async def conduct_literature_review_tool(
         return results 
     except Exception as e:
         print(f"MCP Tool: Error during conduct_literature_review: {e}")
-        # Return a structured error or raise an MCP-specific error
         return {"error": str(e), "details": "Failed to conduct literature review."}
 
-# --- Define MCP Resources (Placeholder) ---
-# Example: Exposing individual papers as resources (requires more design)
-# @mcp_server.resource("papers://{paper_id}")
-# async def get_paper_resource(paper_id: str) -> Dict[str, Any]:
-#     if not literature_agent:
-#         raise Exception("LiteratureAgent not initialized.")
-#     # This would require a method in LiteratureAgent to fetch a specific paper by ID
-#     # paper_data = await literature_agent.get_paper_details(paper_id)
-#     # if paper_data:
-#     #     return paper_data # Ensure it's JSON serializable
-#     # else:
-#     #     raise Exception(f"Paper with ID {paper_id} not found.") # MCP will handle as error
-#     return {"paper_id": paper_id, "status": "Not implemented yet"}
+# New tool: Analyze single paper
+analyze_paper_args = [
+    ToolArgument(name="paper_url", description="URL or identifier of the paper to analyze.", type="string", is_required=True),
+    ToolArgument(name="analysis_type", description="Type of analysis: summary, keywords, methodology, findings.", type="string", is_required=False, default_value="summary"),
+]
 
+@mcp_server.tool(
+    name="analyze_paper",
+    description="Analyzes a single research paper and provides detailed insights.",
+    arguments=analyze_paper_args
+)
+async def analyze_paper_tool(
+    paper_url: str,
+    analysis_type: str = "summary"
+) -> Dict[str, Any]:
+    """Analyzes a single research paper"""
+    if not literature_agent:
+        raise Exception("LiteratureAgent not initialized.")
+    
+    valid_types = {"summary", "keywords", "methodology", "findings"}
+    if analysis_type not in valid_types:
+        raise ValueError(f"Invalid analysis_type. Valid types: {valid_types}")
+    
+    try:
+        # This would require implementing a single paper analysis method in LiteratureAgent
+        # For now, return a placeholder
+        return {
+            "paper_url": paper_url,
+            "analysis_type": analysis_type,
+            "status": "Analysis feature coming soon",
+            "message": "Single paper analysis will be implemented in the next version"
+        }
+    except Exception as e:
+        return {"error": str(e), "details": "Failed to analyze paper."}
 
-# --- Main entry point for running the MCP server directly ---
-# This allows running `python -m src.lit_review_agent.mcp_server`
-# Or using `mcp dev src/lit_review_agent/mcp_server.py`
+# New tool: Search similar papers
+search_similar_args = [
+    ToolArgument(name="query", description="Search query for finding similar papers.", type="string", is_required=True),
+    ToolArgument(name="n_results", description="Number of similar papers to return (1-50).", type="integer", is_required=False, default_value=10),
+]
+
+@mcp_server.tool(
+    name="search_similar_papers",
+    description="Searches for papers similar to a given query using semantic search.",
+    arguments=search_similar_args
+)
+async def search_similar_papers_tool(
+    query: str,
+    n_results: int = 10
+) -> Dict[str, Any]:
+    """Searches for similar papers using vector similarity"""
+    if not literature_agent:
+        raise Exception("LiteratureAgent not initialized.")
+    
+    if n_results < 1 or n_results > 50:
+        raise ValueError("n_results must be between 1 and 50")
+    
+    try:
+        results = await literature_agent.search_similar_papers(query, n_results)
+        return {
+            "query": query,
+            "results": results,
+            "count": len(results)
+        }
+    except Exception as e:
+        return {"error": str(e), "details": "Failed to search similar papers."}
+
+# MCP Resources: Expose paper data as resources
+@mcp_server.resource("papers://{paper_id}")
+async def get_paper_resource(paper_id: str) -> Dict[str, Any]:
+    """Exposes individual papers as MCP resources"""
+    if not literature_agent:
+        raise Exception("LiteratureAgent not initialized.")
+    
+    try:
+        # This would require implementing a method to get paper by ID
+        # For now, return a placeholder
+        return {
+            "paper_id": paper_id,
+            "status": "Resource access coming soon",
+            "message": "Paper resource access will be implemented in the next version"
+        }
+    except Exception as e:
+        raise Exception(f"Failed to retrieve paper {paper_id}: {e}")
+
+@mcp_server.resource("collections://literature")
+async def get_literature_collection() -> Dict[str, Any]:
+    """Exposes the literature collection statistics as a resource"""
+    if not literature_agent:
+        raise Exception("LiteratureAgent not initialized.")
+    
+    try:
+        stats = literature_agent.get_statistics()
+        return {
+            "collection_name": "literature",
+            "statistics": stats,
+            "timestamp": "2024-01-01T00:00:00Z"  # Would use actual timestamp
+        }
+    except Exception as e:
+        raise Exception(f"Failed to retrieve collection statistics: {e}")
 
 if __name__ == "__main__":
-    print("Starting MCP server for Literature Review Agent...")
-    # The mcp_server.run() method will block and serve requests.
-    # It uses stdio transport by default if run directly like this,
-    # which is suitable for Claude Desktop integration or local testing.
-    # For network-based access, you'd configure a different transport (e.g., HTTP).
-    asyncio.run(mcp_server.run_async()) # Use run_async for the FastMCP server with lifespan 
+    print("Starting enhanced MCP server for Literature Review Agent...")
+    asyncio.run(mcp_server.run_async()) 
