@@ -167,6 +167,14 @@ const selectPaper = (paper: Paper) => {
 }
 </script>
 
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  name: 'PaperCard'
+})
+</script>
+
 <style scoped>
 .paper-card {
   @apply relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300;

@@ -19,7 +19,7 @@ from .utils.logger import get_logger, setup_logger
 from .__init__ import __version__ as agent_version
 
 # Setup initial logger for CLI specific messages before agent might reconfigure
-setup_logger(level="INFO") # Default to INFO for CLI startup
+setup_logger(log_level="INFO") # Default to INFO for CLI startup
 logger = get_logger(__name__)
 
 app = typer.Typer(
@@ -49,16 +49,16 @@ def setup():
     """
     console.print("[bold cyan]🚀 AI Literature Review Agent Setup Wizard[/bold cyan]")
     console.print("This wizard will help you configure your API keys and preferences.\n")
-    
+
     try:
         config = Config()
-        
+
         # Check current configuration
         console.print("[bold yellow]Current Configuration Status:[/bold yellow]")
-        
+
         # Check LLM Provider
         console.print(f"LLM Provider: [cyan]{config.llm_provider}[/cyan]")
-        
+
         # Check API Keys
         if config.llm_provider == "deepseek":
             if config.deepseek_api_key:
@@ -66,25 +66,25 @@ def setup():
             else:
                 console.print("❌ DeepSeek API Key: Not configured")
                 console.print("   Get your key from: https://platform.deepseek.com/api_keys")
-        
+
         if config.openai_api_key:
             console.print("✅ OpenAI API Key: Configured (for embeddings)")
         else:
             console.print("❌ OpenAI API Key: Not configured (needed for embeddings)")
             console.print("   Get your key from: https://platform.openai.com/api-keys")
-        
+
         if config.semantic_scholar_api_key:
             console.print("✅ Semantic Scholar API Key: Configured")
         else:
             console.print("⚠️  Semantic Scholar API Key: Not configured (optional)")
             console.print("   Get your key from: https://www.semanticscholar.org/product/api")
-        
+
         console.print(f"\n[bold green]Setup Instructions:[/bold green]")
         console.print("1. Copy config/config.example.env to .env")
         console.print("2. Edit .env file with your API keys")
         console.print("3. Install spaCy model: python -m spacy download en_core_web_sm")
         console.print("4. Run: python -m src.lit_review_agent.cli config-info to verify")
-        
+
     except Exception as e:
         logger.error(f"Error during setup: {e}", exc_info=True)
         console.print(f"[bold red]Setup error:[/bold red] {e}")
@@ -109,7 +109,7 @@ def config_info():
             if value is None:
                 display_value = "[italic gray]Not set[/italic gray]"
             table.add_row(key, display_value)
-        
+
         console.print(table)
         console.print(f"\nConfig loaded from: [yellow]{config.env_file_location()}[/yellow]")
 
@@ -155,10 +155,10 @@ def review(
         ))
 
         console.print("\n[bold green]✅ Review Process Completed.[/bold green]")
-        
+
         if review_results and review_results.get("papers"):
             console.print(f"Successfully processed [bold]{review_results['num_papers_processed']}[/bold] papers.")
-            
+
             # Display results table
             table = Table(title=f"Retrieved Papers for '{research_topic}'", show_lines=True)
             table.add_column("Title", style="cyan", min_width=40, overflow="fold")
@@ -175,12 +175,12 @@ def review(
                     paper.get("source", "N/A")
                 )
             console.print(table)
-            
+
             # Save results if output file specified
             if output_file:
                 output_path = Path(output_file)
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                
+
                 if output_format.lower() == "json":
                     with open(output_path, 'w', encoding='utf-8') as f:
                         json.dump(review_results, f, indent=2, ensure_ascii=False)
@@ -193,7 +193,7 @@ def review(
                     ))
                     with open(output_path, 'w', encoding='utf-8') as f:
                         f.write(report.get("content", ""))
-                
+
                 console.print(f"Results saved to: [yellow]{output_path}[/yellow]")
         else:
             console.print("[yellow]No papers were processed or found.[/yellow]")
@@ -214,38 +214,38 @@ def generate_report(
     Generate a comprehensive report from literature review results.
     """
     console.print(f"[bold cyan]📄 Generating Report:[/bold cyan] '{title}'")
-    
+
     try:
         # Load input data
         input_path = Path(input_file)
         if not input_path.exists():
             console.print(f"[bold red]Error:[/bold red] Input file not found: {input_file}")
             raise typer.Exit(1)
-        
+
         with open(input_path, 'r', encoding='utf-8') as f:
             review_data = json.load(f)
-        
+
         # Initialize agent
         agent_config = Config()
         agent = LiteratureAgent(config=agent_config)
-        
+
         # Generate report
         report = asyncio.run(agent.generate_full_report(
             papers=review_data.get("papers", []),
             topic=title,
             output_format=format
         ))
-        
+
         # Save report
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(report.get("content", ""))
-        
+
         console.print(f"[bold green]✅ Report generated successfully![/bold green]")
         console.print(f"Report saved to: [yellow]{output_path}[/yellow]")
-        
+
     except Exception as e:
         logger.error(f"Error generating report: {e}", exc_info=True)
         console.print(f"[bold red]Error generating report:[/bold red] {e}")
@@ -259,34 +259,34 @@ def search(
     Search the existing knowledge base for similar papers.
     """
     console.print(f"[bold cyan]🔍 Searching knowledge base for:[/bold cyan] '{query}'")
-    
+
     try:
         # Initialize agent
         agent_config = Config()
         agent = LiteratureAgent(config=agent_config)
-        
+
         # Search
         results = asyncio.run(agent.search_similar_papers(query, n_results))
-        
+
         if results:
             console.print(f"[bold green]Found {len(results)} similar papers:[/bold green]")
-            
+
             table = Table(title="Search Results", show_lines=True)
             table.add_column("Title", style="cyan", min_width=40)
             table.add_column("Similarity", style="yellow", width=10)
             table.add_column("Authors", style="green", min_width=20)
-            
+
             for result in results:
                 table.add_row(
                     result.get("title", "N/A"),
                     f"{result.get('similarity', 0):.3f}",
                     ", ".join(result.get("authors", []))
                 )
-            
+
             console.print(table)
         else:
             console.print("[yellow]No similar papers found in the knowledge base.[/yellow]")
-            
+
     except Exception as e:
         logger.error(f"Error during search: {e}", exc_info=True)
         console.print(f"[bold red]Error during search:[/bold red] {e}")
@@ -297,24 +297,24 @@ def stats():
     Display system statistics and status.
     """
     console.print("[bold cyan]📊 System Statistics[/bold cyan]")
-    
+
     try:
         # Initialize agent
         agent_config = Config()
         agent = LiteratureAgent(config=agent_config)
-        
+
         # Get statistics
         stats = agent.get_statistics()
-        
+
         table = Table(title="Agent Statistics", show_header=True, header_style="bold magenta")
         table.add_column("Metric", style="dim", width=30)
         table.add_column("Value")
-        
+
         for key, value in stats.items():
             table.add_row(key.replace("_", " ").title(), str(value))
-        
+
         console.print(table)
-        
+
     except Exception as e:
         logger.error(f"Error getting statistics: {e}", exc_info=True)
         console.print(f"[bold red]Error getting statistics:[/bold red] {e}")
@@ -322,4 +322,4 @@ def stats():
 if __name__ == "__main__":
     # This allows running the CLI directly with `python -m src.lit_review_agent.cli`
     # or just `python src/lit_review_agent/cli.py`
-    app() 
+    app()
