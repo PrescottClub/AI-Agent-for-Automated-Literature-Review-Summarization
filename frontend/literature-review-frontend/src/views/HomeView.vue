@@ -5,12 +5,12 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <el-icon class="text-white text-xl"><Document /></el-icon>
+            <div class="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center">
+              <span class="text-white text-xl font-bold">T</span>
             </div>
             <div>
-              <h1 class="text-xl font-bold gradient-text">AI Literature Review</h1>
-              <p class="text-xs text-gray-500">智能文献综述系统</p>
+              <h1 class="text-xl font-bold gradient-text">Tsearch</h1>
+              <p class="text-xs text-gray-500">Terence's AI Literature Discovery</p>
             </div>
           </div>
           <div class="flex items-center space-x-4">
@@ -33,12 +33,12 @@
       <!-- 头部介绍区域 -->
       <div class="text-center mb-12 animate-fade-in">
         <h2 class="text-4xl font-bold text-gray-900 mb-4">
-          🔬 AI 驱动的文献综述助手
+          � Tsearch - 智能文献发现引擎
         </h2>
         <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-          基于先进的人工智能技术，为您提供高效、准确的学术文献检索、分析与总结服务
+          专为Terence打造的AI驱动文献搜索平台，让学术研究更高效、更精准
         </p>
-        
+
         <!-- 特性卡片 -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           <div class="bg-white rounded-2xl p-6 card-shadow animate-slide-up hover:scale-105 transition-transform">
@@ -48,7 +48,7 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-2">智能检索</h3>
             <p class="text-gray-600">多数据源检索，语义理解，精准匹配</p>
           </div>
-          
+
           <div class="bg-white rounded-2xl p-6 card-shadow animate-slide-up hover:scale-105 transition-transform" style="animation-delay: 0.1s">
             <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
               <el-icon class="text-green-600 text-2xl"><DataAnalysis /></el-icon>
@@ -56,7 +56,7 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-2">AI 分析</h3>
             <p class="text-gray-600">深度分析文献内容，提取关键信息</p>
           </div>
-          
+
           <div class="bg-white rounded-2xl p-6 card-shadow animate-slide-up hover:scale-105 transition-transform" style="animation-delay: 0.2s">
             <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
               <el-icon class="text-purple-600 text-2xl"><Document /></el-icon>
@@ -79,7 +79,7 @@
       <div class="bg-white rounded-3xl p-8 card-shadow mb-8 animate-bounce-in">
         <div class="max-w-4xl mx-auto">
           <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">开始您的文献综述</h3>
-          
+
           <div class="space-y-6">
             <!-- 搜索输入 -->
             <div>
@@ -128,12 +128,12 @@
                   </el-option>
                 </el-select>
               </div>
-              
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">论文数量: {{ maxPapers }}</label>
                 <el-slider v-model="maxPapers" :min="5" :max="50" :step="5" show-input />
               </div>
-              
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">年份范围</label>
                 <el-date-picker
@@ -144,7 +144,7 @@
                   :shortcuts="yearShortcuts"
                 />
               </div>
-              
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">其他选项</label>
                 <div class="space-y-2">
@@ -177,7 +177,7 @@
                 <el-icon class="mr-2"><Search /></el-icon>
                 {{ isSearching ? '正在检索...' : '开始检索' }}
               </el-button>
-              
+
               <el-button
                 v-if="searchResults.length > 0"
                 type="success"
@@ -210,7 +210,7 @@
               <el-button :icon="Download" @click="exportResults">导出</el-button>
             </div>
           </div>
-          
+
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="text-center">
               <div class="text-3xl font-bold text-blue-600">{{ searchResults.length }}</div>
@@ -334,7 +334,7 @@
           <li>查看检索结果并进行筛选</li>
           <li>生成综述报告</li>
         </ol>
-        
+
         <h4 class="text-lg font-semibold mt-6">搜索技巧</h4>
         <ul class="list-disc list-inside space-y-2 text-gray-700">
           <li>使用具体的关键词组合</li>
@@ -479,49 +479,49 @@ const yearShortcuts = [
 ]
 
 // 计算属性
-const fullTextCount = computed(() => 
+const fullTextCount = computed(() =>
   searchResults.value.filter(paper => paper.fullTextRetrieved).length
 )
 
-const totalKeywords = computed(() => 
+const totalKeywords = computed(() =>
   searchResults.value.reduce((total, paper) => total + (paper.keywords?.length || 0), 0)
 )
 
-const uniqueSources = computed(() => 
+const uniqueSources = computed(() =>
   new Set(searchResults.value.map(paper => paper.source)).size
 )
 
 const filteredResults = computed(() => {
   let results = [...searchResults.value]
-  
+
   // 应用筛选
   if (filterAuthor.value) {
-    results = results.filter(paper => 
-      paper.authors.some((author: string) => 
+    results = results.filter(paper =>
+      paper.authors.some((author: string) =>
         author.toLowerCase().includes(filterAuthor.value.toLowerCase())
       )
     )
   }
-  
+
   if (filterKeyword.value) {
-    results = results.filter(paper => 
-      paper.keywords?.some((keyword: string) => 
+    results = results.filter(paper =>
+      paper.keywords?.some((keyword: string) =>
         keyword.toLowerCase().includes(filterKeyword.value.toLowerCase())
       ) || paper.title.toLowerCase().includes(filterKeyword.value.toLowerCase())
     )
   }
-  
+
   if (filterSource.value) {
     results = results.filter(paper => paper.source === filterSource.value)
   }
-  
+
   // 应用排序
   if (sortBy.value === 'date') {
     results.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime())
   } else if (sortBy.value === 'citations') {
     results.sort((a, b) => (b.citations || 0) - (a.citations || 0))
   }
-  
+
   return results
 })
 
@@ -548,7 +548,7 @@ const startSearch = async () => {
     }
 
     searchProgress.value = '正在检索文献...'
-    
+
     const response = await fetch('http://localhost:8000/api/search', {
       method: 'POST',
       headers: {
@@ -563,7 +563,7 @@ const startSearch = async () => {
 
     const data = await response.json()
     searchResults.value = data.papers || []
-    
+
     // 保存到搜索历史
     const historyItem: SearchHistoryItem = {
       query: searchQuery.value,
@@ -575,9 +575,9 @@ const startSearch = async () => {
     if (searchHistory.value.length > 10) {
       searchHistory.value = searchHistory.value.slice(0, 10)
     }
-    
+
     ElMessage.success(`检索完成！找到 ${searchResults.value.length} 篇相关论文`)
-    
+
   } catch (error) {
     console.error('Search error:', error)
     ElMessage.error('检索失败，请检查网络连接或稍后重试')
@@ -612,13 +612,13 @@ const generateReport = async () => {
     }
 
     const data = await response.json()
-    
+
     // 显示报告内容
     ElMessageBox.alert(data.report, '综述报告', {
       dangerouslyUseHTMLString: false,
       customClass: 'report-dialog'
     })
-    
+
   } catch (error) {
     console.error('Report generation error:', error)
     ElMessage.error('报告生成失败，请稍后重试')
@@ -690,7 +690,7 @@ onMounted(() => {
     defaultMaxPapers.value = settings.defaultMaxPapers || 20
     language.value = settings.language || 'zh'
   }
-  
+
   // 加载搜索历史
   const savedHistory = localStorage.getItem('searchHistory')
   if (savedHistory) {

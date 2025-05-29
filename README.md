@@ -362,6 +362,56 @@ python -m src.lit_review_agent.cli search "机器学习药物发现"
 - 覆盖多个学科领域
 - 提供丰富的元数据和引用信息
 
+## 🛠️ VS Code开发环境配置
+
+### Vetur扩展配置
+
+本项目前端代码位于 `frontend/literature-review-frontend/` 目录中，为了让VS Code的Vetur扩展正确识别Vue.js项目，我们已经在 `.vscode/settings.json` 中配置了相应的设置：
+
+```json
+{
+  "vetur.config.settings": "./frontend/literature-review-frontend",
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "files.associations": {
+    "*.vue": "vue"
+  },
+  "vetur.validation.template": true,
+  "vetur.validation.style": true,
+  "vetur.validation.script": true,
+  "vetur.format.defaultFormatter.html": "prettyhtml",
+  "vetur.format.defaultFormatter.js": "prettier",
+  "vetur.format.defaultFormatter.ts": "prettier"
+}
+```
+
+### 推荐的VS Code扩展
+
+为获得最佳开发体验，建议安装以下扩展：
+
+- **Vetur** - Vue.js语言支持
+- **TypeScript Hero** - TypeScript代码管理
+- **Prettier** - 代码格式化
+- **ESLint** - JavaScript/TypeScript代码检查
+- **Tailwind CSS IntelliSense** - Tailwind CSS自动补全
+- **Python** - Python语言支持
+- **Python Docstring Generator** - Python文档字符串生成
+
+### 工作区配置
+
+如果Vetur仍然无法正确识别项目结构，请尝试：
+
+1. **打开正确的工作区**：
+   ```bash
+   code frontend/literature-review-frontend
+   ```
+
+2. **重新加载窗口**：
+   - 按 `Ctrl+Shift+P` (Windows) 或 `Cmd+Shift+P` (Mac)
+   - 输入 "Developer: Reload Window"
+
+3. **检查TypeScript配置**：
+   确保 `frontend/literature-review-frontend/tsconfig.json` 文件存在且配置正确
+
 ## 📁 项目结构
 
 ```
