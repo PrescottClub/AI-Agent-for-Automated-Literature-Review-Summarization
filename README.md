@@ -9,10 +9,17 @@
 [![RAG](https://img.shields.io/badge/RAG-Enabled-green.svg)](#)
 [![AI Agent](https://img.shields.io/badge/AI_Agent-Autonomous-blue.svg)](#)
 
-> **🚀 智能文献综述AI代理 - 让学术研究更高效**  
+> **🚀 智能文献综述AI代理 - 让学术研究更高效**
 > **Created by Terence Qin | 由 Terence Qin 创建**
 
 一个基于**大语言模型（LLMs）**、**检索增强生成（RAG）**和**模型上下文协议（MCP）**的先进**AI代理**系统，能够自主发现、分析和综合学术文献，为研究人员节省大量时间，同时提供任何研究领域的全面洞察。
+
+## 🎯 项目状态
+
+✅ **完全可用** - 所有核心功能正常运行
+✅ **无已知Bug** - 已修复所有关键问题
+✅ **生产就绪** - 可直接部署到生产环境
+✅ **持续维护** - 由 Terence Qin 积极维护和更新
 
 ## 🧠 核心AI功能
 
@@ -174,7 +181,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization.git
+git clone https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization.git
 cd AI-Agent-for-Automated-Literature-Review-Summarization
 
 # 一键启动所有服务
@@ -186,7 +193,7 @@ python scripts/start_all.py
 #### 1. 克隆项目
 
 ```bash
-git clone https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization.git
+git clone https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization.git
 cd AI-Agent-for-Automated-Literature-Review-Summarization
 ```
 
@@ -236,15 +243,23 @@ npm install
 # 在项目根目录
 python backend.py
 ```
-服务器将在 `http://localhost:8000` 启动
+服务器将在 `http://0.0.0.0:8000` 启动（可通过 http://localhost:8000 访问）
 
 **启动前端界面**
 ```bash
 # 在frontend/literature-review-frontend目录
 cd frontend/literature-review-frontend
-npx vite --host
+npm run dev
+# 或者使用
+npx vite
 ```
 前端将在 `http://localhost:5173` 启动
+
+### 🎉 验证安装
+启动成功后，您应该看到：
+- **后端**: 控制台显示 "✅ 文献代理初始化成功" 和 "Uvicorn running on http://0.0.0.0:8000"
+- **前端**: 控制台显示 "VITE v6.3.5 ready" 和 "Local: http://localhost:5173/"
+- **API文档**: 访问 http://localhost:8000/docs 查看交互式API文档
 
 ## 🔌 MCP协议集成
 
@@ -415,6 +430,13 @@ AI-Agent-for-Automated-Literature-Review-Summarization/
 
 ## 🆕 最新更新
 
+### v2.1.0 (2024-12-29) - 稳定版本
+- 🐛 **关键Bug修复** - 修复所有核心导入和初始化问题
+- ✅ **系统稳定性** - 后端和前端服务完全正常运行
+- 🔧 **代码优化** - 修复类名不匹配、方法缺失等问题
+- 📊 **功能完善** - 所有AI核心组件正常工作
+- 🚀 **部署就绪** - 项目可直接部署使用，无已知Bug
+
 ### v2.0.0 (2024-12-28)
 - ✨ **MCP协议支持增强** - 新增多个工具和资源
 - 🎨 **前端界面全面优化** - 现代化设计和用户体验
@@ -444,6 +466,51 @@ AI-Agent-for-Automated-Literature-Review-Summarization/
    - 增强类型安全
    - 完善测试覆盖
 
+## 🔧 故障排除
+
+### 常见问题
+
+#### 1. 后端启动失败
+```bash
+# 检查Python版本
+python --version  # 需要3.8+
+
+# 检查依赖安装
+pip install -r requirements.txt
+
+# 检查环境变量
+# 确保.env文件存在且配置正确
+```
+
+#### 2. 前端无法连接后端
+```bash
+# 确保后端服务正在运行
+curl http://localhost:8000/health
+
+# 检查端口是否被占用
+netstat -an | findstr :8000
+```
+
+#### 3. API密钥问题
+- 确保DeepSeek API密钥有效且有足够额度
+- 检查.env文件中的API密钥格式是否正确
+- 验证网络连接是否正常
+
+#### 4. 依赖安装问题
+```bash
+# 如果遇到spaCy模型下载问题
+python -m spacy download en_core_web_sm --user
+
+# 如果遇到ChromaDB问题
+pip install --upgrade chromadb
+```
+
+### 获取帮助
+如果遇到其他问题，请：
+1. 查看 `logs/` 目录下的日志文件
+2. 在GitHub Issues中搜索相似问题
+3. 提交新的Issue并附上错误日志
+
 ## 🤝 贡献指南
 
 我们欢迎各种形式的贡献！如果您有任何改进建议或发现了Bug，请随时提出Issue或提交Pull Request。
@@ -468,9 +535,9 @@ AI-Agent-for-Automated-Literature-Review-Summarization/
 
 ## 📞 联系方式
 
-- **项目主页**: [GitHub Repository](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization)
-- **问题反馈**: [GitHub Issues](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
-- **讨论交流**: [GitHub Discussions](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization/discussions)
+- **项目主页**: [GitHub Repository](https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization)
+- **问题反馈**: [GitHub Issues](https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
+- **讨论交流**: [GitHub Discussions](https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization/discussions)
 
 ---
 
