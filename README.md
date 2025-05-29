@@ -1,4 +1,4 @@
-# 🤖 AI Agent for Automated Literature Review & Summarization
+# 🤖 AI智能文献综述与摘要生成代理
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.0+-green.svg)](https://vuejs.org/)
@@ -9,219 +9,261 @@
 [![RAG](https://img.shields.io/badge/RAG-Enabled-green.svg)](#)
 [![AI Agent](https://img.shields.io/badge/AI_Agent-Autonomous-blue.svg)](#)
 
-> **🚀 Intelligent Literature Review AI Agent - Making Academic Research More Efficient**  
+> **🚀 智能文献综述AI代理 - 让学术研究更高效**  
 > **Created by Terence Qin | 由 Terence Qin 创建**
 
-An advanced **AI Agent** system powered by **Large Language Models (LLMs)**, **Retrieval-Augmented Generation (RAG)**, and **Model Context Protocol (MCP)** that autonomously discovers, analyzes, and synthesizes academic literature, saving researchers significant time while providing comprehensive insights across any research domain.
+一个基于**大语言模型（LLMs）**、**检索增强生成（RAG）**和**模型上下文协议（MCP）**的先进**AI代理**系统，能够自主发现、分析和综合学术文献，为研究人员节省大量时间，同时提供任何研究领域的全面洞察。
 
-## 🧠 Core AI Features
+## 🧠 核心AI功能
 
-### 🤖 **Autonomous AI Agent**
-- **Self-Directing Research** - AI agent autonomously plans and executes complex literature review tasks
-- **Multi-Step Reasoning** - Breaks down complex queries into manageable research steps
-- **Adaptive Strategy** - Dynamically adjusts search strategies based on initial findings
-- **Quality Assessment** - Automatically evaluates paper relevance and quality using AI
-- **Synthesis Intelligence** - Connects disparate research findings to identify patterns and gaps
+### 🤖 **自主AI代理**
+- **自主研究规划** - AI代理自主规划并执行复杂的文献综述任务
+- **多步推理** - 将复杂查询分解为可管理的研究步骤
+- **自适应策略** - 根据初步发现动态调整搜索策略
+- **质量评估** - 使用AI自动评估论文相关性和质量
+- **综合智能** - 连接不同的研究发现以识别模式和差距
 
-### 🔗 **Retrieval-Augmented Generation (RAG)**
-- **Vector Knowledge Base** - ChromaDB-powered semantic search with 384-dimensional embeddings
-- **Hybrid Retrieval** - Combines keyword search with semantic similarity for optimal results
-- **Context-Aware Generation** - LLM responses grounded in retrieved academic literature
-- **Dynamic Context Management** - Intelligent chunking and context window optimization
-- **Multi-Source Integration** - Seamlessly combines information from multiple academic databases
+### 🔗 **检索增强生成（RAG）**
+- **向量知识库** - ChromaDB驱动的语义搜索，支持384维嵌入
+- **混合检索** - 结合关键词搜索和语义相似性以获得最佳结果
+- **上下文感知生成** - 基于检索的学术文献生成LLM响应
+- **动态上下文管理** - 智能分块和上下文窗口优化
+- **多源集成** - 无缝整合来自多个学术数据库的信息
 
-### 🔌 **Model Context Protocol (MCP) Integration**
-- **MCP Server Implementation** - Full MCP 1.0 compliant server for AI agent interoperability
-- **Tool Ecosystem** - Extensible tools for literature search, analysis, and synthesis
-- **Resource Management** - Exposés structured academic data as MCP resources
-- **Claude Desktop Integration** - Native integration with Anthropic's Claude Desktop
-- **Standard Compliance** - Follows MCP specifications for maximum compatibility
+### 🔌 **模型上下文协议（MCP）集成**
+- **MCP服务器实现** - 完全符合MCP 1.0标准的服务器，实现AI代理互操作性
+- **工具生态系统** - 可扩展的文献搜索、分析和综合工具
+- **资源管理** - 将结构化学术数据作为MCP资源公开
+- **Claude Desktop集成** - 与Anthropic的Claude Desktop原生集成
+- **标准合规** - 遵循MCP规范以实现最大兼容性
 
-### 🧮 **Advanced LLM Integration**
-- **Multi-Provider Support** - DeepSeek (primary), OpenAI, Ollama with intelligent fallback
-- **Cost Optimization** - DeepSeek integration offers 90% cost savings vs OpenAI GPT-4
-- **Prompt Engineering** - Specialized prompts for academic analysis and synthesis
-- **Chain-of-Thought Reasoning** - Structured reasoning for complex literature analysis
-- **Rate Limiting & Retry** - Robust handling of API limits with exponential backoff
+### 🧮 **高级LLM集成**
+- **多供应商支持** - DeepSeek（主要）、OpenAI、Ollama，支持智能回退
+- **成本优化** - DeepSeek集成相比OpenAI GPT-4节省90%成本
+- **提示工程** - 专门用于学术分析和综合的提示
+- **思维链推理** - 复杂文献分析的结构化推理
+- **速率限制和重试** - 通过指数退避稳健处理API限制
 
-### 📊 **Intelligent Analysis Engine**
-- **Semantic Text Processing** - spaCy NLP pipeline for entity extraction and text analysis
-- **Citation Network Analysis** - Identifies influential papers and research clusters
-- **Trend Detection** - Temporal analysis of research directions and emerging topics
-- **Gap Identification** - AI-powered identification of research opportunities
-- **Quality Scoring** - Multi-factor relevance and quality assessment
+### 📊 **智能分析引擎**
+- **语义文本处理** - spaCy NLP管道用于实体提取和文本分析
+- **引用网络分析** - 识别有影响力的论文和研究集群
+- **趋势检测** - 研究方向和新兴主题的时间分析
+- **差距识别** - AI驱动的研究机会识别
+- **质量评分** - 多因子相关性和质量评估
 
-### 🔍 **Multi-Modal Search Intelligence**
-- **Semantic Search** - sentence-transformers (all-MiniLM-L6-v2) for deep semantic understanding
-- **Cross-Database Query** - Unified search across arXiv, Semantic Scholar, and more
-- **Query Expansion** - AI-powered query refinement and expansion
-- **Result Deduplication** - Intelligent duplicate detection across sources
-- **Relevance Ranking** - ML-powered ranking combining multiple relevance signals
+### 🔍 **多模态搜索智能**
+- **语义搜索** - sentence-transformers (all-MiniLM-L6-v2) 实现深度语义理解
+- **跨数据库查询** - 统一搜索arXiv、Semantic Scholar等
+- **查询扩展** - AI驱动的查询优化和扩展
+- **结果去重** - 跨源智能重复检测
+- **相关性排序** - ML驱动的排序，结合多个相关性信号
 
-## ✨ Key Features
+## ✨ 主要特色功能
 
-### 🚀 **Smart Literature Discovery**
-- **Multi-Source Retrieval** - arXiv, Semantic Scholar, and extensible to more databases
-- **Semantic Search** - Vector similarity-based advanced semantic matching
-- **Intelligent Filtering** - Filter by publication date, journal, and relevance
-- **Batch Processing** - Support for large-scale literature batch retrieval and processing
+### 🚀 **智能文献发现**
+- **多源检索** - arXiv、Semantic Scholar，可扩展至更多数据库
+- **语义搜索** - 基于向量相似性的高级语义匹配
+- **智能过滤** - 按发表日期、期刊和相关性过滤
+- **批量处理** - 支持大规模文献批量检索和处理
 
-### 🧠 **AI-Driven Analysis**
-- **Multi-Format Summaries** - Executive summaries, key findings, bullet point summaries
-- **Trend Identification** - Identify emerging topics and research hotspots
-- **Research Gap Analysis** - Discover future research opportunities
-- **Collaboration Network Insights** - Author and institution collaboration pattern analysis
+### 🧠 **AI驱动分析**
+- **多格式摘要** - 执行摘要、关键发现、要点摘要
+- **趋势识别** - 识别新兴主题和研究热点
+- **研究差距分析** - 发现未来研究机会
+- **合作网络洞察** - 作者和机构合作模式分析
 
-### 📊 **Comprehensive Report Generation**
-- **Professional Reports** - Support for Markdown, HTML, LaTeX formats
-- **Executive Summaries** - Concise overviews for decision makers
-- **Detailed Literature Reviews** - In-depth reports with statistical analysis
-- **Citation Management** - Support for multiple academic citation formats
+### 📊 **全面报告生成**
+- **专业报告** - 支持Markdown、HTML、LaTeX格式
+- **执行摘要** - 为决策者提供简洁概览
+- **详细文献综述** - 包含统计分析的深度报告
+- **引用管理** - 支持多种学术引用格式
 
-### 🎨 **Modern Frontend Interface**
-- **Vue3 + TypeScript** - Modern frontend technology stack
-- **Element Plus** - Elegant UI component library
-- **Tailwind CSS** - Utility-first styling framework
-- **Responsive Design** - Perfect adaptation to various devices
-- **Real-time Status Monitoring** - Backend connection status display
-- **Search History** - Automatic saving and management of search records
-- **Advanced Filtering** - Multi-dimensional result filtering and sorting
+### 🎨 **现代化前端界面**
+- **Vue3 + TypeScript** - 现代前端技术栈
+- **Element Plus** - 优雅的UI组件库
+- **Tailwind CSS** - 实用优先的样式框架
+- **响应式设计** - 完美适配各种设备
+- **实时状态监控** - 后端连接状态显示
+- **搜索历史** - 自动保存和管理搜索记录
+- **高级筛选** - 多维度结果筛选和排序
 
-## 🏗️ AI System Architecture
+## 🏗️ AI系统架构
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Vue3 Frontend │    │   FastAPI API   │    │   AI Agent Core │
-│                 │    │                 │    │                 │
-│ • Element Plus  │◄──►│ • RESTful API   │◄──►│ • LangChain     │
-│ • Real-time UI  │    │ • CORS Support  │    │ • RAG Pipeline  │
-│ • TypeScript    │    │ • Validation    │    │ • Vector Search │
-│ • State Mgmt    │    │ • Error Handling│    │ • LLM Agents    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │   AI Services   │
-                    │                 │
-                    │ • DeepSeek LLM  │
-                    │ • ChromaDB      │
-                    │ • spaCy NLP     │
-                    │ • MCP Server    │
-                    │ • Embeddings    │
-                    └─────────────────┘
+                        ╭─────────────────────────────────────────────────╮
+                        │              🌐 用户交互层                        │
+                        ╰─────────────────────────────────────────────────╯
+                                              │
+                        ╭─────────────────────┴─────────────────────╮
+                        │                                           │
+            ╭───────────▼──────────╮                    ╭─────────▼──────────╮
+            │     🎨 Vue3前端       │                    │   🔌 MCP协议接口    │
+            │                     │                    │                   │
+            │  • Element Plus UI  │                    │  • Claude Desktop │
+            │  • 实时状态监控        │                    │  • 标准化工具       │
+            │  • TypeScript       │                    │  • 资源管理         │
+            │  • 响应式设计         │                    │  • 智能路由         │
+            ╰───────────┬──────────╯                    ╰─────────┬──────────╯
+                        │                                        │
+                        ╰─────────────────┬──────────────────────╯
+                                         │
+                        ╭────────────────▼────────────────╮
+                        │         ⚡ FastAPI网关          │
+                        │                                │
+                        │  • RESTful API  • 请求路由     │
+                        │  • CORS支持     • 数据验证     │
+                        │  • 错误处理     • 速率限制     │
+                        ╰────────────────┬────────────────╯
+                                        │
+                        ╭───────────────▼────────────────╮
+                        │        🤖 AI代理核心           │
+                        │                               │
+                        │  ╭─────────────────────────╮   │
+                        │  │    🧠 LangChain框架     │   │
+                        │  │  • 代理编排  • 工具链   │   │
+                        │  │  • 记忆管理  • 任务规划 │   │
+                        │  ╰─────────────────────────╯   │
+                        │                               │
+                        │  ╭─────────────────────────╮   │
+                        │  │    🔍 RAG检索管道       │   │
+                        │  │  • 语义搜索  • 向量存储 │   │
+                        │  │  • 文档分块  • 相关性排序│   │
+                        │  ╰─────────────────────────╯   │
+                        ╰───────────────┬────────────────╯
+                                       │
+                        ╭──────────────▼───────────────╮
+                        │        🔬 AI服务层           │
+                        ╰──────────────┬───────────────╯
+                                      │
+        ╭─────────────────────────────┼─────────────────────────────╮
+        │                            │                            │
+   ╭────▼────╮            ╭─────────▼─────────╮            ╭─────▼─────╮
+   │ 🧮 LLM  │            │   💾 向量数据库     │            │ 🔍 学术API │
+   │         │            │                  │            │           │
+   │DeepSeek │            │  • ChromaDB存储   │            │ • arXiv   │
+   │OpenAI   │            │  • 384维嵌入      │            │ • Semantic│
+   │Ollama   │            │  • 语义索引       │            │   Scholar │
+   ╰─────────╯            │  • 相似性搜索     │            │ • PDF处理 │
+                          ╰─────────────────╯            ╰───────────╯
+
+             ╭─────────────────────────────────────────────────╮
+             │              🔧 智能处理组件                     │
+             │                                                │
+             │  📝 spaCy NLP  •  🎯 质量评估  •  📊 趋势分析    │
+             │  🔗 引用分析   •  📈 统计建模  •  🎨 报告生成    │
+             ╰─────────────────────────────────────────────────╯
 ```
 
-## 🎯 Target Users
+## 🎯 目标用户
 
-- **🎓 Researchers and Academics** - Accelerate systematic reviews and meta-analyses
-- **📚 Graduate Students** - Quickly understand research field status
-- **🏢 R&D Teams** - Track technological progress and market trends
-- **📈 Market Analysts** - Follow emerging technologies and scientific breakthroughs
-- **💼 Consultants** - Provide evidence-based insights
+- **🎓 研究人员和学者** - 加速系统性综述和荟萃分析
+- **📚 研究生** - 快速了解研究领域现状
+- **🏢 研发团队** - 跟踪技术进展和市场趋势
+- **📈 市场分析师** - 追踪新兴技术和科学突破
+- **💼 咨询顾问** - 提供基于证据的洞察
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Environment Requirements
+### 环境要求
 
-- **Python**: 3.8 or higher
-- **Node.js**: 16.0 or higher
-- **npm**: 8.0 or higher
+- **Python**: 3.8 或更高版本
+- **Node.js**: 16.0 或更高版本
+- **npm**: 8.0 或更高版本
 
-### Option 1: One-Click Start (Recommended)
+### 方式一：一键启动（推荐）
 
 ```bash
-# Clone the project
+# 克隆项目
 git clone https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization.git
 cd AI-Agent-for-Automated-Literature-Review-Summarization
 
-# One-click start all services
+# 一键启动所有服务
 python scripts/start_all.py
 ```
 
-### Option 2: Manual Setup
+### 方式二：手动设置
 
-#### 1. Clone Project
+#### 1. 克隆项目
 
 ```bash
 git clone https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization.git
 cd AI-Agent-for-Automated-Literature-Review-Summarization
 ```
 
-#### 2. Backend Setup
+#### 2. 后端设置
 
 ```bash
-# Create virtual environment
+# 创建虚拟环境
 python -m venv venv
 
-# Activate virtual environment
+# 激活虚拟环境
 # Windows
 venv\Scripts\activate
 # Linux/Mac
 source venv/bin/activate
 
-# Install dependencies
+# 安装依赖
 pip install -r requirements.txt
 
-# Download spaCy model
+# 下载spaCy模型
 python -m spacy download en_core_web_sm
 ```
 
-#### 3. Configure Environment Variables
+#### 3. 配置环境变量
 
 ```bash
-# Copy environment variable template
+# 复制环境变量模板
 copy config\config.example.env .env
 
-# Edit .env file, set the following configurations:
+# 编辑.env文件，设置以下配置：
 # LLM_PROVIDER=deepseek
 # DEEPSEEK_API_KEY=your_deepseek_api_key_here
-# OPENAI_API_KEY=your_openai_api_key_here  # For embeddings
+# OPENAI_API_KEY=your_openai_api_key_here  # 用于嵌入
 # SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here
 ```
 
-#### 4. Frontend Setup
+#### 4. 前端设置
 
 ```bash
 cd frontend/literature-review-frontend
 npm install
 ```
 
-#### 5. Start Services
+#### 5. 启动服务
 
-**Start Backend API Server**
+**启动后端API服务器**
 ```bash
-# In project root directory
+# 在项目根目录
 python backend.py
 ```
-Server will start at `http://localhost:8000`
+服务器将在 `http://localhost:8000` 启动
 
-**Start Frontend Interface**
+**启动前端界面**
 ```bash
-# In frontend/literature-review-frontend directory
+# 在frontend/literature-review-frontend目录
 cd frontend/literature-review-frontend
 npx vite --host
 ```
-Frontend will start at `http://localhost:5173`
+前端将在 `http://localhost:5173` 启动
 
-## 🔌 MCP Protocol Integration
+## 🔌 MCP协议集成
 
-### Starting MCP Server
+### 启动MCP服务器
 ```bash
 python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --port 8008 --reload
 ```
 
-#### Available MCP Tools
-- `conduct_literature_review` - Conduct comprehensive literature reviews
-- `analyze_paper` - Analyze individual papers with AI
-- `search_similar_papers` - Find similar papers using semantic search
+#### 可用的MCP工具
+- `conduct_literature_review` - 进行全面的文献综述
+- `analyze_paper` - 使用AI分析单篇论文
+- `search_similar_papers` - 使用语义搜索查找相似论文
 
-#### Available MCP Resources
-- `papers://{paper_id}` - Get specific paper information
-- `collections://literature` - Get literature collection statistics
+#### 可用的MCP资源
+- `papers://{paper_id}` - 获取特定论文信息
+- `collections://literature` - 获取文献集合统计信息
 
-#### Claude Desktop Integration
-Add to Claude Desktop configuration:
+#### Claude Desktop集成
+在Claude Desktop配置中添加：
 ```json
 {
   "mcpServers": {
@@ -236,61 +278,29 @@ Add to Claude Desktop configuration:
 }
 ```
 
-## 📖 Usage Guide
+## 📖 使用指南
 
-### Web Interface Usage
+### Web界面使用
 
-1. **Access Application**: Open browser and visit `http://localhost:5173`
-2. **Enter Research Topic**: Type your research keywords in the search box
-3. **Configure Search Parameters**:
-   - Select Data Source (arXiv, Semantic Scholar)
-   - Set Paper Limit
-   - Select Year Range
-   - Enable Full Text Extraction and AI Analysis
-4. **Start Search**: Click "Start Search" button
-5. **View Results**: Browse through the list of retrieved papers and statistics
-6. **Advanced Features**:
-   - Use Filters to filter by Author, Keyword, Data Source
-   - Sort by Relevance, Time, Citation Count
-   - Export Results as JSON Format
-   - View Search History
-7. **Generate Report**: Generate comprehensive review report based on search results
+1. **访问应用**: 打开浏览器访问 `http://localhost:5173`
+2. **输入研究主题**: 在搜索框中输入研究关键词
+3. **配置搜索参数**:
+   - 选择数据源（arXiv、Semantic Scholar）
+   - 设置论文数量限制
+   - 选择年份范围
+   - 启用全文提取和AI分析
+4. **开始搜索**: 点击"开始搜索"按钮
+5. **查看结果**: 浏览检索到的论文列表和统计信息
+6. **高级功能**:
+   - 使用筛选器按作者、关键词、数据源筛选
+   - 按相关性、时间、引用数排序
+   - 导出结果为JSON格式
+   - 查看搜索历史
+7. **生成报告**: 基于搜索结果生成综合综述报告
 
-### MCP Server Usage
+### 命令行界面使用
 
-#### Starting MCP Server
-```bash
-python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --port 8008 --reload
-```
-
-#### Available MCP Tools
-- `conduct_literature_review` - Conduct comprehensive literature reviews
-- `analyze_paper` - Analyze individual papers with AI
-- `search_similar_papers` - Find similar papers using semantic search
-
-#### Available MCP Resources
-- `papers://{paper_id}` - Get specific paper information
-- `collections://literature` - Get literature collection statistics
-
-#### Claude Desktop Integration
-Add to Claude Desktop configuration:
-```json
-{
-  "mcpServers": {
-    "literature-review": {
-      "command": "python",
-      "args": ["-m", "uvicorn", "src.lit_review_agent.mcp_server:mcp_server", "--port", "8008"],
-      "env": {
-        "DEEPSEEK_API_KEY": "your_api_key_here"
-      }
-    }
-  }
-}
-```
-
-### Command Line Interface Usage
-
-#### Basic Literature Review
+#### 基本文献综述
 ```bash
 python -m src.lit_review_agent.cli review "人工智能在医疗领域的应用" ^
   --max-papers 15 ^
@@ -298,7 +308,7 @@ python -m src.lit_review_agent.cli review "人工智能在医疗领域的应用"
   --output data/ai_healthcare.json
 ```
 
-#### Generate Comprehensive Report
+#### 生成综合报告
 ```bash
 python -m src.lit_review_agent.cli generate-report ^
   "AI医疗应用综述报告" ^
@@ -307,161 +317,161 @@ python -m src.lit_review_agent.cli generate-report ^
   --format markdown
 ```
 
-#### Search Knowledge Base
+#### 搜索知识库
 ```bash
 python -m src.lit_review_agent.cli search "机器学习药物发现"
 ```
 
-## 🔧 Configuration Instructions
+## 🔧 配置说明
 
-### Environment Variable Configuration
+### 环境变量配置
 
-| Variable Name | Description | Required | Default Value |
-|-------------|-------------|----------|---------------|
-| `LLM_PROVIDER` | LLM Provider | Yes | `deepseek` |
-| `DEEPSEEK_API_KEY` | DeepSeek API Key | Yes | - |
-| `OPENAI_API_KEY` | OpenAI API Key (For embeddings) | Recommended | - |
-| `SEMANTIC_SCHOLAR_API_KEY` | Semantic Scholar API Key | No | - |
-| `MAX_PAPERS_DEFAULT` | Default Maximum Papers | No | `20` |
-| `ENABLE_FULL_TEXT` | Enable Full Text Extraction | No | `false` |
+| 变量名 | 描述 | 必需 | 默认值 |
+|--------|------|------|--------|
+| `LLM_PROVIDER` | LLM提供商 | 是 | `deepseek` |
+| `DEEPSEEK_API_KEY` | DeepSeek API密钥 | 是 | - |
+| `OPENAI_API_KEY` | OpenAI API密钥（用于嵌入） | 推荐 | - |
+| `SEMANTIC_SCHOLAR_API_KEY` | Semantic Scholar API密钥 | 否 | - |
+| `MAX_PAPERS_DEFAULT` | 默认最大论文数 | 否 | `20` |
+| `ENABLE_FULL_TEXT` | 启用全文提取 | 否 | `false` |
 
-### Data Source Configuration
+### 数据源配置
 
 #### arXiv
-- No API Key Required
-- Supports Full Text PDF Download
-- Primarily Covers Computer Science, Physics, Mathematics, etc.
+- 无需API密钥
+- 支持全文PDF下载
+- 主要覆盖计算机科学、物理学、数学等领域
 
 #### Semantic Scholar
-- Recommended to Apply for API Key to Increase Request Limits
-- Covers Multiple Academic Fields
-- Provides Rich Metadata and Citation Information
+- 推荐申请API密钥以提高请求限制
+- 覆盖多个学科领域
+- 提供丰富的元数据和引用信息
 
-## 📁 Project Structure
+## 📁 项目结构
 
 ```
 AI-Agent-for-Automated-Literature-Review-Summarization/
-├── .vscode/            # VSCode Editor Configuration
-├── .streamlit/         # Streamlit Application Configuration
-├── config/             # Configuration Files and Templates
-│   └── config.example.env # Environment Variable Template
-├── data/               # Storage of Raw Data, Processed Data
-├── docs/               # Project Documentation
-├── frontend/           # Frontend Application Code
-│   ├── simple-frontend/ # Simple HTML/JS Frontend Example
-│   └── literature-review-frontend/ # Vue3 Frontend Application
-├── logs/               # Log Files
-├── reports/            # Generated Reports
-├── scripts/            # Helper Scripts
-│   └── start_all.py    # One-Click Start Script
-├── src/                # Main Python Source Code
-│   ├── lit_review_agent/ # Literature Review Agent Core Logic
+├── .vscode/            # VSCode编辑器配置
+├── .streamlit/         # Streamlit应用配置
+├── config/             # 配置文件和模板
+│   └── config.example.env # 环境变量模板
+├── data/               # 原始数据、处理后数据存储
+├── docs/               # 项目文档
+├── frontend/           # 前端应用代码
+│   ├── simple-frontend/ # 简单HTML/JS前端示例
+│   └── literature-review-frontend/ # Vue3前端应用
+├── logs/               # 日志文件
+├── reports/            # 生成的报告
+├── scripts/            # 辅助脚本
+│   └── start_all.py    # 一键启动脚本
+├── src/                # 主要Python源代码
+│   ├── lit_review_agent/ # 文献综述代理核心逻辑
 │   │   ├── __init__.py
-│   │   ├── agent.py      # Agent Core Implementation
-│   │   ├── cli.py        # Command Line Interface
-│   │   ├── mcp_server.py # MCP Server (Enhanced Version)
-│   │   ├── ai_core/      # AI Core Module
-│   │   ├── processing/   # Data Processing Module
-│   │   ├── retrieval/    # Retrieval Module
-│   │   └── utils/        # Utility Functions
-├── tests/              # Test Code
-├── venv/               # Python Virtual Environment
-├── .gitignore          # Git Ignore File
-├── backend             # FastAPI Backend Service Entry
-├── README.md           # Project Introduction and Usage Guide
-└── requirements.txt    # Python Dependency Package List
+│   │   ├── agent.py      # 代理核心实现
+│   │   ├── cli.py        # 命令行界面
+│   │   ├── mcp_server.py # MCP服务器（增强版）
+│   │   ├── ai_core/      # AI核心模块
+│   │   ├── processing/   # 数据处理模块
+│   │   ├── retrieval/    # 检索模块
+│   │   └── utils/        # 工具函数
+├── tests/              # 测试代码
+├── venv/               # Python虚拟环境
+├── .gitignore          # Git忽略文件
+├── backend             # FastAPI后端服务入口
+├── README.md           # 项目介绍和使用指南
+└── requirements.txt    # Python依赖包列表
 ```
 
-## ��️ Technology Stack
+## 🛠️ 技术栈
 
-### Backend Technology
-- **Python 3.8+** - Core Programming Language
-- **FastAPI** - Modern Web Framework
-- **LangChain** - LLM Application Development Framework
-- **ChromaDB** - Vector Database
-- **Pydantic** - Data Validation and Settings Management
-- **spaCy** - Natural Language Processing
-- **sentence-transformers** - Text Embedding
+### 后端技术
+- **Python 3.8+** - 核心编程语言
+- **FastAPI** - 现代Web框架
+- **LangChain** - LLM应用开发框架
+- **ChromaDB** - 向量数据库
+- **Pydantic** - 数据验证和设置管理
+- **spaCy** - 自然语言处理
+- **sentence-transformers** - 文本嵌入
 
-### Frontend Technology
-- **Vue 3** - Progressive JavaScript Framework
-- **TypeScript** - Type-Safe JavaScript
-- **Element Plus** - Vue 3 Component Library
-- **Tailwind CSS** - Utility-First CSS Framework
-- **Vite** - Modern Build Tool
+### 前端技术
+- **Vue 3** - 渐进式JavaScript框架
+- **TypeScript** - 类型安全的JavaScript
+- **Element Plus** - Vue 3组件库
+- **Tailwind CSS** - 实用优先的CSS框架
+- **Vite** - 现代构建工具
 
-### AI and Data Processing
-- **DeepSeek** - Primary LLM Provider
-- **OpenAI** - Alternative LLM and Embedding Service
-- **Ollama** - Local LLM Support
-- **arXiv API** - Academic Paper Retrieval
-- **Semantic Scholar API** - Academic Search Engine
+### AI和数据处理
+- **DeepSeek** - 主要LLM提供商
+- **OpenAI** - 备用LLM和嵌入服务
+- **Ollama** - 本地LLM支持
+- **arXiv API** - 学术论文检索
+- **Semantic Scholar API** - 学术搜索引擎
 
-### Protocol and Standards
-- **MCP (Model Context Protocol)** - AI Agent Communication Protocol
-- **RESTful API** - Web Service Interface
-- **JSON** - Data Exchange Format
-- **Markdown** - Document Format
+### 协议和标准
+- **MCP (模型上下文协议)** - AI代理通信协议
+- **RESTful API** - Web服务接口
+- **JSON** - 数据交换格式
+- **Markdown** - 文档格式
 
-## 🆕 Latest Updates
+## 🆕 最新更新
 
 ### v2.0.0 (2024-12-28)
-- ✨ **MCP Protocol Support Enhancement** - Added Multiple Tools and Resources
-- 🎨 **Frontend Interface Full Optimization** - Modern Design and User Experience
-- 🔍 **Advanced Search Function** - Filter, Sort, History Record
-- 📊 **Real-time Status Monitoring** - Backend Connection Status Display
-- 🚀 **One-Click Start Script** - Simplify Deployment and Launch Process
-- 🐛 **Bug Fix** - Fixed Multiple Known Issues
-- 📝 **Documentation Update** - Complete Usage Guide and API Documentation
+- ✨ **MCP协议支持增强** - 新增多个工具和资源
+- 🎨 **前端界面全面优化** - 现代化设计和用户体验
+- 🔍 **高级搜索功能** - 筛选、排序、历史记录
+- 📊 **实时状态监控** - 后端连接状态显示
+- 🚀 **一键启动脚本** - 简化部署和启动流程
+- 🐛 **Bug修复** - 修复多个已知问题
+- 📝 **文档更新** - 完善使用指南和API文档
 
-### Main Improvements
-1. **MCP Server Enhancement**
-   - Added `analyze_paper` Tool
-   - Added `search_similar_papers` Tool
-   - Improved Parameter Validation and Error Handling
-   - Supported MCP Resource Exposure
+### 主要改进
+1. **MCP服务器增强**
+   - 新增 `analyze_paper` 工具
+   - 新增 `search_similar_papers` 工具
+   - 完善参数验证和错误处理
+   - 支持MCP资源暴露
 
-2. **Frontend Interface Optimization**
-   - Responsive Design Improvement
-   - Search History Management
-   - Advanced Filtering and Sorting
-   - Real-time Status Monitoring
-   - Settings and Help Dialog
+2. **前端界面优化**
+   - 响应式设计改进
+   - 搜索历史管理
+   - 高级筛选和排序
+   - 实时状态监控
+   - 设置和帮助对话框
 
-3. **System Stability**
-   - Improved Error Handling
-   - Optimized Performance
-   - Enhanced Type Safety
-   - Complete Test Coverage
+3. **系统稳定性**
+   - 改进错误处理
+   - 优化性能
+   - 增强类型安全
+   - 完善测试覆盖
 
-## 🤝 Contribution Guidelines
+## 🤝 贡献指南
 
-We Welcome All Forms of Contributions! If You Have Any Improvement Suggestions or Found Bugs, Please Feel Free to Raise Issue or Submit Pull Request.
+我们欢迎各种形式的贡献！如果您有任何改进建议或发现了Bug，请随时提出Issue或提交Pull Request。
 
-1. Fork This Repository
-2. Create Your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit Your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork本仓库
+2. 创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交您的更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 打开一个Pull Request
 
-## 📝 License
+## 📝 许可证
 
-This Project Uses MIT License. For Details, Please See [LICENSE](LICENSE) File.
+本项目采用MIT许可证。详情请见 [LICENSE](LICENSE) 文件。
 
-## 🙏 Acknowledgments
+## 🙏 致谢
 
-- Thanks to Project Founder **Terence Qin** for His Pioneering Work and Continuous Maintenance
-- Thanks to All Developers Who Contributed Code and Ideas to This Project
-- Thanks to DeepSeek for Providing Powerful and Economical LLM Service
-- Thanks to LangChain, FastAPI, Vue.js, etc. for Providing Excellent Tools in Open Source Community
-- Thanks to Model Context Protocol Team for Driving AI Agent Standardization
+- 感谢项目创始人 **Terence Qin** 的开创性工作和持续维护
+- 感谢所有为本项目贡献代码和想法的开发者
+- 感谢DeepSeek提供的强大且经济高效的LLM服务
+- 感谢LangChain、FastAPI、Vue.js等开源社区提供的优秀工具
+- 感谢Model Context Protocol团队推动AI代理标准化
 
-## 📞 Contact Information
+## 📞 联系方式
 
-- **Project Page**: [GitHub Repository](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization)
-- **Issue Feedback**: [GitHub Issues](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
-- **Discussion Exchange**: [GitHub Discussions](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization/discussions)
+- **项目主页**: [GitHub Repository](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization)
+- **问题反馈**: [GitHub Issues](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization/issues)
+- **讨论交流**: [GitHub Discussions](https://github.com/TerenceYin/AI-Agent-for-Automated-Literature-Review-Summarization/discussions)
 
 ---
 
-**Let AI Empower Your Academic Research!🚀** 
+**让AI为您的学术研究赋能！🚀**
