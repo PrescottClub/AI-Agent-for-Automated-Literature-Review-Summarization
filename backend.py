@@ -281,9 +281,9 @@ if __name__ == "__main__":
     import uvicorn
     print("🚀 启动 FastAPI 服务器...")
     uvicorn.run(
-        "api_server:app",
+        app,
         host="0.0.0.0",
         port=8000,
-        reload=True,
+        reload=False,
         log_level="info"
     ) 
