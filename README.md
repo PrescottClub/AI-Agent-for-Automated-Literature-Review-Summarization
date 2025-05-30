@@ -10,7 +10,7 @@
 > **🚀 Tsearch - 让学术研究更高效的AI智能助手**
 > **Created by Terence Qin | 由 Terence Qin 创建**
 
-**🚀 Tsearch：您的智能文献炼金工坊！** 我们运用尖端的大语言模型 (LLMs) 与检索增强生成 (RAG) 技术，打造了一款能自动挖掘、深度解析并巧妙融合海量学术文献的智能系统。Tsearch 旨在赋予研究者们前所未有的洞察力，让您轻松驾驭知识的海洋，高效锁定研究焦点！
+**Tsearch：赋能科研创新，您的智能文献分析引擎。** 本系统深度融合前沿大语言模型（LLMs）与检索增强生成（RAG）技术，致力于解决学术研究中信息过载、文献筛选耗时等核心痛点。Tsearch能够自动化实现文献的智能发现、精准解析与高效整合，为科研人员、高校师生及企业研发团队提供强大、便捷的文献研究支持，助力洞察学术趋势，加速知识转化与创新突破。
 
 ## 🎯 项目状态
 
@@ -59,14 +59,25 @@
 
 ## 🏗️ 系统架构
 
-```mermaid
 graph TD
-    A[🎨 Vue3 前端<br/>• 响应式界面<br/>• 实时状态监控<br/>• 搜索历史管理] --> B{⚡ FastAPI 后端<br/>• RESTful API<br/>• 数据验证<br/>• 错误处理};
-    B --> C{🤖 AI 代理核心<br/>• 智能搜索<br/>• 文献分析<br/>• 报告生成};
-    C --> D[🧮 LLM<br/>DeepSeek / OpenAI];
-    C --> E[💾 向量数据库<br/>ChromaDB<br/>• 语义搜索];
-    C --> F[🔍 学术API<br/>arXiv / Semantic Scholar];
-```
+    classDef lightNode fill:#f0f8ff,stroke:#add8e6,color:#333333,stroke-width:2px;
+    classDef diamondNode fill:#f5f5f5,stroke:#cccccc,color:#333333,stroke-width:2px;
+    classDef rectNode fill:#e6e6fa,stroke:#d8bfd8,color:#333333,stroke-width:2px;
+
+    A[🎨 Vue3 前端<br/>• 响应式界面<br/>• 实时状态监控<br/>• 搜索历史管理] :::rectNode;
+    B{⚡ FastAPI 后端<br/>• RESTful API<br/>• 数据验证<br/>• 错误处理} :::diamondNode;
+    C{🤖 AI 代理核心<br/>• 智能搜索<br/>• 文献分析<br/>• 报告生成} :::diamondNode;
+    D[🧮 LLM<br/>DeepSeek / OpenAI] :::rectNode;
+    E[💾 向量数据库<br/>ChromaDB<br/>• 语义搜索] :::rectNode;
+    F[🔍 学术API<br/>arXiv / Semantic Scholar] :::rectNode;
+
+    A --> B;
+    B --> C;
+    C --> D;
+    C --> E;
+    C --> F;
+
+    linkStyle default stroke:#b0c4de,stroke-width:2px;
 
 ## 🎯 目标用户
 
