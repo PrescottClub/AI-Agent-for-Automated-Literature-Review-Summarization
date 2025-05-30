@@ -59,25 +59,28 @@
 
 ## 🏗️ 系统架构
 
+```mermaid
 graph TD
-    classDef lightNode fill:#f0f8ff,stroke:#add8e6,color:#333333,stroke-width:2px;
-    classDef diamondNode fill:#f5f5f5,stroke:#cccccc,color:#333333,stroke-width:2px;
-    classDef rectNode fill:#e6e6fa,stroke:#d8bfd8,color:#333333,stroke-width:2px;
+    A[🎨 Vue3 前端<br/>• 响应式界面<br/>• 实时状态监控<br/>• 搜索历史管理]
+    B{⚡ FastAPI 后端<br/>• RESTful API<br/>• 数据验证<br/>• 错误处理}
+    C{🤖 AI 代理核心<br/>• 智能搜索<br/>• 文献分析<br/>• 报告生成}
+    D[🧮 LLM<br/>DeepSeek / OpenAI]
+    E[💾 向量数据库<br/>ChromaDB<br/>• 语义搜索]
+    F[🔍 学术API<br/>arXiv / Semantic Scholar]
 
-    A[🎨 Vue3 前端<br/>• 响应式界面<br/>• 实时状态监控<br/>• 搜索历史管理] :::rectNode;
-    B{⚡ FastAPI 后端<br/>• RESTful API<br/>• 数据验证<br/>• 错误处理} :::diamondNode;
-    C{🤖 AI 代理核心<br/>• 智能搜索<br/>• 文献分析<br/>• 报告生成} :::diamondNode;
-    D[🧮 LLM<br/>DeepSeek / OpenAI] :::rectNode;
-    E[💾 向量数据库<br/>ChromaDB<br/>• 语义搜索] :::rectNode;
-    F[🔍 学术API<br/>arXiv / Semantic Scholar] :::rectNode;
+    A --> B
+    B --> C
+    C --> D
+    C --> E
+    C --> F
 
-    A --> B;
-    B --> C;
-    C --> D;
-    C --> E;
-    C --> F;
-
-    linkStyle default stroke:#b0c4de,stroke-width:2px;
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style B fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style C fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    style D fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style E fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style F fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+```
 
 ## 🎯 目标用户
 
