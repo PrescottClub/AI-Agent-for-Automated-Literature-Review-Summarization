@@ -14,7 +14,7 @@ from .retrieval.pdf_processor import PDFProcessor
 from .retrieval.semantic_scholar_client import SemanticScholarClient
 from .utils.config import Config
 from .utils.logger import LoggerMixin, get_logger, setup_logger
-from .utils.display import display, print_status, print_error, print_success, print_warning
+from .utils.display import display, print_status, print_error, print_success
 from .ai_core.summarizer import Summarizer
 
 logger = get_logger(__name__)
@@ -225,10 +225,14 @@ class LiteratureAgent(LoggerMixin):
         )
 
         # Generate action plan based on extracted parameters
+        # Initialize variables to avoid scope issues
+        time_limit = locals().get('time_limit')
+        focus = locals().get('focus')
+
         action_plan = self._generate_basic_action_plan({
             "topic": research_topic,
-            "time_limit": time_limit if 'time_limit' in locals() else None,
-            "focus": focus if 'focus' in locals() else None,
+            "time_limit": time_limit,
+            "focus": focus,
             "year_start": year_start,
             "year_end": year_end,
             "max_papers": max_papers,
@@ -527,11 +531,11 @@ class LiteratureAgent(LoggerMixin):
             # Combine texts
             combined_text = "\n\n---\n\n".join(paper_texts)
 
-            # Generate summary
-            summary = await self.llm_manager.generate_summary(
-                combined_text,
+            # Generate summary using the summarizer
+            summary = await self.summarizer.summarize_text(
+                text=combined_text,
                 summary_type=summary_type,
-                max_length=1000
+                max_tokens=1000
             )
 
             self.logger.info("Custom summary generated successfully")
@@ -559,7 +563,8 @@ class LiteratureAgent(LoggerMixin):
         try:
             # Generate output filename if not provided
             if not output_file:
-                timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                from datetime import timezone
+                timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
                 topic_safe = "".join(c for c in results.get("topic", "review") if c.isalnum() or c in (' ', '-', '_')).rstrip()
                 topic_safe = topic_safe.replace(' ', '_')[:50]
 

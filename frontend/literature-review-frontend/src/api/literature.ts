@@ -35,7 +35,8 @@ api.interceptors.response.use(
 
 // 文献检索接口
 export interface SearchParams {
-  query: string
+  query?: string  // 传统结构化查询
+  rawQuery?: string  // 自然语言查询
   sources: string[]
   maxPapers: number
   yearStart?: number
@@ -61,6 +62,7 @@ export interface SearchResult {
   totalCount: number
   processingTime: number
   summary?: string
+  actionPlan?: string[]  // AI生成的行动计划
 }
 
 // 文献检索
@@ -99,4 +101,4 @@ export const getSystemStatus = async () => {
   }
 }
 
-export default api 
+export default api

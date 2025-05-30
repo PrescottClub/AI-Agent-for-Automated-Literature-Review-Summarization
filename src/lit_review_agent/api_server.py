@@ -60,7 +60,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="AI Literature Review API",
     description="智能文献综述系统 API",
-    version="2.0.0",
+    version="3.1.0",
     lifespan=lifespan
 )
 
@@ -137,7 +137,7 @@ async def root():
     """根路径"""
     return {
         "message": "AI Literature Review API",
-        "version": "1.0.0",
+        "version": "3.1.0",
         "status": "running"
     }
 

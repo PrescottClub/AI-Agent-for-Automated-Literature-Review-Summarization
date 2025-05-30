@@ -31,8 +31,7 @@ streamlit>=1.25.0
 mcp[cli]>=1.9.1
 
 # Caching and Redis
-redis>=5.0.0
-redis[hiredis]>=5.0.0  # High-performance Redis client
+redis[hiredis]>=5.0.0  # High-performance Redis client with hiredis
 
 # Utilities
 python-dotenv>=1.0.0
@@ -53,9 +52,6 @@ pre-commit>=3.3.0
 
 # Logging and monitoring
 loguru>=0.7.0
-
-# Caching and storage
-redis>=5.0.0
 
 # Additional utilities for improved functionality
 aiofiles>=23.0.0  # for async file operations

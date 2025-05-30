@@ -83,8 +83,8 @@ CMD ["python", "-m", "uvicorn", "src.lit_review_agent.api_server:app", \
      "--workers", "1"]
 
 # 元数据标签
-LABEL version="2.0.0" \
+LABEL version="3.1.0" \
       description="AI Agent for Literature Review and Summarization" \
       architecture="multi-stage" \
       components="Vue3+FastAPI+ChromaDB" \
-      maintainer="Terence Qin" 
+      maintainer="Terence Qin"
