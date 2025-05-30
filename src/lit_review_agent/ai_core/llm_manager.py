@@ -300,6 +300,87 @@ class LLMManager(LoggerMixin):
             self.logger.error(f"Failed to generate embeddings: {e}", exc_info=True)
             raise
 
+    async def extract_core_research_params(self, query: str) -> Dict[str, Optional[str]]:
+        """
+        Extract key research parameters from a natural language query.
+
+        Args:
+            query: The user's natural language research query
+
+        Returns:
+            Dictionary containing extracted parameters: topic, time_limit, focus
+        """
+        system_prompt = """You are an expert research assistant. Your task is to extract key parameters from a user's research query.
+
+The parameters to extract are:
+1. 'topic': The main subject of the research.
+2. 'time_limit': Any specified time constraint (e.g., "last year", "since 2020", "recent"). If not specified, return null.
+3. 'focus': Specific sub-topics, keywords, or aspects the user wants to concentrate on. If not specified, return null.
+
+Return the output as a JSON object with keys "topic", "time_limit", and "focus".
+If a parameter is not found, its value should be null.
+
+Examples:
+- Query: "machine learning in healthcare applications from 2020 to 2023"
+  Output: {"topic": "machine learning in healthcare applications", "time_limit": "2020 to 2023", "focus": null}
+
+- Query: "recent advances in natural language processing, focusing on transformer architectures"
+  Output: {"topic": "natural language processing", "time_limit": "recent", "focus": "transformer architectures"}
+
+- Query: "quantum computing"
+  Output: {"topic": "quantum computing", "time_limit": null, "focus": null}"""
+
+        user_prompt = f"User Query: \"{query}\"\n\nJSON Output:"
+
+        try:
+            response_text = await self.generate_completion(
+                prompt=user_prompt,
+                system_prompt=system_prompt,
+                max_tokens=200,
+                temperature=0.1
+            )
+
+            if not response_text:
+                self.logger.error("No response from LLM for parameter extraction")
+                return {"topic": query, "time_limit": None, "focus": None}
+
+            # Try to parse JSON response
+            import json
+            try:
+                # Clean the response to extract JSON
+                response_text = response_text.strip()
+                if response_text.startswith("```json"):
+                    response_text = response_text[7:]
+                if response_text.endswith("```"):
+                    response_text = response_text[:-3]
+                response_text = response_text.strip()
+
+                parsed_params = json.loads(response_text)
+
+                # Validate required fields
+                if not isinstance(parsed_params, dict):
+                    raise ValueError("Response is not a dictionary")
+
+                # Ensure we have the required keys with proper defaults
+                result = {
+                    "topic": parsed_params.get("topic") or query,
+                    "time_limit": parsed_params.get("time_limit"),
+                    "focus": parsed_params.get("focus")
+                }
+
+                self.logger.info(f"Successfully extracted parameters: {result}")
+                return result
+
+            except (json.JSONDecodeError, ValueError) as e:
+                self.logger.warning(f"Failed to parse JSON response: {e}. Response: {response_text}")
+                # Fallback: use the original query as topic
+                return {"topic": query, "time_limit": None, "focus": None}
+
+        except Exception as e:
+            self.logger.error(f"Error extracting research parameters: {e}")
+            # Fallback: use the original query as topic
+            return {"topic": query, "time_limit": None, "focus": None}
+
     async def generate_completion(
         self,
         prompt: str,

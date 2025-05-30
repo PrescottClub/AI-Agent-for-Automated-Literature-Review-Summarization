@@ -130,7 +130,8 @@ except Exception as e:
 
 # 请求模型
 class SearchRequest(BaseModel):
-    query: str
+    query: Optional[str] = None  # Legacy structured query field
+    rawQuery: Optional[str] = None  # New natural language query field
     sources: List[str] = ["arxiv", "semantic_scholar"]
     maxPapers: int = 20
     yearStart: Optional[int] = None
@@ -265,15 +266,35 @@ async def search_literature(request: SearchRequest):
     try:
         agent = get_agent()
 
-        print(f"开始检索: {request.query}")
+        # Determine which query to use
+        query_to_use = request.rawQuery or request.query
+        if not query_to_use:
+            raise HTTPException(status_code=400, detail="Either 'query' or 'rawQuery' must be provided")
+
+        print(f"开始检索: {query_to_use}")
 
         if agent:
             # 使用真实的代理
-            results = await agent.conduct_literature_review(
-                research_topic=request.query,
-                max_papers=request.maxPapers,
-                retrieve_full_text=request.retrieveFullText
-            )
+            if request.rawQuery:
+                # Use natural language processing
+                results = await agent.conduct_literature_review(
+                    raw_query=request.rawQuery,
+                    max_papers=request.maxPapers,
+                    sources=request.sources,
+                    retrieve_full_text=request.retrieveFullText,
+                    year_start=request.yearStart,
+                    year_end=request.yearEnd
+                )
+            else:
+                # Use legacy structured query
+                results = await agent.conduct_literature_review(
+                    research_topic=request.query,
+                    max_papers=request.maxPapers,
+                    sources=request.sources,
+                    retrieve_full_text=request.retrieveFullText,
+                    year_start=request.yearStart,
+                    year_end=request.yearEnd
+                )
 
             # 转换结果格式
             papers = []
@@ -325,7 +346,7 @@ async def search_literature(request: SearchRequest):
             papers=papers,
             totalCount=len(papers),
             processingTime=processing_time,
-            summary=f"基于'{request.query}'的文献检索完成，共找到{len(papers)}篇相关论文。"
+            summary=f"基于'{query_to_use}'的文献检索完成，共找到{len(papers)}篇相关论文。"
         )
 
     except Exception as e:

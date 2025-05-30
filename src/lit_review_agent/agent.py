@@ -66,7 +66,8 @@ class LiteratureAgent(LoggerMixin):
 
     async def conduct_literature_review(
         self,
-        research_topic: str,
+        research_topic: str = None,
+        raw_query: str = None,
         max_papers: int = 20,
         sources: Optional[List[str]] = None,
         retrieve_full_text: bool = False,
@@ -77,7 +78,8 @@ class LiteratureAgent(LoggerMixin):
         Conducts a comprehensive literature review for a given research topic.
 
         Args:
-            research_topic: The topic to search for.
+            research_topic: The topic to search for (legacy parameter).
+            raw_query: Natural language query from user (new parameter).
             max_papers: Maximum number of papers to retrieve and process overall.
             sources: A list of sources to use (e.g., ['arxiv', 'semantic_scholar']).
                      Defaults to sources defined in config if None.
@@ -89,6 +91,65 @@ class LiteratureAgent(LoggerMixin):
             A dictionary containing the review results, including retrieved papers,
             analysis, and potentially identified trends.
         """
+        # Handle natural language query processing
+        if raw_query and not research_topic:
+            # Extract parameters from natural language query
+            self.logger.info(f"Received raw query: '{raw_query}'")
+            display.print_header(f"Processing query: {raw_query}")
+
+            # Extract core research parameters using LLM
+            parsed_params = await self.llm_manager.extract_core_research_params(raw_query)
+            self.logger.info(f"Parsed parameters: {parsed_params}")
+            print_status(f"Interpreted parameters: {parsed_params}")
+
+            research_topic = parsed_params.get("topic")
+            if not research_topic:
+                print_error("Could not determine the main research topic from the query.")
+                return {"error": "Missing research topic"}
+
+            # Handle time constraints if specified
+            time_limit = parsed_params.get("time_limit")
+            if time_limit and not year_start and not year_end:
+                # Simple time parsing - can be enhanced later
+                from datetime import datetime
+                current_year = datetime.now().year
+
+                if "last year" in time_limit.lower():
+                    year_start = current_year - 1
+                    year_end = current_year
+                elif "recent" in time_limit.lower():
+                    year_start = current_year - 3
+                    year_end = current_year
+                elif "since" in time_limit.lower():
+                    # Try to extract year from "since YYYY"
+                    import re
+                    year_match = re.search(r'since\s+(\d{4})', time_limit.lower())
+                    if year_match:
+                        year_start = int(year_match.group(1))
+                        year_end = current_year
+                else:
+                    # Handle "YYYY to YYYY" format and other patterns
+                    import re
+                    if re.search(r'\d{4}\s+to\s+\d{4}', time_limit.lower()):
+                        years = re.findall(r'\d{4}', time_limit)
+                        if len(years) >= 2:
+                            year_start = int(years[0])
+                            year_end = int(years[1])
+
+            # Handle focus keywords - could be used to enhance search query
+            focus = parsed_params.get("focus")
+            if focus:
+                # Enhance the research topic with focus keywords
+                research_topic = f"{research_topic} {focus}"
+                print_status(f"Enhanced search query with focus: {research_topic}")
+
+        elif research_topic and not raw_query:
+            # Legacy mode - use research_topic directly
+            pass
+        else:
+            print_error("Either research_topic or raw_query must be provided.")
+            return {"error": "Missing query parameters"}
+
         # Display enhanced header
         display.print_header(
             f"Literature Review: {research_topic}",

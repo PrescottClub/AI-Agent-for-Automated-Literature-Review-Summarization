@@ -81,31 +81,39 @@
           <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">开始您的文献综述</h3>
 
           <div class="space-y-6">
-            <!-- 搜索输入 -->
+            <!-- 自然语言搜索输入 -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">研究主题</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                <span class="flex items-center">
+                  <el-icon class="mr-2"><TrendCharts /></el-icon>
+                  智能研究查询
+                </span>
+              </label>
               <el-input
                 v-model="searchQuery"
-                placeholder="请输入您的研究主题，例如：人工智能在医疗领域的应用"
+                type="textarea"
+                :rows="3"
+                placeholder="请用自然语言描述您的研究需求，例如：&#10;• 我想了解最近三年人工智能在医疗诊断领域的应用进展&#10;• 寻找关于深度学习优化算法的最新研究，重点关注transformer架构&#10;• 查找2020年以来量子计算在密码学中的应用研究"
                 size="large"
                 class="w-full"
-                :prefix-icon="Search"
                 @keyup.enter="startSearch"
-              >
-                <template #append>
-                  <el-button :icon="Microphone" @click="startVoiceInput" />
-                </template>
-              </el-input>
-              <!-- 快速搜索建议 -->
-              <div class="mt-2 flex flex-wrap gap-2">
-                <el-tag
-                  v-for="suggestion in searchSuggestions"
-                  :key="suggestion"
-                  class="cursor-pointer hover:bg-blue-100"
-                  @click="searchQuery = suggestion"
-                >
-                  {{ suggestion }}
-                </el-tag>
+                show-word-limit
+                maxlength="500"
+              />
+
+              <!-- 智能提示和快速模板 -->
+              <div class="mt-3">
+                <div class="text-xs text-gray-500 mb-2">💡 智能提示：系统会自动识别您的研究主题、时间范围和关注重点</div>
+                <div class="flex flex-wrap gap-2">
+                  <el-tag
+                    v-for="suggestion in naturalLanguageSuggestions"
+                    :key="suggestion"
+                    class="cursor-pointer hover:bg-blue-100 text-xs"
+                    @click="searchQuery = suggestion"
+                  >
+                    {{ suggestion }}
+                  </el-tag>
+                </div>
               </div>
             </div>
 
@@ -452,14 +460,14 @@ const language = ref('zh')
 // 搜索历史
 const searchHistory = ref<SearchHistoryItem[]>([])
 
-// 搜索建议
-const searchSuggestions = ref([
-  '人工智能在医疗领域的应用',
-  '机器学习算法优化',
-  '深度学习图像识别',
-  '自然语言处理技术',
-  '区块链技术应用',
-  '量子计算发展'
+// 自然语言搜索建议
+const naturalLanguageSuggestions = ref([
+  '最近三年人工智能在医疗诊断领域的应用进展',
+  '寻找关于深度学习优化算法的最新研究，重点关注transformer架构',
+  '查找2020年以来量子计算在密码学中的应用研究',
+  '我想了解机器学习在自动驾驶技术中的最新突破',
+  '近期区块链技术在金融科技领域的创新应用有哪些',
+  '自然语言处理在多语言翻译方面的最新进展'
 ])
 
 // 年份快捷选项
@@ -538,7 +546,7 @@ const startSearch = async () => {
 
   try {
     const requestData = {
-      query: searchQuery.value,
+      rawQuery: searchQuery.value,  // Use natural language query
       sources: selectedSources.value,
       maxPapers: maxPapers.value,
       yearStart: yearRange.value?.[0]?.getFullYear(),

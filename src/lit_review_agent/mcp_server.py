@@ -32,18 +32,18 @@ def create_mcp_server():
     if not MCP_AVAILABLE:
         print("❌ MCP not available. Please install MCP dependencies.")
         return None
-    
+
     server = FastMCP(
         name="LiteratureReviewAgent",
         description="AI-powered literature review and analysis server"
     )
-    
+
     @server.lifespan()
     async def lifespan_manager():
         """管理服务器生命周期"""
         global agent_config, literature_agent
         print("🚀 Initializing Literature Review Agent...")
-        
+
         try:
             agent_config = Config()
             literature_agent = LiteratureAgent(config=agent_config)
@@ -54,7 +54,7 @@ def create_mcp_server():
             raise
         finally:
             print("🔄 Shutting down Literature Review Agent...")
-    
+
     @server.tool(
         name="conduct_literature_review",
         description="Conduct a comprehensive literature review on a research topic",
@@ -88,7 +88,8 @@ def create_mcp_server():
         ]
     )
     async def conduct_review(
-        research_topic: str,
+        research_topic: str = None,
+        raw_query: str = None,
         max_papers: int = 20,
         sources: Optional[str] = None,
         retrieve_full_text: bool = False
@@ -96,39 +97,54 @@ def create_mcp_server():
         """执行文献综述"""
         if not literature_agent:
             return {"error": "Literature agent not initialized"}
-        
+
         # 验证参数
         if max_papers < 1 or max_papers > 100:
             return {"error": "max_papers must be between 1 and 100"}
-        
+
+        # 确保有查询内容
+        query_to_use = raw_query or research_topic
+        if not query_to_use:
+            return {"error": "Either research_topic or raw_query must be provided"}
+
         # 处理数据源
         source_list = None
         if sources:
             source_list = [s.strip() for s in sources.split(',')]
-        
+
         try:
-            print(f"🔍 Starting literature review for: {research_topic}")
-            results = await literature_agent.conduct_literature_review(
-                research_topic=research_topic,
-                max_papers=max_papers,
-                sources=source_list,
-                retrieve_full_text=retrieve_full_text
-            )
-            
+            print(f"🔍 Starting literature review for: {query_to_use}")
+            if raw_query:
+                # 使用自然语言查询
+                results = await literature_agent.conduct_literature_review(
+                    raw_query=raw_query,
+                    max_papers=max_papers,
+                    sources=source_list,
+                    retrieve_full_text=retrieve_full_text
+                )
+            else:
+                # 使用传统结构化查询
+                results = await literature_agent.conduct_literature_review(
+                    research_topic=research_topic,
+                    max_papers=max_papers,
+                    sources=source_list,
+                    retrieve_full_text=retrieve_full_text
+                )
+
             # 确保结果可序列化
             if 'papers' in results:
                 results['papers'] = [
                     paper.model_dump() if hasattr(paper, 'model_dump') else paper
                     for paper in results['papers']
                 ]
-            
+
             print(f"✅ Review completed. Found {len(results.get('papers', []))} papers")
             return results
-            
+
         except Exception as e:
             print(f"❌ Error during literature review: {e}")
             return {"error": str(e)}
-    
+
     @server.tool(
         name="search_similar_papers",
         description="Search for papers similar to a query using semantic search",
@@ -152,10 +168,10 @@ def create_mcp_server():
         """搜索相似论文"""
         if not literature_agent:
             return {"error": "Literature agent not initialized"}
-        
+
         if n_results < 1 or n_results > 50:
             return {"error": "n_results must be between 1 and 50"}
-        
+
         try:
             results = await literature_agent.search_similar_papers(query, n_results)
             return {
@@ -165,26 +181,26 @@ def create_mcp_server():
             }
         except Exception as e:
             return {"error": str(e)}
-    
+
     @server.resource("papers://{paper_id}")
     async def get_paper(paper_id: str) -> Dict[str, Any]:
         """获取特定论文信息"""
         if not literature_agent:
             raise Exception("Literature agent not initialized")
-        
+
         # 这里应该实现从数据库获取论文的逻辑
         return {
             "paper_id": paper_id,
             "message": "Paper retrieval feature coming soon",
             "timestamp": datetime.now().isoformat()
         }
-    
+
     @server.resource("collections://literature")
     async def get_collection_stats() -> Dict[str, Any]:
         """获取文献集合统计信息"""
         if not literature_agent:
             raise Exception("Literature agent not initialized")
-        
+
         try:
             stats = literature_agent.get_statistics()
             return {
@@ -194,7 +210,7 @@ def create_mcp_server():
             }
         except Exception as e:
             raise Exception(f"Failed to get statistics: {e}")
-    
+
     return server
 
 # 创建服务器实例
@@ -205,7 +221,7 @@ async def run_mcp_server():
     if not mcp_server:
         print("❌ Cannot start MCP server - not available")
         return
-    
+
     print("🚀 Starting MCP Literature Review Server...")
     await mcp_server.run_async()
 

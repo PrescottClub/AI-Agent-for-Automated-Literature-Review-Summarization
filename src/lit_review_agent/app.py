@@ -34,30 +34,30 @@ def inject_custom_css():
         --success: #10b981;
         --warning: #f59e0b;
         --error: #ef4444;
-        
+
         --bg-primary: #ffffff;
         --bg-secondary: #f8fafc;
         --bg-card: #ffffff;
         --bg-hover: #f1f5f9;
-        
+
         --text-primary: #0f172a;
         --text-secondary: #475569;
         --text-muted: #64748b;
-        
+
         --border: #e2e8f0;
         --border-light: #f1f5f9;
         --border-dark: #cbd5e1;
-        
+
         --radius: 12px;
         --radius-lg: 16px;
         --radius-xl: 24px;
-        
+
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
         --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        
+
         --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -83,7 +83,7 @@ def inject_custom_css():
     header {visibility: hidden;}
     .stDeployButton {visibility: hidden;}
     .stDecoration {display: none;}
-    
+
     /* 现代化头部设计 */
     .modern-header {
         background: var(--bg-primary);
@@ -561,32 +561,32 @@ def inject_custom_css():
         .modern-title {
             font-size: 2rem;
         }
-        
+
         .modern-card, .paper-card-modern {
             padding: 1rem;
             margin: 0.75rem 0;
         }
-        
+
         .search-container {
             padding: 1.5rem;
             margin: 1.5rem 0;
         }
-        
+
         .metrics-grid {
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 0.75rem;
         }
-        
+
         .paper-number-modern {
             position: static;
             display: inline-block;
             margin-bottom: 0.75rem;
         }
-        
+
         .paper-title-modern {
             margin-right: 0;
         }
-        
+
         .paper-meta-modern {
             flex-direction: column;
             gap: 0.5rem;
@@ -666,12 +666,12 @@ def display_metrics(results: Dict):
     """显示统计指标 - 现代极简风格。"""
     if results and "processed_papers" in results:
         papers = results["processed_papers"]
-        
+
         # 使用现代化metrics-grid样式
         st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
-        
+
         col1, col2, col3, col4 = st.columns(4)
-        
+
         with col1:
             st.markdown(f"""
             <div class="metric-card-modern">
@@ -679,7 +679,7 @@ def display_metrics(results: Dict):
                 <div class="metric-label-modern">📚 论文总数</div>
             </div>
             """, unsafe_allow_html=True)
-        
+
         with col2:
             full_text_count = sum(1 for p in papers if p.get("full_text_retrieved", False))
             st.markdown(f"""
@@ -688,7 +688,7 @@ def display_metrics(results: Dict):
                 <div class="metric-label-modern">📄 全文获取</div>
             </div>
             """, unsafe_allow_html=True)
-        
+
         with col3:
             total_keywords = sum(len(p.get("keywords", [])) for p in papers)
             st.markdown(f"""
@@ -697,7 +697,7 @@ def display_metrics(results: Dict):
                 <div class="metric-label-modern">🔍 关键词数</div>
             </div>
             """, unsafe_allow_html=True)
-        
+
         with col4:
             sources = set(p.get("source", "unknown") for p in papers)
             st.markdown(f"""
@@ -706,7 +706,7 @@ def display_metrics(results: Dict):
                 <div class="metric-label-modern">🌐 数据源</div>
             </div>
             """, unsafe_allow_html=True)
-        
+
         st.markdown('</div>', unsafe_allow_html=True)
 
 
@@ -721,7 +721,7 @@ def display_paper_card(paper: Dict, index: int):
             authors_str = ", ".join(authors)
     else:
         authors_str = "未知作者"
-    
+
     # 处理发布日期
     pub_date = paper.get("published_date")
     if pub_date:
@@ -732,18 +732,18 @@ def display_paper_card(paper: Dict, index: int):
             date_str = pub_date
     else:
         date_str = "未知日期"
-    
+
     # 使用Streamlit原生组件构建卡片
     with st.container():
         # 开始卡片容器
         st.markdown('<div class="paper-card-modern fade-in-up">', unsafe_allow_html=True)
-        
+
         # 论文编号（右上角）
         st.markdown(f'<div class="paper-number-modern">#{index}</div>', unsafe_allow_html=True)
-        
+
         # 论文标题
         st.markdown(f'<div class="paper-title-modern">{paper.get("title", "未知标题")}</div>', unsafe_allow_html=True)
-        
+
         # 元信息行
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -752,13 +752,13 @@ def display_paper_card(paper: Dict, index: int):
             st.markdown(f"📅 **日期:** {date_str}")
         with col3:
             st.markdown(f"📊 **来源:** {paper.get('source', 'unknown').upper()}")
-        
+
         # 摘要
         summary = paper.get("ai_enhanced_summary", paper.get("original_summary", "暂无摘要"))
         if len(summary) > 300:
             summary = summary[:300] + "..."
         st.markdown(f"**摘要:** {summary}")
-        
+
         # 关键词
         keywords = paper.get("keywords", [])
         if keywords:
@@ -768,23 +768,23 @@ def display_paper_card(paper: Dict, index: int):
             for i, kw in enumerate(keywords[:6]):
                 with keyword_cols[i]:
                     st.markdown(f'<span class="keyword-tag-modern">{kw}</span>', unsafe_allow_html=True)
-        
+
         # 操作按钮
         if paper.get("url") or paper.get("pdf_url"):
             st.markdown("**链接:**")
             btn_col1, btn_col2, btn_col3 = st.columns([1, 1, 4])
-            
+
             if paper.get("url"):
                 with btn_col1:
                     st.markdown(f'<a href="{paper["url"]}" target="_blank" class="paper-link-modern">📄 查看原文</a>', unsafe_allow_html=True)
-            
+
             if paper.get("pdf_url"):
                 with btn_col2:
                     st.markdown(f'<a href="{paper["pdf_url"]}" target="_blank" class="paper-link-modern">📁 PDF下载</a>', unsafe_allow_html=True)
-        
+
         # 结束卡片容器
         st.markdown('</div>', unsafe_allow_html=True)
-        
+
         # 添加间距
         st.markdown("<br>", unsafe_allow_html=True)
 
@@ -798,19 +798,19 @@ def main():
         layout="wide",
         initial_sidebar_state="expanded"
     )
-    
+
     # 注入现代极简设计CSS
     inject_custom_css()
-    
+
     # 显示头部
     display_header()
-    
+
     # 侧边栏 - 现代极简风格
     with st.sidebar:
         with st.container():
             st.markdown('<div class="sidebar-modern">', unsafe_allow_html=True)
             st.markdown('<div class="sidebar-title">🎛️ 检索配置</div>', unsafe_allow_html=True)
-            
+
             # 数据源选择
             st.subheader("📚 数据源")
             sources = st.multiselect(
@@ -819,7 +819,7 @@ def main():
                 default=["arxiv", "semantic_scholar"],
                 help="选择要检索的学术数据库"
             )
-            
+
             # 检索参数
             st.subheader("⚙️ 检索参数")
             max_papers = st.slider(
@@ -830,13 +830,13 @@ def main():
                 step=5,
                 help="限制检索的最大论文数量"
             )
-            
+
             retrieve_full_text = st.checkbox(
                 "获取全文",
                 value=False,
                 help="尝试下载并处理PDF全文（可能较慢）"
             )
-            
+
             # 时间范围
             st.subheader("📅 时间范围")
             col1, col2 = st.columns(2)
@@ -856,25 +856,26 @@ def main():
                     value=2024,
                     step=1
                 )
-            
+
             st.markdown('</div>', unsafe_allow_html=True)
-    
+
     # 主内容区
     main_container = st.container()
-    
+
     with main_container:
         # 查询输入区 - 现代极简风格
         st.markdown('<div class="search-container">', unsafe_allow_html=True)
-        
+
         col1, col2 = st.columns([3, 1])
-        
+
         with col1:
-            research_topic = st.text_input(
-                "🔍 研究主题",
-                placeholder="请输入您要研究的主题，例如：machine learning in healthcare",
-                help="输入具体的研究主题或关键词"
+            research_query = st.text_area(
+                "🤖 智能研究查询",
+                placeholder="请用自然语言描述您的研究需求，例如：\n• 我想了解最近三年人工智能在医疗诊断领域的应用进展\n• 寻找关于深度学习优化算法的最新研究，重点关注transformer架构\n• 查找2020年以来量子计算在密码学中的应用研究",
+                help="系统会自动识别您的研究主题、时间范围和关注重点",
+                height=100
             )
-        
+
         with col2:
             st.write("")  # 空行对齐
             search_button = st.button(
@@ -882,42 +883,42 @@ def main():
                 type="primary",
                 use_container_width=True
             )
-        
+
         st.markdown('</div>', unsafe_allow_html=True)
-        
+
         # 结果展示区
-        if search_button and research_topic:
+        if search_button and research_query:
             if not sources:
                 st.error("❌ 请至少选择一个数据源！")
                 return
-            
+
             # 初始化会话状态
             if "results" not in st.session_state:
                 st.session_state.results = None
-            
+
             # 显示加载状态
             with st.spinner("🔄 正在检索和分析文献，请稍候..."):
                 progress_bar = st.progress(0)
                 status_text = st.empty()
-                
+
                 try:
                     # 更新进度
                     progress_bar.progress(20)
                     status_text.text("📡 初始化检索系统...")
                     time.sleep(0.5)
-                    
+
                     # 初始化agent
                     config = Config()
                     agent = LiteratureAgent(config=config)
-                    
+
                     progress_bar.progress(40)
                     status_text.text("🔍 检索相关文献...")
                     time.sleep(0.5)
-                    
-                    # 执行检索
+
+                    # 执行检索 - 使用自然语言查询
                     results = asyncio.run(
                         agent.conduct_literature_review(
-                            research_topic=research_topic,
+                            raw_query=research_query,
                             max_papers=max_papers,
                             sources=sources,
                             retrieve_full_text=retrieve_full_text,
@@ -925,42 +926,42 @@ def main():
                             year_end=year_end
                         )
                     )
-                    
+
                     progress_bar.progress(80)
                     status_text.text("🤖 AI分析处理中...")
                     time.sleep(0.5)
-                    
+
                     # 存储结果
                     st.session_state.results = results
-                    
+
                     progress_bar.progress(100)
                     status_text.text("✅ 检索完成!")
                     time.sleep(0.3)
-                    
+
                     # 清理进度指示器
                     progress_bar.empty()
                     status_text.empty()
-                    
+
                 except Exception as e:
                     st.error(f"❌ 检索过程中出现错误: {str(e)}")
                     return
-        
+
         # 显示结果
         if st.session_state.get("results"):
             results = st.session_state.results
-            
+
             st.success(f"✅ 成功检索到 {results.get('num_papers_processed', 0)} 篇相关文献")
-            
+
             # 显示统计指标
             display_metrics(results)
-            
+
             # 显示论文列表
             if results.get("processed_papers"):
                 st.markdown('<div class="modern-card">', unsafe_allow_html=True)
                 st.subheader("📚 检索结果")
-                
+
                 papers = results["processed_papers"]
-                
+
                 # 排序选项
                 col1, col2 = st.columns([2, 1])
                 with col1:
@@ -971,29 +972,29 @@ def main():
                         ["默认", "按时间降序", "按标题"],
                         index=0
                     )
-                
+
                 # 排序处理
                 if sort_by == "按时间降序":
                     papers = sorted(
-                        papers, 
-                        key=lambda x: x.get("published_date", ""), 
+                        papers,
+                        key=lambda x: x.get("published_date", ""),
                         reverse=True
                     )
                 elif sort_by == "按标题":
                     papers = sorted(
-                        papers, 
+                        papers,
                         key=lambda x: x.get("title", "").lower()
                     )
-                
+
                 st.markdown('</div>', unsafe_allow_html=True)
-                
+
                 # 显示论文卡片
                 for i, paper in enumerate(papers, 1):
                     display_paper_card(paper, i)
-            
+
             else:
                 st.warning("⚠️ 未找到相关文献，请尝试调整搜索关键词或扩大时间范围。")
 
 
 if __name__ == "__main__":
-    main() 
+    main()
