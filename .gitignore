@@ -132,7 +132,10 @@ Thumbs.db
 
 # ===== PROJECT SPECIFIC =====
 
-# Cursor AI IDE
+# AI Development Files (Hidden)
+.ai-rules.md
+.augmentignore
+.remember/
 .cursor/
 
 # Environment and Configuration
@@ -226,4 +229,4 @@ site/
 .local/
 local/
 dev/
-development/ 
+development/
