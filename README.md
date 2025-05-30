@@ -74,12 +74,12 @@ graph TD
     C --> E
     C --> F
 
-    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    style B fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    style C fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    style D fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style E fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    style F fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    style A fill:#f0f8ff,stroke:#4682b4,stroke-width:2px,color:#000000
+    style B fill:#f5f5f5,stroke:#696969,stroke-width:2px,color:#000000
+    style C fill:#f0fff0,stroke:#228b22,stroke-width:2px,color:#000000
+    style D fill:#fff8dc,stroke:#daa520,stroke-width:2px,color:#000000
+    style E fill:#ffefd5,stroke:#d2691e,stroke-width:2px,color:#000000
+    style F fill:#f0ffff,stroke:#20b2aa,stroke-width:2px,color:#000000
 ```
 
 ## 🎯 目标用户
