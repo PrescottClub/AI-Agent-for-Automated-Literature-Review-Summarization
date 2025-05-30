@@ -64,6 +64,68 @@ class LiteratureAgent(LoggerMixin):
 
         self.logger.info("Initialized Literature Agent")
 
+    def _generate_basic_action_plan(self, params: dict) -> List[str]:
+        """
+        Generate a basic action plan based on extracted parameters.
+
+        Args:
+            params: Dictionary containing extracted parameters and search settings
+
+        Returns:
+            List of action plan steps as strings
+        """
+        plan = []
+
+        # Step 1: Parameter analysis
+        topic = params.get("topic", "未指定主题")
+        time_limit = params.get("time_limit")
+        focus = params.get("focus")
+        year_start = params.get("year_start")
+        year_end = params.get("year_end")
+        max_papers = params.get("max_papers", 20)
+        sources = params.get("sources", [])
+        retrieve_full_text = params.get("retrieve_full_text", False)
+
+        # Generate plan steps
+        plan.append(f"🎯 确定研究主题：{topic}")
+
+        # Time constraint step
+        if time_limit or year_start or year_end:
+            time_desc = ""
+            if year_start and year_end:
+                time_desc = f"{year_start}-{year_end}年"
+            elif year_start:
+                time_desc = f"{year_start}年至今"
+            elif time_limit:
+                time_desc = time_limit
+            plan.append(f"📅 设定时间范围：{time_desc}")
+
+        # Focus area step
+        if focus:
+            plan.append(f"🔍 重点关注领域：{focus}")
+
+        # Data sources step
+        sources_str = "、".join(sources) if sources else "默认数据源"
+        plan.append(f"📚 选择数据源：{sources_str}")
+
+        # Search strategy step
+        search_strategy = f"检索最多{max_papers}篇相关论文"
+        if retrieve_full_text:
+            search_strategy += "，并获取全文内容"
+        plan.append(f"🔎 执行检索策略：{search_strategy}")
+
+        # Processing steps
+        plan.append("📊 分析论文元数据：标题、作者、摘要、引用数等")
+        plan.append("📈 识别研究趋势：发表时间分布、热点关键词")
+
+        if retrieve_full_text:
+            plan.append("📄 处理全文内容：提取关键信息和核心观点")
+
+        plan.append("🤖 AI智能分析：生成综合性研究洞察")
+        plan.append("📝 生成最终报告：整理发现和建议")
+
+        return plan
+
     async def conduct_literature_review(
         self,
         research_topic: str = None,
@@ -161,6 +223,25 @@ class LiteratureAgent(LoggerMixin):
             f"Parameters: max_papers={max_papers}, sources={sources}, retrieve_full_text={retrieve_full_text}, "
             f"year_start={year_start}, year_end={year_end}"
         )
+
+        # Generate action plan based on extracted parameters
+        action_plan = self._generate_basic_action_plan({
+            "topic": research_topic,
+            "time_limit": time_limit if 'time_limit' in locals() else None,
+            "focus": focus if 'focus' in locals() else None,
+            "year_start": year_start,
+            "year_end": year_end,
+            "max_papers": max_papers,
+            "sources": sources or ["arxiv", "semantic_scholar"],
+            "retrieve_full_text": retrieve_full_text
+        })
+
+        # Display action plan
+        print_status("📋 生成的行动计划:")
+        for i, step in enumerate(action_plan, 1):
+            print(f"  {i}. {step}")
+
+        self.logger.info(f"Generated action plan with {len(action_plan)} steps")
 
         if sources is None:
             sources = self.config.default_retrieval_sources
@@ -368,6 +449,7 @@ class LiteratureAgent(LoggerMixin):
         # Display final results
         results = {
             "research_topic": research_topic,
+            "action_plan": action_plan,
             "retrieved_items": [item.model_dump() for item in retrieved_items],
             "processed_papers": processed_papers,
             "num_papers_processed": len(processed_papers)

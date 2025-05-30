@@ -204,6 +204,31 @@
 
       <!-- 结果展示区域 -->
       <div v-if="searchResults.length > 0" class="animate-fade-in">
+        <!-- 行动计划展示 -->
+        <div v-if="actionPlan && actionPlan.length > 0" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 card-shadow mb-6">
+          <div class="flex items-center mb-4">
+            <el-icon class="text-2xl text-blue-600 mr-3"><TrendCharts /></el-icon>
+            <h3 class="text-xl font-bold text-gray-900">🤖 AI生成的行动计划</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div
+              v-for="(step, index) in actionPlan"
+              :key="index"
+              class="flex items-start p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+            >
+              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold mr-3">
+                {{ index + 1 }}
+              </div>
+              <div class="flex-1 text-sm text-gray-700">
+                {{ step }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 text-xs text-gray-500 text-center">
+            💡 此计划由AI根据您的查询自动生成，展示了文献检索和分析的主要步骤
+          </div>
+        </div>
+
         <!-- 统计信息和操作栏 -->
         <div class="bg-white rounded-2xl p-6 card-shadow mb-6">
           <div class="flex justify-between items-center mb-4">
@@ -437,6 +462,7 @@ const isGeneratingReport = ref(false)
 const hasSearched = ref(false)
 const searchResults = ref<Paper[]>([])
 const searchProgress = ref('')
+const actionPlan = ref<string[]>([])  // 新增行动计划数据
 
 // UI 状态
 const showSettings = ref(false)
@@ -571,6 +597,7 @@ const startSearch = async () => {
 
     const data = await response.json()
     searchResults.value = data.papers || []
+    actionPlan.value = data.actionPlan || []  // 获取行动计划
 
     // 保存到搜索历史
     const historyItem: SearchHistoryItem = {
@@ -654,6 +681,7 @@ const exportResults = () => {
 const clearSearch = () => {
   searchQuery.value = ''
   searchResults.value = []
+  actionPlan.value = []  // 清除行动计划
   hasSearched.value = false
 }
 

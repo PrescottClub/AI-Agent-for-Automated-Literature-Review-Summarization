@@ -160,6 +160,7 @@ class SearchResult(BaseModel):
     totalCount: int
     processingTime: float
     summary: Optional[str] = None
+    actionPlan: Optional[List[str]] = None
 
 # 全局变量
 literature_agent = None
@@ -298,8 +299,10 @@ async def search_literature(request: SearchRequest):
 
             # 转换结果格式
             papers = []
-            if results and "papers" in results:
-                for paper_data in results["papers"]:
+            action_plan = None
+
+            if results and "processed_papers" in results:
+                for paper_data in results["processed_papers"]:
                     paper = Paper(
                         title=paper_data.get("title", "未知标题"),
                         authors=paper_data.get("authors", []),
@@ -312,30 +315,44 @@ async def search_literature(request: SearchRequest):
                         fullTextRetrieved=paper_data.get("full_text_retrieved", False)
                     )
                     papers.append(paper)
+
+                # Extract action plan from results
+                action_plan = results.get("action_plan", [])
         else:
             # 使用模拟数据
             await asyncio.sleep(1)  # 模拟处理时间
             papers = [
                 Paper(
-                    title=f"人工智能在{request.query}领域的应用研究",
+                    title=f"人工智能在{query_to_use}领域的应用研究",
                     authors=["张三", "李四", "王五"],
                     publishedDate="2024-01-15",
                     source="arxiv",
-                    summary=f"本文深入研究了人工智能技术在{request.query}领域的最新应用。",
-                    keywords=["人工智能", "机器学习", request.query],
+                    summary=f"本文深入研究了人工智能技术在{query_to_use}领域的最新应用。",
+                    keywords=["人工智能", "机器学习", query_to_use],
                     url="https://arxiv.org/abs/2401.12345",
                     fullTextRetrieved=True
                 ),
                 Paper(
-                    title=f"{request.query}中的机器学习方法综述",
+                    title=f"{query_to_use}中的机器学习方法综述",
                     authors=["赵六", "钱七"],
                     publishedDate="2023-12-20",
                     source="semantic_scholar",
-                    summary=f"本综述分析了{request.query}领域中机器学习方法的发展现状。",
+                    summary=f"本综述分析了{query_to_use}领域中机器学习方法的发展现状。",
                     keywords=["机器学习", "数据分析"],
                     url="https://example.com/paper2",
                     fullTextRetrieved=False
                 )
+            ]
+
+            # 生成模拟的行动计划
+            action_plan = [
+                f"🎯 确定研究主题：{query_to_use}",
+                "📚 选择数据源：arxiv、semantic_scholar",
+                f"🔎 执行检索策略：检索最多{request.maxPapers}篇相关论文",
+                "📊 分析论文元数据：标题、作者、摘要、引用数等",
+                "📈 识别研究趋势：发表时间分布、热点关键词",
+                "🤖 AI智能分析：生成综合性研究洞察",
+                "📝 生成最终报告：整理发现和建议"
             ]
 
         processing_time = time.time() - start_time
@@ -346,7 +363,8 @@ async def search_literature(request: SearchRequest):
             papers=papers,
             totalCount=len(papers),
             processingTime=processing_time,
-            summary=f"基于'{query_to_use}'的文献检索完成，共找到{len(papers)}篇相关论文。"
+            summary=f"基于'{query_to_use}'的文献检索完成，共找到{len(papers)}篇相关论文。",
+            actionPlan=action_plan
         )
 
     except Exception as e:

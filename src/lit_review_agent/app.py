@@ -952,6 +952,24 @@ def main():
 
             st.success(f"✅ 成功检索到 {results.get('num_papers_processed', 0)} 篇相关文献")
 
+            # 显示行动计划
+            if results.get("action_plan"):
+                st.subheader("🤖 AI生成的行动计划")
+                action_plan = results["action_plan"]
+
+                # 创建两列布局显示行动计划
+                col1, col2 = st.columns(2)
+                for i, step in enumerate(action_plan):
+                    if i % 2 == 0:
+                        with col1:
+                            st.info(f"**步骤 {i+1}:** {step}")
+                    else:
+                        with col2:
+                            st.info(f"**步骤 {i+1}:** {step}")
+
+                st.caption("💡 此计划由AI根据您的查询自动生成，展示了文献检索和分析的主要步骤")
+                st.divider()
+
             # 显示统计指标
             display_metrics(results)
 
