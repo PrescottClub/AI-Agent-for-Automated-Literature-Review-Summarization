@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "preserve",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "noImplicitThis": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["frontend/literature-review-frontend/src/*"],
+      "~/*": ["frontend/literature-review-frontend/*"]
+    }
+  },
+  "include": [
+    "frontend/literature-review-frontend/src/**/*",
+    "frontend/literature-review-frontend/*.js",
+    "frontend/literature-review-frontend/*.ts",
+    "frontend/literature-review-frontend/*.vue"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "venv",
+    "**/*.pyc",
+    "**/__pycache__"
+  ]
+}

@@ -479,6 +479,15 @@ AI-Agent-for-Automated-Literature-Review-Summarization/
 
 ## 🆕 最新更新
 
+### v2.3.0 (2025-05-29) - 稳定性增强版本
+- 🔧 **后端稳定性优化** - 改进API服务器错误处理和资源管理
+- 🏥 **健康检查增强** - 新增详细的系统状态监控
+- 🧹 **项目清理** - 删除测试数据库和无用文件
+- 🛡️ **异常处理改进** - 增强代理初始化的错误处理
+- 📊 **状态监控** - 实时显示服务和数据库连接状态
+- 🔄 **资源清理** - 改进应用关闭时的资源释放
+- 📝 **文档更新** - 更新故障排除指南和使用说明
+
 ### v2.2.0 (2025-05-29) - 生产就绪版本
 - 🧹 **项目清理** - 删除所有测试文件和无用代码
 - 🐛 **Bug修复** - 修复NLTK数据缺失问题
@@ -531,6 +540,32 @@ pip install -r requirements.txt
 
 # 检查环境变量
 # 确保.env文件存在且配置正确
+
+# 检查虚拟环境
+# 确保使用虚拟环境中的Python
+venv\Scripts\python.exe --version  # Windows
+source venv/bin/activate && python --version  # Linux/Mac
+
+# 测试后端启动
+python scripts/start_backend_only.py
+```
+
+#### 1.1 后端服务不稳定
+```bash
+# 检查健康状态
+curl http://localhost:8000/health
+
+# 查看详细状态信息
+curl http://localhost:8000/api/status
+
+# 检查日志文件
+type logs\app.log  # Windows
+cat logs/app.log   # Linux/Mac
+
+# 重启后端服务
+# 停止当前服务 (Ctrl+C)
+# 重新启动
+python scripts/start_backend_only.py
 ```
 
 #### 2. 前端无法连接后端

@@ -11,7 +11,7 @@ httpx[http2]>=0.25.0
 
 # Data processing and analysis
 pandas>=2.0.0
-numpy>=1.24.0,<2.0.0
+numpy>=1.24.0
 requests>=2.31.0
 arxiv>=2.1.0
 
@@ -52,4 +52,4 @@ loguru>=0.7.0
 
 # Additional utilities for improved functionality
 aiofiles>=23.0.0  # for async file operations
-aiohttp>=3.8.0    # for async HTTP requests 
+aiohttp>=3.8.0    # for async HTTP requests

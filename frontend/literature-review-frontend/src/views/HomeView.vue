@@ -33,7 +33,7 @@
       <!-- 头部介绍区域 -->
       <div class="text-center mb-12 animate-fade-in">
         <h2 class="text-4xl font-bold text-gray-900 mb-4">
-          � Tsearch - 智能文献发现引擎
+          🔬 Tsearch - 智能文献发现引擎
         </h2>
         <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
           专为Terence打造的AI驱动文献搜索平台，让学术研究更高效、更精准

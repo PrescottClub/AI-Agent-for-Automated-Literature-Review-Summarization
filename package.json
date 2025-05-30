@@ -1,0 +1,45 @@
+{
+  "name": "tsearch-literature-agent",
+  "version": "1.0.0",
+  "description": "AI Agent for Automated Literature Review & Summarization - Tsearch智能文献综述系统",
+  "main": "index.js",
+  "scripts": {
+    "start": "python scripts/start_all.py",
+    "start-backend": "python src/lit_review_agent/api_server.py",
+    "start-frontend": "cd frontend/literature-review-frontend && npm run dev",
+    "install-deps": "pip install -r requirements.txt && cd frontend/literature-review-frontend && npm install",
+    "test": "python -m pytest tests/",
+    "lint": "flake8 src/",
+    "format": "black src/",
+    "clean": "find . -type d -name '__pycache__' -exec rm -rf {} + && find . -name '*.pyc' -delete"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization.git"
+  },
+  "keywords": [
+    "ai",
+    "literature-review",
+    "research",
+    "summarization",
+    "nlp",
+    "machine-learning",
+    "academic",
+    "papers",
+    "arxiv",
+    "semantic-scholar"
+  ],
+  "author": "Terence Qin <prescottchun@163.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization/issues"
+  },
+  "homepage": "https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "python": ">=3.8.0"
+  },
+  "workspaces": [
+    "frontend/literature-review-frontend"
+  ]
+}

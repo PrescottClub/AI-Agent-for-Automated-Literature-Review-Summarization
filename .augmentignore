@@ -1,0 +1,113 @@
+# .augmentignore - 配置 Augment Agent 忽略的文件和目录
+
+# ===== 虚拟环境和依赖 =====
+venv/
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ===== 数据库和数据文件 =====
+data/chroma_db/
+src/data/chroma_db/
+*.sqlite3
+*.db
+*.sqlite
+
+# ===== 日志文件 =====
+logs/
+src/logs/
+*.log
+*.out
+
+# ===== 临时文件和缓存 =====
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# ===== IDE 和编辑器文件 =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===== 环境配置文件 =====
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+config.env
+
+# ===== 输出和报告文件 =====
+data/outputs/
+src/data/outputs/
+reports/
+*.pdf
+*.docx
+*.xlsx
+
+# ===== 前端构建文件 =====
+frontend/literature-review-frontend/dist/
+frontend/literature-review-frontend/.nuxt/
+frontend/literature-review-frontend/.next/
+frontend/literature-review-frontend/out/
+
+# ===== 测试文件 =====
+e2e/
+playwright-report/
+test-results/
+
+# ===== Git 相关 =====
+.git/
+.gitignore
+
+# ===== 系统文件 =====
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 大型二进制文件 =====
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+
+# ===== 文档生成文件 =====
+docs/_build/
+docs/.doctrees/
+
+# ===== 特定忽略文件 =====
+CLEANUP_REPORT.md

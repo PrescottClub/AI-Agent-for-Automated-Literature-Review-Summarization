@@ -5,6 +5,7 @@ FastAPI 服务器 - 为 Vue3 前端提供 API 接口
 
 import asyncio
 import sys
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -27,11 +28,40 @@ except ImportError as e:
     LiteratureAgent = None
     Config = None
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """应用生命周期管理"""
+    # 启动时初始化
+    print(">> 启动 AI Literature Review API 服务器...")
+    try:
+        agent = get_agent()
+        if agent:
+            print(">> 文献代理初始化成功")
+        else:
+            print(">> 文献代理初始化失败，将使用模拟数据")
+    except Exception as e:
+        print(f">> 代理初始化异常: {e}")
+        print(">> 将使用模拟数据模式运行")
+
+    yield
+
+    # 关闭时清理
+    print(">> 关闭 AI Literature Review API 服务器...")
+    global literature_agent
+    if literature_agent:
+        try:
+            # 清理资源
+            literature_agent = None
+            print(">> 资源清理完成")
+        except Exception as e:
+            print(f">> 资源清理异常: {e}")
+
 # 创建 FastAPI 应用
 app = FastAPI(
     title="AI Literature Review API",
     description="智能文献综述系统 API",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # 配置 CORS
@@ -83,22 +113,20 @@ def get_agent():
     global literature_agent
     if literature_agent is None and LiteratureAgent and Config:
         try:
+            print(">> 正在初始化文献代理...")
             config = Config()
             literature_agent = LiteratureAgent(config)
+            print(">> 文献代理初始化成功")
+        except ImportError as e:
+            print(f">> 导入错误: {e}")
+            literature_agent = None
         except Exception as e:
-            print(f"Failed to initialize LiteratureAgent: {e}")
+            print(f">> 代理初始化失败: {e}")
+            print(">> 提示: 请检查环境变量配置和依赖安装")
             literature_agent = None
     return literature_agent
 
-@app.on_event("startup")
-async def startup_event():
-    """应用启动时初始化"""
-    print("🚀 启动 AI Literature Review API 服务器...")
-    agent = get_agent()
-    if agent:
-        print("✅ 文献代理初始化成功")
-    else:
-        print("❌ 文献代理初始化失败，将使用模拟数据")
+
 
 @app.get("/")
 async def root():
@@ -108,6 +136,32 @@ async def root():
         "version": "1.0.0",
         "status": "running"
     }
+
+@app.get("/health")
+async def health_check():
+    """健康检查端点"""
+    try:
+        agent = get_agent()
+        agent_status = "healthy" if agent else "degraded"
+
+        return {
+            "status": "ok",
+            "timestamp": datetime.now().isoformat(),
+            "agent_status": agent_status,
+            "version": "1.0.0",
+            "services": {
+                "api": "running",
+                "agent": agent_status,
+                "database": "connected" if agent else "unavailable"
+            }
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "timestamp": datetime.now().isoformat(),
+            "error": str(e),
+            "agent_status": "error"
+        }
 
 @app.get("/api/status")
 async def get_status():
@@ -123,12 +177,12 @@ async def get_status():
 async def search_literature(request: SearchRequest):
     """文献检索"""
     start_time = time.time()
-    
+
     try:
         agent = get_agent()
-        
-        print(f"🔍 开始检索: {request.query}")
-        
+
+        print(f"开始检索: {request.query}")
+
         if agent:
             # 使用真实的代理
             results = await agent.conduct_literature_review(
@@ -136,7 +190,7 @@ async def search_literature(request: SearchRequest):
                 max_papers=request.maxPapers,
                 retrieve_full_text=request.retrieveFullText
             )
-            
+
             # 转换结果格式
             papers = []
             if results and "papers" in results:
@@ -178,31 +232,31 @@ async def search_literature(request: SearchRequest):
                     fullTextRetrieved=False
                 )
             ]
-        
+
         processing_time = time.time() - start_time
-        
-        print(f"✅ 检索完成: 找到 {len(papers)} 篇论文，耗时 {processing_time:.2f}s")
-        
+
+        print(f"检索完成: 找到 {len(papers)} 篇论文，耗时 {processing_time:.2f}s")
+
         return SearchResult(
             papers=papers,
             totalCount=len(papers),
             processingTime=processing_time,
             summary=f"基于'{request.query}'的文献检索完成，共找到{len(papers)}篇相关论文。"
         )
-        
+
     except Exception as e:
-        print(f"❌ 检索失败: {e}")
+        print(f"检索失败: {e}")
         raise HTTPException(status_code=500, detail=f"检索失败: {str(e)}")
 
 @app.post("/api/generate-report")
 async def generate_report(request: ReportRequest):
     """生成综述报告"""
     try:
-        print(f"📝 开始生成报告: {request.title}")
-        
+        print(f"开始生成报告: {request.title}")
+
         # 模拟报告生成
         await asyncio.sleep(2)
-        
+
         report = f"""# {request.title}
 
 ## 摘要
@@ -226,18 +280,18 @@ async def generate_report(request: ReportRequest):
 ---
 *报告生成时间: {datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')}*
         """
-        
-        print("✅ 报告生成完成")
-        
+
+        print("报告生成完成")
+
         return {"report": report}
-        
+
     except Exception as e:
-        print(f"❌ 报告生成失败: {e}")
+        print(f"报告生成失败: {e}")
         raise HTTPException(status_code=500, detail=f"报告生成失败: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 启动 FastAPI 服务器...")
+    print("启动 FastAPI 服务器...")
     uvicorn.run(
         app,
         host="0.0.0.0",
