@@ -179,37 +179,7 @@ npx vite
 - **前端**: 控制台显示 "VITE v6.3.5 ready" 和 "Local: http://localhost:5173/"
 - **API文档**: 访问 http://localhost:8000/docs 查看交互式API文档
 
-## 🔌 MCP协议集成
 
-### 启动MCP服务器
-```bash
-python -m uvicorn src.lit_review_agent.mcp_server:mcp_server --host 0.0.0.0 --port 8008 --reload
-```
-
-#### 可用的MCP工具
-- `conduct_literature_review` - 进行全面的文献综述
-- `analyze_paper` - 使用AI分析单篇论文
-- `search_similar_papers` - 使用语义搜索查找相似论文
-
-#### 可用的MCP资源
-- `papers://{paper_id}` - 获取特定论文信息
-- `collections://literature` - 获取文献集合统计信息
-
-#### Claude Desktop集成
-在Claude Desktop配置中添加：
-```json
-{
-  "mcpServers": {
-    "literature-review": {
-      "command": "python",
-      "args": ["-m", "uvicorn", "src.lit_review_agent.mcp_server:mcp_server", "--port", "8008"],
-      "env": {
-        "DEEPSEEK_API_KEY": "your_api_key_here"
-      }
-    }
-  }
-}
-```
 
 ## 📖 使用指南
 
@@ -280,120 +250,52 @@ python -m src.lit_review_agent.cli search "机器学习药物发现"
 - 覆盖多个学科领域
 - 提供丰富的元数据和引用信息
 
-## 🛠️ VS Code开发环境配置
+## 🔧 开发环境
 
-### Vetur扩展配置
-
-本项目前端代码位于 `frontend/literature-review-frontend/` 目录中，为了让VS Code的Vetur扩展正确识别Vue.js项目，我们已经在 `.vscode/settings.json` 中配置了相应的设置：
-
-```json
-{
-  "vetur.config.settings": "./frontend/literature-review-frontend",
-  "typescript.preferences.includePackageJsonAutoImports": "auto",
-  "files.associations": {
-    "*.vue": "vue"
-  },
-  "vetur.validation.template": true,
-  "vetur.validation.style": true,
-  "vetur.validation.script": true,
-  "vetur.format.defaultFormatter.html": "prettyhtml",
-  "vetur.format.defaultFormatter.js": "prettier",
-  "vetur.format.defaultFormatter.ts": "prettier"
-}
-```
-
-### 推荐的VS Code扩展
-
-为获得最佳开发体验，建议安装以下扩展：
-
-- **Vetur** - Vue.js语言支持
-- **TypeScript Hero** - TypeScript代码管理
-- **Prettier** - 代码格式化
-- **ESLint** - JavaScript/TypeScript代码检查
-- **Tailwind CSS IntelliSense** - Tailwind CSS自动补全
+### VS Code推荐扩展
+- **Vue Language Features (Volar)** - Vue3支持
+- **TypeScript Vue Plugin (Volar)** - TypeScript支持
 - **Python** - Python语言支持
-- **Python Docstring Generator** - Python文档字符串生成
-
-### 工作区配置
-
-如果Vetur仍然无法正确识别项目结构，请尝试：
-
-1. **打开正确的工作区**：
-   ```bash
-   code frontend/literature-review-frontend
-   ```
-
-2. **重新加载窗口**：
-   - 按 `Ctrl+Shift+P` (Windows) 或 `Cmd+Shift+P` (Mac)
-   - 输入 "Developer: Reload Window"
-
-3. **检查TypeScript配置**：
-   确保 `frontend/literature-review-frontend/tsconfig.json` 文件存在且配置正确
+- **Prettier** - 代码格式化
 
 ## 📁 项目结构
 
 ```
-AI-Agent-for-Automated-Literature-Review-Summarization/
-├── .vscode/            # VSCode编辑器配置
-├── .streamlit/         # Streamlit应用配置
-├── config/             # 配置文件和模板
-│   └── config.example.env # 环境变量模板
-├── data/               # 原始数据、处理后数据存储
-├── docs/               # 项目文档
-├── frontend/           # 前端应用代码
-│   └── literature-review-frontend/ # Vue3前端应用
-├── logs/               # 日志文件
-├── reports/            # 生成的报告
-├── scripts/            # 辅助脚本
-│   └── start_all.py    # 一键启动脚本
-├── src/                # 主要Python源代码
-│   ├── lit_review_agent/ # 文献综述代理核心逻辑
-│   │   ├── __init__.py
-│   │   ├── agent.py      # 代理核心实现
-│   │   ├── api_server.py # FastAPI服务器
-│   │   ├── app.py        # Streamlit应用
-│   │   ├── cli.py        # 命令行界面
-│   │   ├── mcp_server.py # MCP服务器（增强版）
-│   │   ├── ai_core/      # AI核心模块
-│   │   ├── processing/   # 数据处理模块
-│   │   ├── retrieval/    # 检索模块
-│   │   └── utils/        # 工具函数
-├── venv/               # Python虚拟环境
-├── .gitignore          # Git忽略文件
-├── README.md           # 项目介绍和使用指南
-└── requirements.txt    # Python依赖包列表
+Tsearch/
+├── config/             # 配置文件
+│   └── config.example.env
+├── data/               # 数据存储
+│   ├── chroma_db/      # 向量数据库
+│   └── outputs/        # 输出文件
+├── frontend/           # Vue3前端
+│   └── literature-review-frontend/
+├── scripts/            # 启动脚本
+│   ├── start_all.py    # 一键启动
+│   └── quick_start.py  # 快速启动
+├── src/                # 核心代码
+│   └── lit_review_agent/
+│       ├── agent.py         # 主代理
+│       ├── api_server.py    # API服务器
+│       ├── ai_core/         # AI核心
+│       ├── processing/      # 数据处理
+│       ├── retrieval/       # 文献检索
+│       ├── middleware/      # 安全中间件
+│       ├── monitoring/      # 性能监控
+│       └── utils/           # 工具函数
+├── tests/              # 基础测试
+├── venv/               # Python环境
+├── README.md           # 项目说明
+└── requirements.txt    # 依赖列表
 ```
 
 ## 🛠️ 技术栈
 
-### 后端技术
-- **Python 3.8+** - 核心编程语言
-- **FastAPI** - 现代Web框架
-- **LangChain** - LLM应用开发框架
-- **ChromaDB** - 向量数据库
-- **Pydantic** - 数据验证和设置管理
-- **spaCy** - 自然语言处理
-- **sentence-transformers** - 文本嵌入
-
-### 前端技术
-- **Vue 3** - 渐进式JavaScript框架
-- **TypeScript** - 类型安全的JavaScript
-- **Element Plus** - Vue 3组件库
-- **Tailwind CSS** - 实用优先的CSS框架
-- **Vite** - 现代构建工具
-
-### AI和数据处理
-- **DeepSeek** - 主要LLM提供商
-- **OpenAI** - 备用LLM和嵌入服务
-- **Ollama** - 本地LLM支持
-- **arXiv API** - 学术论文检索
-- **Semantic Scholar API** - 学术搜索引擎
-
-### 协议和标准
-- **MCP (模型上下文协议)** - AI代理通信协议
-- **RESTful API** - Web服务接口
-- **JSON** - 数据交换格式
-- **Markdown** - 文档格式
+### 核心技术
+- **Python 3.8+** + **FastAPI** - 后端API服务
+- **Vue 3** + **TypeScript** - 现代前端界面
+- **ChromaDB** - 向量数据库存储
+- **DeepSeek/OpenAI** - AI大语言模型
+- **Docker** - 容器化部署
 
 ## 🆕 最新更新
 
