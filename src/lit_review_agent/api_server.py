@@ -23,10 +23,6 @@ if str(current_dir) not in sys.path:
 try:
     from src.lit_review_agent.agent import LiteratureAgent
     from src.lit_review_agent.utils.config import Config
-    from src.lit_review_agent.middleware.security import create_security_middleware
-    from src.lit_review_agent.monitoring.performance import PerformanceMiddleware, get_performance_monitor
-    from src.lit_review_agent.api.health_routes import router as health_router
-    from src.lit_review_agent.health_check import setup_health_checks, health_manager
 except ImportError as e:
     print(f"Warning: Could not import modules: {e}")
     LiteratureAgent = None
@@ -41,16 +37,6 @@ async def lifespan(app: FastAPI):
         agent = get_agent()
         if agent:
             print(">> 文献代理初始化成功")
-
-            # 设置健康检查
-            if Config:
-                config = Config()
-                await setup_health_checks(
-                    config=config,
-                    llm_manager=getattr(agent, 'llm_manager', None),
-                    embeddings_manager=getattr(agent, 'embeddings_manager', None)
-                )
-                print(">> 健康检查系统初始化完成")
         else:
             print(">> 文献代理初始化失败，将使用模拟数据")
     except Exception as e:
@@ -87,46 +73,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 添加性能监控中间件
-try:
-    from starlette.middleware.base import BaseHTTPMiddleware
-
-    class PerformanceMiddlewareWrapper(BaseHTTPMiddleware):
-        def __init__(self, app, monitor):
-            super().__init__(app)
-            self.monitor = monitor
-
-        async def dispatch(self, request, call_next):
-            middleware = PerformanceMiddleware(self.monitor)
-            return await middleware(request, call_next)
-
-    performance_monitor = get_performance_monitor()
-    app.add_middleware(PerformanceMiddlewareWrapper, monitor=performance_monitor)
-    print(">> 性能监控中间件已添加")
-except Exception as e:
-    print(f">> 性能监控中间件添加失败: {e}")
-
-# 添加安全中间件
-try:
-    class SecurityMiddlewareWrapper(BaseHTTPMiddleware):
-        def __init__(self, app, max_requests=100, window=3600):
-            super().__init__(app)
-            self.security_middleware = create_security_middleware(max_requests, window)
-
-        async def dispatch(self, request, call_next):
-            return await self.security_middleware(request, call_next)
-
-    app.add_middleware(SecurityMiddlewareWrapper, max_requests=100, window=3600)
-    print(">> 安全中间件已添加")
-except Exception as e:
-    print(f">> 安全中间件添加失败: {e}")
-
-# 包含健康检查路由
-try:
-    app.include_router(health_router)
-    print(">> 健康检查路由已添加")
-except Exception as e:
-    print(f">> 健康检查路由添加失败: {e}")
+# 简化版本 - 移除复杂中间件
 
 # 请求模型
 class SearchRequest(BaseModel):
@@ -196,33 +143,21 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """健康检查端点 - 兼容性保持"""
+    """健康检查端点"""
     try:
-        # 使用新的健康检查系统
-        if 'health_manager' in globals():
-            health_status = await health_manager.get_health_status()
-            return {
-                "status": "ok" if health_status["status"] == "healthy" else "degraded",
-                "timestamp": datetime.now().isoformat(),
-                "agent_status": health_status["status"],
-                "version": "2.0.0",
-                "services": _extract_legacy_service_status(health_status.get("checks", {}))
+        agent = get_agent()
+        agent_status = "healthy" if agent else "degraded"
+        return {
+            "status": "ok",
+            "timestamp": datetime.now().isoformat(),
+            "agent_status": agent_status,
+            "version": "3.1.0",
+            "services": {
+                "api": "running",
+                "agent": agent_status,
+                "database": "connected" if agent else "unavailable"
             }
-        else:
-            # 回退到简单检查
-            agent = get_agent()
-            agent_status = "healthy" if agent else "degraded"
-            return {
-                "status": "ok",
-                "timestamp": datetime.now().isoformat(),
-                "agent_status": agent_status,
-                "version": "2.0.0",
-                "services": {
-                    "api": "running",
-                    "agent": agent_status,
-                    "database": "connected" if agent else "unavailable"
-                }
-            }
+        }
     except Exception as e:
         return {
             "status": "error",
@@ -230,24 +165,6 @@ async def health_check():
             "error": str(e),
             "agent_status": "error"
         }
-
-def _extract_legacy_service_status(checks):
-    """从健康检查结果中提取传统格式的服务状态"""
-    services = {
-        "api": "running",
-        "agent": "unknown",
-        "database": "unknown"
-    }
-
-    for check_name, check_result in checks.items():
-        status = check_result.get("status", "unknown")
-
-        if "llm" in check_name:
-            services["agent"] = "healthy" if status == "healthy" else "degraded"
-        elif "database" in check_name or "vector" in check_name:
-            services["database"] = "connected" if status == "healthy" else "unavailable"
-
-    return services
 
 @app.get("/api/status")
 async def get_status():
