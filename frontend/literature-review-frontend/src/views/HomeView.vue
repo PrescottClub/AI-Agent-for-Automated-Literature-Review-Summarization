@@ -88,175 +88,92 @@
 
     <!-- 主要内容区域 -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- 头部介绍区域 -->
-      <div class="text-center mb-12 animate-fade-in">
-        <h2 class="text-4xl font-bold text-gray-900 mb-4">
-          🔬 Tsearch - 智能文献发现引擎
-        </h2>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-          专为Terence打造的AI驱动文献搜索平台，让学术研究更高效、更精准
-        </p>
-
-        <!-- 特性卡片 -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <div class="bg-white rounded-2xl p-6 card-shadow animate-slide-up hover:scale-105 transition-transform">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <el-icon class="text-blue-600 text-2xl"><Search /></el-icon>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">智能检索</h3>
-            <p class="text-gray-600">多数据源检索，语义理解，精准匹配</p>
-          </div>
-
-          <div class="bg-white rounded-2xl p-6 card-shadow animate-slide-up hover:scale-105 transition-transform" style="animation-delay: 0.1s">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <el-icon class="text-green-600 text-2xl"><DataAnalysis /></el-icon>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">AI 分析</h3>
-            <p class="text-gray-600">深度分析文献内容，提取关键信息</p>
-          </div>
-
-          <div class="bg-white rounded-2xl p-6 card-shadow animate-slide-up hover:scale-105 transition-transform" style="animation-delay: 0.2s">
-            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <el-icon class="text-purple-600 text-2xl"><Document /></el-icon>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">智能总结</h3>
-            <p class="text-gray-600">生成专业的文献综述报告</p>
-          </div>
-
-          <div class="bg-white rounded-2xl p-6 card-shadow animate-slide-up hover:scale-105 transition-transform" style="animation-delay: 0.3s">
-            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <el-icon class="text-orange-600 text-2xl"><TrendCharts /></el-icon>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">趋势分析</h3>
-            <p class="text-gray-600">识别研究热点和发展趋势</p>
-          </div>
-        </div>
+      <!-- 简洁的头部 -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">文献搜索</h1>
+        <p class="text-gray-600">使用自然语言描述您的研究需求</p>
       </div>
 
       <!-- 搜索区域 -->
-      <div class="bg-white rounded-3xl p-8 card-shadow mb-8 animate-bounce-in">
-        <div class="max-w-4xl mx-auto">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">开始您的文献综述</h3>
-
-          <div class="space-y-6">
-            <!-- 自然语言搜索输入 -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                <span class="flex items-center">
-                  <el-icon class="mr-2"><TrendCharts /></el-icon>
-                  智能研究查询
-                </span>
-              </label>
+      <div class="max-w-4xl mx-auto mb-8">
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+          <!-- 搜索输入框 -->
+          <div class="p-6">
+            <div class="relative">
               <el-input
                 v-model="searchQuery"
                 type="textarea"
-                :rows="3"
-                placeholder="请用自然语言描述您的研究需求，例如：&#10;• 我想了解最近三年人工智能在医疗诊断领域的应用进展&#10;• 寻找关于深度学习优化算法的最新研究，重点关注transformer架构&#10;• 查找2020年以来量子计算在密码学中的应用研究"
-                size="large"
-                class="w-full"
-                @keyup.enter="startSearch"
-                show-word-limit
-                maxlength="500"
+                :rows="4"
+                placeholder="用自然语言描述您的研究需求，例如：我想了解最近三年人工智能在医疗诊断领域的应用进展"
+                class="w-full border-0 resize-none"
+                @keyup.enter.ctrl="startSearch"
               />
-
-              <!-- 智能提示和快速模板 -->
-              <div class="mt-3">
-                <div class="text-xs text-gray-500 mb-2">💡 智能提示：系统会自动识别您的研究主题、时间范围和关注重点</div>
-                <div class="flex flex-wrap gap-2">
-                  <el-tag
-                    v-for="suggestion in naturalLanguageSuggestions"
-                    :key="suggestion"
-                    class="cursor-pointer hover:bg-blue-100 text-xs"
-                    @click="searchQuery = suggestion"
-                  >
-                    {{ suggestion }}
-                  </el-tag>
-                </div>
+              <div class="absolute bottom-3 right-3 flex items-center space-x-2">
+                <span class="text-xs text-gray-400">Ctrl + Enter</span>
+                <button
+                  @click="startSearch"
+                  :disabled="!searchQuery.trim() || isSearching"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <el-icon v-if="isSearching" class="animate-spin mr-1"><Loading /></el-icon>
+                  {{ isSearching ? '搜索中...' : '搜索' }}
+                </button>
               </div>
             </div>
+          </div>
 
-            <!-- 配置选项 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- 快速建议 -->
+          <div class="px-6 pb-4 border-t border-gray-100">
+            <div class="flex flex-wrap gap-2 mt-3">
+              <button
+                v-for="suggestion in naturalLanguageSuggestions.slice(0, 3)"
+                :key="suggestion"
+                @click="searchQuery = suggestion"
+                class="px-3 py-1 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+              >
+                {{ suggestion }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 高级选项（可折叠） -->
+        <div v-if="showAdvancedOptions" class="max-w-4xl mx-auto mb-6">
+          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">数据源</label>
                 <el-select v-model="selectedSources" multiple placeholder="选择数据源" class="w-full">
-                  <el-option label="arXiv" value="arxiv">
-                    <span class="flex items-center">
-                      <el-icon class="mr-2"><Document /></el-icon>
-                      arXiv
-                    </span>
-                  </el-option>
-                  <el-option label="Semantic Scholar" value="semantic_scholar">
-                    <span class="flex items-center">
-                      <el-icon class="mr-2"><Search /></el-icon>
-                      Semantic Scholar
-                    </span>
-                  </el-option>
+                  <el-option label="arXiv" value="arxiv" />
+                  <el-option label="Semantic Scholar" value="semantic_scholar" />
                 </el-select>
               </div>
-
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">论文数量: {{ maxPapers }}</label>
-                <el-slider v-model="maxPapers" :min="5" :max="50" :step="5" show-input />
+                <el-slider v-model="maxPapers" :min="5" :max="50" :step="5" />
               </div>
-
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">年份范围</label>
-                <el-date-picker
-                  v-model="yearRange"
-                  type="yearrange"
-                  placeholder="选择年份范围"
-                  class="w-full"
-                  :shortcuts="yearShortcuts"
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">其他选项</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">选项</label>
                 <div class="space-y-2">
-                  <el-checkbox v-model="retrieveFullText">
-                    <span class="flex items-center">
-                      <el-icon class="mr-1"><Download /></el-icon>
-                      获取全文
-                    </span>
-                  </el-checkbox>
-                  <el-checkbox v-model="enableAIAnalysis">
-                    <span class="flex items-center">
-                      <el-icon class="mr-1"><DataAnalysis /></el-icon>
-                      AI 深度分析
-                    </span>
-                  </el-checkbox>
+                  <el-checkbox v-model="retrieveFullText">获取全文</el-checkbox>
+                  <el-checkbox v-model="enableAIAnalysis">AI 分析</el-checkbox>
                 </div>
               </div>
             </div>
-
-            <!-- 搜索按钮 -->
-            <div class="text-center">
-              <el-button
-                type="primary"
-                size="large"
-                :loading="isSearching"
-                @click="startSearch"
-                class="px-12 py-3 text-lg font-semibold rounded-xl mr-4"
-                :disabled="!searchQuery.trim()"
-              >
-                <el-icon class="mr-2"><Search /></el-icon>
-                {{ isSearching ? '正在检索...' : '开始检索' }}
-              </el-button>
-
-              <el-button
-                v-if="searchResults.length > 0"
-                type="success"
-                size="large"
-                @click="generateReport"
-                :loading="isGeneratingReport"
-                class="px-8 py-3 text-lg font-semibold rounded-xl"
-              >
-                <el-icon class="mr-2"><Document /></el-icon>
-                {{ isGeneratingReport ? '生成中...' : '生成报告' }}
-              </el-button>
-            </div>
           </div>
+        </div>
+
+        <!-- 高级选项切换 -->
+        <div class="max-w-4xl mx-auto mb-8 text-center">
+          <button
+            @click="showAdvancedOptions = !showAdvancedOptions"
+            class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            {{ showAdvancedOptions ? '隐藏高级选项' : '显示高级选项' }}
+            <el-icon class="ml-1" :class="{ 'rotate-180': showAdvancedOptions }">
+              <ArrowDown />
+            </el-icon>
+          </button>
         </div>
       </div>
 
@@ -287,86 +204,35 @@
           </div>
         </div>
 
-        <!-- 统计信息和操作栏 -->
-        <div class="bg-white rounded-2xl p-6 card-shadow mb-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold text-gray-900">检索结果</h3>
-            <div class="flex items-center space-x-2">
-              <el-select v-model="sortBy" placeholder="排序方式" class="w-32">
-                <el-option label="相关性" value="relevance" />
-                <el-option label="时间" value="date" />
-                <el-option label="引用数" value="citations" />
-              </el-select>
-              <el-button :icon="Filter" @click="showFilters = !showFilters">筛选</el-button>
-              <el-button :icon="Download" @click="exportResults">导出</el-button>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center">
-              <div class="text-3xl font-bold text-blue-600">{{ searchResults.length }}</div>
-              <div class="text-sm text-gray-600">检索到的论文</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-green-600">{{ fullTextCount }}</div>
-              <div class="text-sm text-gray-600">获取全文</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-purple-600">{{ totalKeywords }}</div>
-              <div class="text-sm text-gray-600">关键词总数</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-orange-600">{{ uniqueSources }}</div>
-              <div class="text-sm text-gray-600">数据源</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 筛选器 -->
-        <div v-if="showFilters" class="bg-white rounded-2xl p-6 card-shadow mb-6 animate-slide-up">
-          <h4 class="text-lg font-semibold mb-4">高级筛选</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">作者</label>
-              <el-input v-model="filterAuthor" placeholder="输入作者姓名" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">关键词</label>
-              <el-input v-model="filterKeyword" placeholder="输入关键词" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">数据源</label>
-              <el-select v-model="filterSource" placeholder="选择数据源" class="w-full">
-                <el-option label="全部" value="" />
-                <el-option label="arXiv" value="arxiv" />
-                <el-option label="Semantic Scholar" value="semantic_scholar" />
-              </el-select>
-            </div>
+        <!-- 简洁的结果头部 -->
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            找到 {{ searchResults.length }} 篇相关文献
+          </h2>
+          <div class="flex items-center space-x-3">
+            <button
+              @click="generateReport"
+              :disabled="isGeneratingReport"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+            >
+              {{ isGeneratingReport ? '生成中...' : '生成报告' }}
+            </button>
+            <el-select v-model="sortBy" placeholder="排序" size="small" class="w-24">
+              <el-option label="相关性" value="relevance" />
+              <el-option label="时间" value="date" />
+            </el-select>
           </div>
         </div>
 
         <!-- 论文列表 -->
         <div class="space-y-4">
           <div
-            v-for="(paper, index) in filteredResults"
+            v-for="(paper, index) in searchResults"
             :key="index"
-            class="bg-white rounded-2xl p-6 card-shadow animate-slide-up hover:scale-[1.02] transition-all duration-300"
-            :style="{ animationDelay: `${index * 0.05}s` }"
+            class="transition-all duration-200"
           >
             <PaperCard :paper="paper" :index="index + 1" @select="togglePaperSelection" />
           </div>
-        </div>
-
-        <!-- 分页 -->
-        <div v-if="filteredResults.length > pageSize" class="flex justify-center mt-8">
-          <el-pagination
-            :current-page="currentPage"
-            @current-change="handlePageChange"
-            :page-size="pageSize"
-            :total="filteredResults.length"
-            layout="prev, pager, next, jumper"
-            class="bg-white rounded-xl p-4 card-shadow"
-          />
         </div>
       </div>
 
@@ -479,7 +345,8 @@ import {
   Delete,
   Menu,
   Sunny,
-  Moon
+  Moon,
+  ArrowDown
 } from '@element-plus/icons-vue'
 import PaperCard from '../components/PaperCard.vue'
 
@@ -536,6 +403,7 @@ const showHistory = ref(false)
 const showFilters = ref(false)
 const showMobileMenu = ref(false)
 const isDarkMode = ref(false)
+const showAdvancedOptions = ref(false)
 
 // 筛选和排序
 const sortBy = ref('relevance')
