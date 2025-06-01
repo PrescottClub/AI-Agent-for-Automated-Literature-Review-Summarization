@@ -1,33 +1,38 @@
 <template>
-  <div class="min-h-screen bg-white">
-    <!-- 极简导航栏 -->
-    <nav class="bg-white border-b border-gray-100 sticky top-0 z-40">
-      <div class="max-w-6xl mx-auto px-6">
-        <div class="flex justify-between items-center h-14">
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <!-- 现代化导航栏 -->
+    <nav class="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 sticky top-0 z-40 shadow-sm shadow-slate-200/20">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="flex justify-between items-center h-16">
           <!-- Logo区域 -->
-          <div class="flex items-center space-x-3 cursor-pointer" @click="goToWelcome">
-            <div class="w-7 h-7 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-md flex items-center justify-center relative overflow-hidden">
-              <!-- 科技感背景纹理 -->
-              <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-transparent"></div>
-              <div class="absolute top-0 right-0 w-1.5 h-1.5 bg-blue-300/30 rounded-full"></div>
-              <div class="absolute bottom-0.5 left-0.5 w-0.5 h-0.5 bg-blue-200/40 rounded-full"></div>
+          <div class="flex items-center space-x-4 cursor-pointer group" @click="goToWelcome">
+            <div class="w-9 h-9 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-xl flex items-center justify-center relative overflow-hidden shadow-lg shadow-blue-500/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-blue-500/40 group-hover:scale-105">
+              <!-- 动态光效 -->
+              <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent"></div>
+              <div class="absolute top-1 right-1 w-1 h-1 bg-white/40 rounded-full"></div>
+              <div class="absolute bottom-1 left-1 w-0.5 h-0.5 bg-white/30 rounded-full"></div>
               <!-- T字母 -->
-              <span class="text-white text-xs font-bold relative z-10">T</span>
+              <span class="text-white text-sm font-bold relative z-10">T</span>
             </div>
-            <span class="text-lg font-medium text-gray-900">Tsearch</span>
+            <div>
+              <span class="text-lg font-bold gradient-text">Tsearch</span>
+              <p class="text-xs text-slate-500 font-medium -mt-1">AI Literature Discovery</p>
+            </div>
           </div>
 
           <!-- 右侧操作按钮 -->
-          <div class="flex items-center space-x-2">
+          <div class="flex items-center space-x-3">
             <!-- 历史记录 -->
-            <button @click="showHistory = true" class="nav-button relative">
+            <button @click="showHistory = true" class="nav-button relative group">
               <el-icon><Clock /></el-icon>
-              <span v-if="searchHistory.length > 0" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              <span v-if="searchHistory.length > 0" class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+              <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">历史记录</span>
             </button>
 
             <!-- 系统设置 -->
-            <button @click="showSettings = true" class="nav-button">
+            <button @click="showSettings = true" class="nav-button relative group">
               <el-icon><Setting /></el-icon>
+              <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">设置</span>
             </button>
 
             <!-- 移动端菜单 -->
@@ -52,47 +57,71 @@
     </nav>
 
     <!-- 主要内容区域 -->
-    <div class="max-w-4xl mx-auto px-6 py-12">
-      <!-- 极简的头部 -->
-      <div class="text-center mb-12">
-        <h1 class="text-2xl font-semibold text-gray-900 mb-3">文献搜索</h1>
-        <p class="text-gray-600 text-sm">使用自然语言描述您的研究需求</p>
+    <div class="max-w-5xl mx-auto px-6 py-16">
+      <!-- 现代化头部 -->
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-medium mb-6">
+          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          智能文献搜索
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold gradient-text mb-6 leading-tight">
+          发现学术
+          <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">洞察</span>
+        </h1>
+        <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">使用自然语言描述您的研究需求，AI将为您找到最相关的学术文献</p>
       </div>
 
-      <!-- 搜索区域 -->
-      <div class="mb-12">
-        <div class="border border-gray-200 rounded-lg">
+      <!-- 现代化搜索区域 -->
+      <div class="mb-16">
+        <div class="relative bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-3xl shadow-xl shadow-slate-200/20 overflow-hidden">
           <!-- 搜索输入框 -->
-          <div class="p-4">
-            <el-input
-              v-model="searchQuery"
-              type="textarea"
-              :rows="3"
-              placeholder="用自然语言描述您的研究需求，例如：我想了解最近三年人工智能在医疗诊断领域的应用进展"
-              class="w-full border-0 resize-none"
-              @keyup.enter.ctrl="startSearch"
-            />
-            <div class="flex items-center justify-between mt-3">
-              <span class="text-xs text-gray-400">Ctrl + Enter 搜索</span>
-              <button
-                @click="startSearch"
-                :disabled="!searchQuery.trim() || isSearching"
-                class="px-4 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <el-icon v-if="isSearching" class="animate-spin mr-1"><Loading /></el-icon>
-                {{ isSearching ? '搜索中...' : '搜索' }}
-              </button>
+          <div class="p-8">
+            <div class="relative">
+              <el-input
+                v-model="searchQuery"
+                type="textarea"
+                :rows="4"
+                placeholder="用自然语言描述您的研究需求，例如：我想了解最近三年人工智能在医疗诊断领域的应用进展"
+                class="w-full border-0 resize-none text-lg"
+                @keyup.enter.ctrl="startSearch"
+              />
+              <!-- 搜索按钮 -->
+              <div class="flex items-center justify-between mt-6">
+                <div class="flex items-center space-x-2 text-sm text-slate-500">
+                  <kbd class="px-2 py-1 bg-slate-100 rounded text-xs">Ctrl</kbd>
+                  <span>+</span>
+                  <kbd class="px-2 py-1 bg-slate-100 rounded text-xs">Enter</kbd>
+                  <span>快速搜索</span>
+                </div>
+                <button
+                  @click="startSearch"
+                  :disabled="!searchQuery.trim() || isSearching"
+                  class="group relative px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 overflow-hidden"
+                >
+                  <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <span class="relative flex items-center">
+                    <el-icon v-if="isSearching" class="animate-spin mr-2"><Loading /></el-icon>
+                    {{ isSearching ? '搜索中...' : '开始搜索' }}
+                    <svg v-if="!isSearching" class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- 快速建议 -->
-          <div class="px-4 pb-4 border-t border-gray-100">
-            <div class="flex flex-wrap gap-2 mt-3">
+          <div class="px-8 pb-6 border-t border-slate-100">
+            <div class="flex flex-wrap gap-3 mt-4">
+              <span class="text-sm text-slate-500 font-medium">快速开始：</span>
               <button
                 v-for="suggestion in naturalLanguageSuggestions.slice(0, 2)"
                 :key="suggestion"
                 @click="searchQuery = suggestion"
-                class="px-3 py-1 text-xs text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                class="px-4 py-2 text-sm text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200 hover:border-slate-300"
               >
                 {{ suggestion }}
               </button>
@@ -687,21 +716,27 @@ watch(searchHistory, () => {
   to { transform: rotate(360deg); }
 }
 
-/* 导航样式 */
+/* 现代化导航样式 */
 .nav-button {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6b7280;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  color: #64748b;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .nav-button:hover {
-  color: #374151;
-  background-color: #f3f4f6;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
 .mobile-nav-link {

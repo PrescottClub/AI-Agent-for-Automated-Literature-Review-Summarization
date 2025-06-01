@@ -26,26 +26,30 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="app" class="min-h-screen bg-white relative">
-    <!-- 极简背景 - 仅保留微妙的纹理 -->
-    <div class="fixed inset-0 pointer-events-none">
-      <div class="absolute inset-0 bg-gradient-to-b from-gray-50/30 to-transparent"></div>
+  <div id="app" class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 relative">
+    <!-- 现代化背景 -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+      <!-- 渐变光晕效果 -->
+      <div class="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-indigo-400/10 to-pink-400/10 rounded-full blur-3xl"></div>
+      <!-- 网格纹理 -->
+      <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] opacity-25"></div>
     </div>
 
-    <!-- 后端状态指示器 - 极简设计 -->
+    <!-- 现代化状态指示器 -->
     <div v-if="backendStatus === 'disconnected'"
-         class="fixed top-6 right-6 bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg z-50 text-sm">
-      <div class="flex items-center space-x-2">
-        <div class="w-2 h-2 bg-red-500 rounded-full"></div>
-        <span>服务未连接</span>
+         class="fixed top-6 right-6 bg-white/80 backdrop-blur-xl border border-red-200/50 text-red-600 px-4 py-3 rounded-xl z-50 text-sm shadow-lg shadow-red-500/10">
+      <div class="flex items-center space-x-3">
+        <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+        <span class="font-medium">服务未连接</span>
       </div>
     </div>
 
     <div v-else-if="backendStatus === 'connected'"
-         class="fixed top-6 right-6 bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg z-50 text-sm">
-      <div class="flex items-center space-x-2">
+         class="fixed top-6 right-6 bg-white/80 backdrop-blur-xl border border-green-200/50 text-green-600 px-4 py-3 rounded-xl z-50 text-sm shadow-lg shadow-green-500/10">
+      <div class="flex items-center space-x-3">
         <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-        <span>已连接</span>
+        <span class="font-medium">已连接</span>
       </div>
     </div>
 
@@ -65,26 +69,32 @@ onMounted(() => {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, sans-serif;
-  line-height: 1.5;
-  color: #111827;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: #0f172a;
   font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 简化的文字效果 */
+/* 现代化文字效果 */
 .gradient-text {
-  color: #1f2937;
-  font-weight: 600;
+  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
 }
 
-/* 简化的卡片阴影效果 */
+/* 现代化卡片阴影效果 */
 .card-shadow {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-shadow:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
 }
 
 /* 动画效果 */
@@ -116,31 +126,39 @@ body {
   animation: bounceIn 0.8s ease-out;
 }
 
-/* Element Plus 简化样式 */
+/* Element Plus 现代化样式 */
 .el-button--primary {
-  background: #2563eb;
-  border: 1px solid #2563eb;
-  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.25);
 }
 
 .el-button--primary:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px 0 rgba(59, 130, 246, 0.35);
 }
 
 .el-input__wrapper {
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  transition: border-color 0.2s ease;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
 }
 
 .el-input__wrapper:hover {
-  border-color: #9ca3af;
+  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .el-input__wrapper.is-focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 1px #2563eb;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(255, 255, 255, 1);
 }
 
 /* 滚动条样式 */
