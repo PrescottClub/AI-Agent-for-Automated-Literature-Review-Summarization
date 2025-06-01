@@ -56,11 +56,12 @@
               支持自然语言查询，智能分析，一键生成报告。
             </p>
 
-            <!-- 现代化CTA按钮 -->
+            <!-- Gemini AI风格CTA按钮 -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
               <button @click="startJourney"
-                      class="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      class="group relative px-8 py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-500 hover:scale-105 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-400 via-blue-400 to-indigo-400 opacity-0 group-hover:opacity-20 animate-pulse"></div>
                 <span class="relative flex items-center">
                   开始使用 Tsearch
                   <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,25 +70,28 @@
                 </span>
               </button>
               <button @click="scrollToFeatures"
-                      class="px-8 py-4 text-slate-700 border-2 border-slate-200 rounded-2xl font-semibold text-lg hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 hover:scale-105">
+                      class="px-8 py-4 text-purple-700 border-2 border-purple-200 rounded-2xl font-semibold text-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-300 hover:scale-105">
                 了解更多
               </button>
             </div>
           </div>
 
-          <!-- Bento Box风格特性展示 - 参考Tilebit设计 -->
+          <!-- Gemini AI风格特性展示 -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24" ref="featuresSection">
             <div v-for="(feature, index) in features"
                  :key="index"
-                 class="group relative p-6 bg-white border border-gray-100 rounded-2xl hover:border-gray-200 transition-all duration-200 hover:shadow-lg">
+                 class="group relative p-6 bg-white/80 backdrop-blur-sm border border-purple-100/50 rounded-2xl hover:border-purple-200 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 hover:scale-105">
+
+              <!-- Gemini风格渐变背景 -->
+              <div class="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-blue-50/50 to-indigo-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
               <div class="relative z-10">
-                <!-- 简洁图标设计 -->
-                <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-gray-100 transition-colors">
-                  <component :is="feature.icon" class="w-6 h-6 text-gray-700" />
+                <!-- Gemini风格图标设计 -->
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:from-purple-200 group-hover:to-blue-200 transition-all duration-300">
+                  <component :is="feature.icon" class="w-6 h-6 text-purple-600 group-hover:text-purple-700 transition-colors" />
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-3">{{ feature.title }}</h3>
-                <p class="text-gray-600 text-sm leading-relaxed">{{ feature.description }}</p>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3 group-hover:text-purple-900 transition-colors">{{ feature.title }}</h3>
+                <p class="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors">{{ feature.description }}</p>
               </div>
             </div>
           </div>

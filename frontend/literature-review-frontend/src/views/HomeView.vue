@@ -73,9 +73,9 @@
         <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">使用自然语言描述您的研究需求，AI将为您找到最相关的学术文献</p>
       </div>
 
-      <!-- 简洁搜索区域 - 参考Linear/Stripe风格 -->
+      <!-- Gemini AI风格搜索区域 -->
       <div class="mb-16">
-        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div class="bg-white/80 backdrop-blur-sm border border-purple-200/50 rounded-2xl overflow-hidden shadow-lg shadow-purple-500/10">
           <!-- 搜索输入框 -->
           <div class="p-6">
             <el-input
@@ -88,15 +88,15 @@
             />
             <!-- 搜索按钮 -->
             <div class="flex items-center justify-between mt-4">
-              <div class="flex items-center space-x-2 text-sm text-gray-500">
-                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">⌘</kbd>
-                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">↵</kbd>
+              <div class="flex items-center space-x-2 text-sm text-purple-600">
+                <kbd class="px-2 py-1 bg-purple-100 rounded text-xs font-mono">⌘</kbd>
+                <kbd class="px-2 py-1 bg-purple-100 rounded text-xs font-mono">↵</kbd>
                 <span>搜索</span>
               </div>
               <button
                 @click="startSearch"
                 :disabled="!searchQuery.trim() || isSearching"
-                class="px-6 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                class="px-6 py-2 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-purple-500/25"
               >
                 <el-icon v-if="isSearching" class="animate-spin mr-2"><Loading /></el-icon>
                 {{ isSearching ? '搜索中...' : '搜索' }}
@@ -105,13 +105,13 @@
           </div>
 
           <!-- 快速建议 -->
-          <div class="px-6 pb-4 border-t border-gray-100">
+          <div class="px-6 pb-4 border-t border-purple-100">
             <div class="flex flex-wrap gap-2 mt-3">
               <button
                 v-for="suggestion in naturalLanguageSuggestions.slice(0, 2)"
                 :key="suggestion"
                 @click="searchQuery = suggestion"
-                class="px-3 py-1 text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors"
+                class="px-3 py-1 text-sm text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-md transition-colors border border-purple-200/50"
               >
                 {{ suggestion }}
               </button>
@@ -161,23 +161,23 @@
 
       <!-- 结果展示区域 -->
       <div v-if="searchResults.length > 0" class="animate-fade-in">
-        <!-- 行动计划展示 - 简洁设计 -->
-        <div v-if="actionPlan && actionPlan.length > 0" class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6">
+        <!-- Gemini AI风格行动计划展示 -->
+        <div v-if="actionPlan && actionPlan.length > 0" class="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border border-purple-200/50 rounded-xl p-4 mb-6 shadow-lg shadow-purple-500/10">
           <div class="flex items-center mb-3">
-            <div class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center mr-2">
+            <div class="w-5 h-5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mr-2">
               <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
             </div>
-            <h3 class="text-sm font-medium text-blue-900">AI生成的行动计划</h3>
+            <h3 class="text-sm font-medium bg-gradient-to-r from-purple-700 to-blue-700 bg-clip-text text-transparent">AI生成的行动计划</h3>
           </div>
           <div class="space-y-2">
             <div
               v-for="(step, index) in actionPlan"
               :key="index"
-              class="flex items-start text-sm text-blue-800"
+              class="flex items-start text-sm text-purple-800"
             >
-              <span class="flex-shrink-0 w-5 h-5 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">
+              <span class="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-purple-200 to-blue-200 text-purple-800 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">
                 {{ index + 1 }}
               </span>
               <span class="flex-1">{{ step }}</span>
@@ -185,17 +185,17 @@
           </div>
         </div>
 
-        <!-- 简洁的结果头部 -->
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+        <!-- Gemini AI风格结果头部 -->
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-purple-100">
           <div>
-            <h2 class="text-lg font-semibold text-gray-900">搜索结果</h2>
-            <p class="text-sm text-gray-500">找到 {{ searchResults.length }} 篇相关文献</p>
+            <h2 class="text-lg font-semibold bg-gradient-to-r from-purple-700 to-blue-700 bg-clip-text text-transparent">搜索结果</h2>
+            <p class="text-sm text-purple-600">找到 {{ searchResults.length }} 篇相关文献</p>
           </div>
           <div class="flex items-center space-x-3">
             <button
               @click="generateReport"
               :disabled="isGeneratingReport"
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              class="px-4 py-2 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all duration-300 shadow-lg shadow-purple-500/25"
             >
               {{ isGeneratingReport ? '生成中...' : '生成报告' }}
             </button>

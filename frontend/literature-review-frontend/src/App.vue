@@ -26,15 +26,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="app" class="min-h-screen bg-white relative">
-    <!-- 顶级现代化背景 - 参考Stripe/Linear风格 -->
+  <div id="app" class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 relative">
+    <!-- Gemini AI风格背景 - 紫蓝渐变 -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden">
-      <!-- 微妙的网格背景 -->
-      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(15,23,42,0.15) 1px, transparent 0); background-size: 20px 20px;"></div>
-      <!-- 顶部渐变遮罩 -->
-      <div class="absolute inset-0 bg-gradient-to-b from-white via-white/95 to-white/90"></div>
-      <!-- 精致的光晕效果 -->
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-indigo-500/5 rounded-full blur-3xl"></div>
+      <!-- 动态渐变背景 -->
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50/50 to-indigo-50"></div>
+      <!-- Gemini风格光晕效果 -->
+      <div class="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+      <!-- 微妙的网格纹理 -->
+      <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] opacity-25"></div>
     </div>
 
     <!-- 顶级状态指示器 - 参考Linear风格 -->
@@ -78,13 +79,24 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* 现代化文字效果 */
+/* Gemini AI风格文字效果 */
 .gradient-text {
-  background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 50%, #6366f1 100%);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 700;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* 现代化卡片阴影效果 */
@@ -162,22 +174,22 @@ body {
   background: rgba(255, 255, 255, 1);
 }
 
-/* 滚动条样式 */
+/* Gemini AI风格滚动条 */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #faf7ff;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: linear-gradient(to bottom, #a855f7, #3b82f6);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: linear-gradient(to bottom, #9333ea, #2563eb);
 }
 
 /* 背景网格图案 */

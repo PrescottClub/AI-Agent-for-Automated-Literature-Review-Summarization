@@ -52,45 +52,45 @@
         <span
           v-for="keyword in paper.keywords.slice(0, 5)"
           :key="keyword"
-          class="px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200 hover:bg-gradient-to-r hover:from-blue-100 hover:to-indigo-100 transition-colors"
+          class="px-3 py-1 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 text-purple-700 rounded-full text-xs font-medium border border-purple-200/50 hover:from-purple-100 hover:via-blue-100 hover:to-indigo-100 transition-all duration-200"
         >
           {{ keyword }}
         </span>
         <span
           v-if="paper.keywords.length > 5"
-          class="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-medium"
+          class="px-3 py-1 bg-gradient-to-r from-purple-100 to-blue-100 text-purple-600 rounded-full text-xs font-medium"
         >
           +{{ paper.keywords.length - 5 }}
         </span>
       </div>
     </div>
 
-    <!-- 简洁操作按钮 -->
-    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+    <!-- Gemini AI风格操作按钮 -->
+    <div class="flex items-center justify-between pt-4 border-t border-purple-100">
       <div class="flex items-center space-x-3">
         <button
           v-if="paper.url"
           @click="openLink(paper.url)"
-          class="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+          class="text-sm text-purple-600 hover:text-purple-800 transition-colors font-medium"
         >
           查看原文
         </button>
         <button
           v-if="paper.pdfUrl"
           @click="openLink(paper.pdfUrl)"
-          class="text-sm text-green-600 hover:text-green-800 transition-colors"
+          class="text-sm text-blue-600 hover:text-blue-800 transition-colors font-medium"
         >
           下载PDF
         </button>
       </div>
 
       <div class="flex items-center space-x-2">
-        <button @click="selectPaper(paper)" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <button @click="selectPaper(paper)" class="text-purple-400 hover:text-purple-600 transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
           </svg>
         </button>
-        <button class="text-gray-400 hover:text-gray-600 transition-colors">
+        <button class="text-purple-400 hover:text-purple-600 transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
           </svg>
@@ -174,16 +174,20 @@ export default defineComponent({
 <style scoped>
 .paper-card {
   position: relative;
-  background: white;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
   padding: 20px;
-  border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
+  border: 1px solid rgba(147, 51, 234, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px 0 rgba(147, 51, 234, 0.1), 0 1px 2px 0 rgba(147, 51, 234, 0.06);
 }
 
 .paper-card:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-color: rgba(147, 51, 234, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(147, 51, 234, 0.1), 0 4px 6px -2px rgba(147, 51, 234, 0.05);
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 /* 文本截断 */
