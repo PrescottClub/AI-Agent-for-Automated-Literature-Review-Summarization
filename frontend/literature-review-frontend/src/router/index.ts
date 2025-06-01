@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import WelcomeView from '../views/WelcomeView.vue'
 import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
@@ -6,7 +7,12 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: 'welcome',
+      component: WelcomeView,
+    },
+    {
+      path: '/search',
+      name: 'search',
       component: HomeView,
     },
     {

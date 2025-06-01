@@ -26,22 +26,39 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="app" class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-    <!-- 后端状态指示器 -->
-    <div v-if="backendStatus === 'disconnected'" 
-         class="fixed top-0 left-0 right-0 bg-red-500 text-white text-center py-2 z-50">
-      <el-icon class="mr-2"><Warning /></el-icon>
-      后端服务未连接，请确保后端服务器正在运行 (http://localhost:8000)
+  <div id="app" class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
+    <!-- 背景装饰元素 -->
+    <div class="fixed inset-0 pointer-events-none">
+      <!-- 浮动几何图形 -->
+      <div class="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-float"></div>
+      <div class="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-pink-400/20 to-orange-400/20 rounded-full blur-lg animate-float-delayed"></div>
+      <div class="absolute bottom-32 left-1/4 w-40 h-40 bg-gradient-to-r from-green-400/15 to-blue-400/15 rounded-full blur-2xl animate-float-slow"></div>
+
+      <!-- 网格背景 -->
+      <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
     </div>
-    
-    <div v-else-if="backendStatus === 'connected'" 
-         class="fixed top-0 left-0 right-0 bg-green-500 text-white text-center py-1 z-50 text-sm">
-      <el-icon class="mr-1"><CircleCheck /></el-icon>
-      后端服务已连接
+
+    <!-- 后端状态指示器 - 现代化设计 -->
+    <div v-if="backendStatus === 'disconnected'"
+         class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 backdrop-blur-md text-white px-6 py-3 rounded-full z-50 shadow-lg border border-red-400/30 animate-slide-down">
+      <div class="flex items-center space-x-2">
+        <el-icon class="animate-pulse"><Warning /></el-icon>
+        <span class="font-medium">后端服务未连接</span>
+        <div class="w-2 h-2 bg-red-300 rounded-full animate-ping"></div>
+      </div>
+    </div>
+
+    <div v-else-if="backendStatus === 'connected'"
+         class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500/90 backdrop-blur-md text-white px-6 py-2 rounded-full z-50 shadow-lg border border-green-400/30 animate-slide-down">
+      <div class="flex items-center space-x-2">
+        <el-icon><CircleCheck /></el-icon>
+        <span class="text-sm font-medium">服务已连接</span>
+        <div class="w-2 h-2 bg-green-300 rounded-full"></div>
+      </div>
     </div>
 
     <!-- 主要内容 -->
-    <div :class="{ 'pt-10': backendStatus !== 'checking' }">
+    <div class="relative z-10">
       <RouterView />
     </div>
   </div>
@@ -151,6 +168,61 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* 背景网格图案 */
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* 浮动动画 */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-20px) rotate(120deg); }
+  66% { transform: translateY(10px) rotate(240deg); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(15px) rotate(-120deg); }
+  66% { transform: translateY(-10px) rotate(-240deg); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-30px) rotate(180deg); }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 10s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-float-slow {
+  animation: float-slow 12s ease-in-out infinite;
+  animation-delay: 4s;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.5s ease-out;
 }
 
 /* 响应式设计 */

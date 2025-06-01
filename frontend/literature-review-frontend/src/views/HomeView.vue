@@ -1,28 +1,86 @@
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-    <!-- 导航栏 -->
-    <nav class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
+    <!-- 现代化导航栏 -->
+    <nav class="bg-white/90 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-40 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center">
-              <span class="text-white text-xl font-bold">T</span>
+          <!-- Logo区域 -->
+          <div class="flex items-center space-x-3 cursor-pointer" @click="goToWelcome">
+            <div class="relative">
+              <div class="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <span class="text-white text-xl font-bold">T</span>
+              </div>
+              <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
             </div>
             <div>
-              <h1 class="text-xl font-bold gradient-text">Tsearch</h1>
-              <p class="text-xs text-gray-500">Terence's AI Literature Discovery</p>
+              <h1 class="text-xl font-bold gradient-text hover:scale-105 transition-transform duration-200">Tsearch</h1>
+              <p class="text-xs text-gray-500">AI Literature Discovery</p>
             </div>
           </div>
-          <div class="flex items-center space-x-4">
+
+          <!-- 中间导航链接 -->
+          <div class="hidden md:flex items-center space-x-8">
+            <router-link to="/search" class="nav-link">
+              <el-icon class="mr-1"><Search /></el-icon>
+              搜索
+            </router-link>
+            <router-link to="/about" class="nav-link">
+              <el-icon class="mr-1"><Document /></el-icon>
+              关于
+            </router-link>
+          </div>
+
+          <!-- 右侧操作按钮 -->
+          <div class="flex items-center space-x-3">
+            <!-- 主题切换 -->
+            <el-tooltip content="切换主题">
+              <button @click="toggleTheme" class="nav-button">
+                <el-icon><Sunny v-if="isDarkMode" /><Moon v-else /></el-icon>
+              </button>
+            </el-tooltip>
+
+            <!-- 系统设置 -->
             <el-tooltip content="系统设置">
-              <el-button type="primary" :icon="Setting" circle @click="showSettings = true" />
+              <button @click="showSettings = true" class="nav-button">
+                <el-icon><Setting /></el-icon>
+              </button>
             </el-tooltip>
+
+            <!-- 使用帮助 -->
             <el-tooltip content="使用帮助">
-              <el-button type="info" :icon="QuestionFilled" circle @click="showHelp = true" />
+              <button @click="showHelp = true" class="nav-button">
+                <el-icon><QuestionFilled /></el-icon>
+              </button>
             </el-tooltip>
+
+            <!-- 历史记录 -->
             <el-tooltip content="历史记录">
-              <el-button type="success" :icon="Clock" circle @click="showHistory = true" />
+              <button @click="showHistory = true" class="nav-button relative">
+                <el-icon><Clock /></el-icon>
+                <span v-if="searchHistory.length > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  {{ searchHistory.length > 9 ? '9+' : searchHistory.length }}
+                </span>
+              </button>
             </el-tooltip>
+
+            <!-- 移动端菜单 -->
+            <button @click="showMobileMenu = !showMobileMenu" class="md:hidden nav-button">
+              <el-icon><Menu /></el-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200 py-4 animate-slide-down">
+          <div class="flex flex-col space-y-3">
+            <router-link to="/search" class="mobile-nav-link" @click="showMobileMenu = false">
+              <el-icon class="mr-2"><Search /></el-icon>
+              搜索文献
+            </router-link>
+            <router-link to="/about" class="mobile-nav-link" @click="showMobileMenu = false">
+              <el-icon class="mr-2"><Document /></el-icon>
+              关于我们
+            </router-link>
           </div>
         </div>
       </div>
@@ -403,6 +461,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Search,
@@ -417,7 +476,10 @@ import {
   Microphone,
   Download,
   Filter,
-  Delete
+  Delete,
+  Menu,
+  Sunny,
+  Moon
 } from '@element-plus/icons-vue'
 import PaperCard from '../components/PaperCard.vue'
 
@@ -450,6 +512,9 @@ interface SearchHistoryItem {
   }
 }
 
+// 路由
+const router = useRouter()
+
 // 响应式数据
 const searchQuery = ref('')
 const selectedSources = ref(['arxiv', 'semantic_scholar'])
@@ -469,6 +534,8 @@ const showSettings = ref(false)
 const showHelp = ref(false)
 const showHistory = ref(false)
 const showFilters = ref(false)
+const showMobileMenu = ref(false)
+const isDarkMode = ref(false)
 
 // 筛选和排序
 const sortBy = ref('relevance')
@@ -716,6 +783,17 @@ const handlePageChange = (page: number) => {
   currentPage.value = page
 }
 
+// 新增方法
+const goToWelcome = () => {
+  router.push('/')
+}
+
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+  // 这里可以添加主题切换逻辑
+  ElMessage.info(isDarkMode.value ? '已切换到深色模式' : '已切换到浅色模式')
+}
+
 // 生命周期
 onMounted(() => {
   // 加载保存的设置
@@ -785,5 +863,22 @@ watch(searchHistory, () => {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* 导航样式 */
+.nav-link {
+  @apply flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200;
+}
+
+.nav-link.router-link-active {
+  @apply text-blue-600 bg-blue-50;
+}
+
+.nav-button {
+  @apply w-10 h-10 flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200;
+}
+
+.mobile-nav-link {
+  @apply flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200;
 }
 </style>
