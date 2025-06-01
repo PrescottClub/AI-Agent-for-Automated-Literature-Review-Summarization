@@ -1,24 +1,12 @@
 {
-  // Vue.js 项目配置 - 解决 Vetur 找不到配置文件的问题
-  "vetur.projects": [
-    "./frontend/literature-review-frontend"
-  ],
-  "vetur.config.settings": {
-    "vetur.useWorkspaceDependencies": true,
-    "vetur.experimental.templateInterpolationService": true
-  },
-  "vetur.ignoreProjectWarning": true,
-  "vetur.validation.template": false,
-  "vetur.validation.style": false,
-  "vetur.validation.script": false,
-
   // Vue Language Features (Volar) 配置 - Vue 3 推荐
-  "vue.server.hybridMode": true,
+  "vue.server.hybridMode": false,
   "vue.server.includeLanguages": ["vue", "javascript", "typescript"],
 
   // TypeScript 配置
   "typescript.preferences.includePackageJsonAutoImports": "auto",
   "typescript.suggest.autoImports": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
 
   // 文件关联
   "files.associations": {
