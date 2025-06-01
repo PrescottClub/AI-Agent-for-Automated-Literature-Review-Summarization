@@ -2,7 +2,7 @@
 import { RouterView } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Warning, CircleCheck } from '@element-plus/icons-vue'
+// 移除未使用的图标导入
 
 // 检查后端连接状态
 const backendStatus = ref<'checking' | 'connected' | 'disconnected'>('checking')
@@ -26,30 +26,31 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="app" class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 relative">
-    <!-- 现代化背景 -->
+  <div id="app" class="min-h-screen bg-white relative">
+    <!-- 顶级现代化背景 - 参考Stripe/Linear风格 -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden">
-      <!-- 渐变光晕效果 -->
-      <div class="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-indigo-400/10 to-pink-400/10 rounded-full blur-3xl"></div>
-      <!-- 网格纹理 -->
-      <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] opacity-25"></div>
+      <!-- 微妙的网格背景 -->
+      <div class="absolute inset-0" style="background-image: radial-gradient(circle at 1px 1px, rgba(15,23,42,0.15) 1px, transparent 0); background-size: 20px 20px;"></div>
+      <!-- 顶部渐变遮罩 -->
+      <div class="absolute inset-0 bg-gradient-to-b from-white via-white/95 to-white/90"></div>
+      <!-- 精致的光晕效果 -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-indigo-500/5 rounded-full blur-3xl"></div>
     </div>
 
-    <!-- 现代化状态指示器 -->
+    <!-- 顶级状态指示器 - 参考Linear风格 -->
     <div v-if="backendStatus === 'disconnected'"
-         class="fixed top-6 right-6 bg-white/80 backdrop-blur-xl border border-red-200/50 text-red-600 px-4 py-3 rounded-xl z-50 text-sm shadow-lg shadow-red-500/10">
-      <div class="flex items-center space-x-3">
-        <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-        <span class="font-medium">服务未连接</span>
+         class="fixed top-4 right-4 bg-white border border-red-200 text-red-700 px-3 py-2 rounded-lg z-50 text-xs font-medium shadow-sm">
+      <div class="flex items-center space-x-2">
+        <div class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+        <span>服务未连接</span>
       </div>
     </div>
 
     <div v-else-if="backendStatus === 'connected'"
-         class="fixed top-6 right-6 bg-white/80 backdrop-blur-xl border border-green-200/50 text-green-600 px-4 py-3 rounded-xl z-50 text-sm shadow-lg shadow-green-500/10">
-      <div class="flex items-center space-x-3">
-        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-        <span class="font-medium">已连接</span>
+         class="fixed top-4 right-4 bg-white border border-green-200 text-green-700 px-3 py-2 rounded-lg z-50 text-xs font-medium shadow-sm">
+      <div class="flex items-center space-x-2">
+        <div class="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+        <span>已连接</span>
       </div>
     </div>
 

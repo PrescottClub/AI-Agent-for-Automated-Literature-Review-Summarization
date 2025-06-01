@@ -1,0 +1,39 @@
+{
+  "recommendations": [
+    // Vue.js 开发 (推荐使用 Volar 而不是 Vetur)
+    "Vue.volar",
+    "Vue.vscode-typescript-vue-plugin",
+    
+    // 备用 Vue 扩展 (如果需要 Vetur)
+    "octref.vetur",
+    
+    // JavaScript/TypeScript 开发
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-typescript-next",
+    
+    // Python 开发
+    "ms-python.python",
+    "ms-python.pylint",
+    "ms-python.black-formatter",
+    
+    // 通用开发工具
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-css-peek",
+    "bradlc.vscode-tailwindcss",
+    
+    // Git 和版本控制
+    "eamodio.gitlens",
+    
+    // 文件图标
+    "vscode-icons-team.vscode-icons",
+    
+    // 代码质量
+    "streetsidesoftware.code-spell-checker"
+  ],
+  "unwantedRecommendations": [
+    // 避免冲突的扩展
+    "ms-vscode.vscode-typescript-vue-plugin-pack"
+  ]
+}

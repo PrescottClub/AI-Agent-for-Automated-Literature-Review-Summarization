@@ -115,8 +115,15 @@ venv.bak/
 *.iws
 *.iml
 
-# VSCode
-.vscode/
+# VSCode (允许工作区配置)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# 项目配置文件 (允许提交)
+!package.json
+!jsconfig.json
+!frontend/literature-review-frontend/vetur.config.js
 
 # Mypy cache
 .mypy_cache/
@@ -246,9 +253,8 @@ dist/
 dist-ssr/
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# Editor directories and files (前端项目)
+# .vscode/* (已在上面配置)
 .idea
 .DS_Store
 *.suo

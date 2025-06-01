@@ -1,0 +1,44 @@
+{
+  "name": "tsearch-ai-literature-review",
+  "version": "3.4.0",
+  "description": "AI Agent for Automated Literature Review & Summarization - 智能文献发现引擎",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "frontend/literature-review-frontend"
+  ],
+  "scripts": {
+    "dev": "cd frontend/literature-review-frontend && npm run dev",
+    "build": "cd frontend/literature-review-frontend && npm run build",
+    "preview": "cd frontend/literature-review-frontend && npm run preview",
+    "lint": "cd frontend/literature-review-frontend && npm run lint",
+    "type-check": "cd frontend/literature-review-frontend && npm run type-check",
+    "start-backend": "python -m src.main",
+    "start-all": "python scripts/start_all.py",
+    "quick-start": "python scripts/quick_start.py",
+    "test": "cd frontend/literature-review-frontend && npm run test:unit",
+    "test:e2e": "cd frontend/literature-review-frontend && npm run test:e2e"
+  },
+  "keywords": [
+    "ai",
+    "literature-review",
+    "academic-research",
+    "vue3",
+    "python",
+    "machine-learning",
+    "nlp",
+    "research-assistant"
+  ],
+  "author": "Terence Qin <prescottchun@163.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.8.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
