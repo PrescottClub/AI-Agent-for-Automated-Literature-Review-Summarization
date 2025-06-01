@@ -317,7 +317,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -372,7 +372,6 @@ const router = useRouter()
 const searchQuery = ref('')
 const selectedSources = ref(['arxiv', 'semantic_scholar'])
 const maxPapers = ref(20)
-const yearRange = ref<Date[]>([])
 const retrieveFullText = ref(false)
 const enableAIAnalysis = ref(true)
 const isSearching = ref(false)
@@ -388,14 +387,6 @@ const showHelp = ref(false)
 const showHistory = ref(false)
 const showMobileMenu = ref(false)
 const showAdvancedOptions = ref(false)
-
-// 筛选和排序
-const sortBy = ref('relevance')
-const filterAuthor = ref('')
-const filterKeyword = ref('')
-const filterSource = ref('')
-const currentPage = ref(1)
-const pageSize = ref(10)
 
 // 设置
 const defaultSources = ref(['arxiv', 'semantic_scholar'])
@@ -439,9 +430,9 @@ const startSearch = async () => {
     ];
 
     searchResults.value = [
-        { id: '1', title: 'AI在肿瘤早期诊断中的应用进展回顾', authors: ['张三', '李四'], publishedDate: '2023-10-15', source: 'arXiv', summary: '本文综述了人工智能技术，特别是深度学习，在多种癌症早期诊断中的最新应用和挑战...', keywords: ['AI', '癌症诊断', '深度学习'], url: '#', pdfUrl: '#', relevance_score: 0.95, isFavorite: false },
-        { id: '2', title: '基于Transformer的医疗影像智能分析平台', authors: ['王五'], publishedDate: '2024-01-20', source: 'Semantic Scholar', summary: '提出了一种基于Transformer架构的医疗影像分析平台，能够有效提升多种疾病的诊断准确率...', keywords: ['Transformer', '医疗影像', '智能诊断'], url: '#', pdfUrl: '#', relevance_score: 0.92, isFavorite: true },
-        { id: '3', title: '可解释AI在临床决策支持系统中的研究', authors: ['赵六', '孙七'], publishedDate: '2023-05-01', source: 'PubMed Central', summary: '探讨了可解释人工智能（XAI）在构建临床决策支持系统（CDSS）中的重要性及其实现方法...', keywords: ['XAI', '临床决策', '可解释性'], url: '#', pdfUrl: '#', relevance_score: 0.88, isFavorite: false }
+        { id: '1', title: 'AI在肿瘤早期诊断中的应用进展回顾', authors: ['张三', '李四'], publishedDate: '2023-10-15', source: 'arXiv', summary: '本文综述了人工智能技术，特别是深度学习，在多种癌症早期诊断中的最新应用和挑战...', keywords: ['AI', '癌症诊断', '深度学习'], url: '#', pdfUrl: '#', isFavorite: false },
+        { id: '2', title: '基于Transformer的医疗影像智能分析平台', authors: ['王五'], publishedDate: '2024-01-20', source: 'Semantic Scholar', summary: '提出了一种基于Transformer架构的医疗影像分析平台，能够有效提升多种疾病的诊断准确率...', keywords: ['Transformer', '医疗影像', '智能诊断'], url: '#', pdfUrl: '#', isFavorite: true },
+        { id: '3', title: '可解释AI在临床决策支持系统中的研究', authors: ['赵六', '孙七'], publishedDate: '2023-05-01', source: 'PubMed Central', summary: '探讨了可解释人工智能（XAI）在构建临床决策支持系统（CDSS）中的重要性及其实现方法...', keywords: ['XAI', '临床决策', '可解释性'], url: '#', pdfUrl: '#', isFavorite: false }
     ];
 
     const historyItem: SearchHistoryItem = {
