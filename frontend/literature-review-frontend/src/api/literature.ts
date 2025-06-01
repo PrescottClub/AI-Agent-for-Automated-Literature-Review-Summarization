@@ -19,7 +19,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error)
-  }
+  },
 )
 
 // 响应拦截器
@@ -30,13 +30,13 @@ api.interceptors.response.use(
   (error) => {
     console.error('API Error:', error)
     return Promise.reject(error)
-  }
+  },
 )
 
 // 文献检索接口
 export interface SearchParams {
-  query?: string  // 传统结构化查询
-  rawQuery?: string  // 自然语言查询
+  query?: string // 传统结构化查询
+  rawQuery?: string // 自然语言查询
   sources: string[]
   maxPapers: number
   yearStart?: number
@@ -62,7 +62,7 @@ export interface SearchResult {
   totalCount: number
   processingTime: number
   summary?: string
-  actionPlan?: string[]  // AI生成的行动计划
+  actionPlan?: string[] // AI生成的行动计划
 }
 
 // 文献检索
@@ -83,7 +83,7 @@ export const generateReport = async (papers: Paper[], title: string): Promise<st
       papers,
       title,
     })
-    return (response as any).report
+    return response.data.report
   } catch (error) {
     console.error('Report generation failed:', error)
     throw error

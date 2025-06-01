@@ -4,9 +4,6 @@
   "description": "AI Agent for Automated Literature Review & Summarization - 智能文献发现引擎",
   "type": "module",
   "private": true,
-  "workspaces": [
-    "frontend/literature-review-frontend"
-  ],
   "scripts": {
     "dev": "cd frontend/literature-review-frontend && npm run dev",
     "build": "cd frontend/literature-review-frontend && npm run build",
