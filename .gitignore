@@ -137,6 +137,12 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
+# Vite cache
+.vite/
+
+# Streamlit cache
+.streamlit/
+
 # ===== PROJECT SPECIFIC =====
 
 # AI Development Files (Hidden)

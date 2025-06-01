@@ -1,124 +1,98 @@
 <template>
-  <div class="welcome-container">
-    <!-- 主要内容 -->
-    <div class="relative z-10 min-h-screen flex flex-col">
-      <!-- 现代化顶部导航 -->
-      <nav class="flex items-center justify-between p-8 max-w-7xl mx-auto w-full">
-        <div class="flex items-center space-x-4">
-          <!-- 重新设计的Logo -->
-          <div class="relative group">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-2xl flex items-center justify-center relative overflow-hidden shadow-lg shadow-blue-500/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-blue-500/40 group-hover:scale-105">
-              <!-- 动态光效 -->
-              <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent"></div>
-              <div class="absolute top-1 right-1 w-1.5 h-1.5 bg-white/40 rounded-full"></div>
-              <div class="absolute bottom-1 left-1 w-1 h-1 bg-white/30 rounded-full"></div>
-              <!-- 现代化T字母 -->
-              <span class="text-white text-lg font-bold relative z-10 tracking-tight">T</span>
-            </div>
+  <div class="min-h-screen bg-gray-50 text-gray-700">
+    <!-- Main content container -->
+    <div class="relative z-10 flex flex-col min-h-screen">
+      <!-- Simplified Navigation -->
+      <nav class="flex items-center justify-between p-6 sm:p-8 max-w-7xl mx-auto w-full">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 bg-primary-DEFAULT rounded-lg flex items-center justify-center shadow-sm">
+            <span class="text-white text-lg sm:text-xl font-semibold">T</span>
           </div>
           <div>
-            <h1 class="text-xl font-bold gradient-text">Tsearch</h1>
-            <p class="text-xs text-slate-500 font-medium">AI Literature Discovery</p>
+            <h1 class="text-lg sm:text-xl font-semibold text-gray-800">Tsearch</h1>
+            <p class="text-xs text-gray-500">AI Literature Discovery</p>
           </div>
         </div>
-        <button @click="startJourney" class="group flex items-center space-x-2 px-4 py-2 text-slate-600 hover:text-slate-900 text-sm font-medium transition-all duration-200 hover:bg-slate-50 rounded-lg">
-          <span>进入应用</span>
-          <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
+        <button @click="startJourney" class="el-button el-button--primary el-button--small sm:el-button--medium">
+          进入应用 <el-icon class="ml-1 el-icon--right"><ArrowRightBold /></el-icon>
         </button>
       </nav>
 
-      <!-- 主要内容区域 -->
-      <div class="flex-1 flex items-center justify-center px-8">
-        <div class="max-w-5xl mx-auto text-center">
-          <!-- 现代化主标题 -->
-          <div class="mb-20">
-            <!-- 标签 -->
-            <div class="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-medium mb-8">
-              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-              </svg>
+      <!-- Main Hero Section -->
+      <div class="flex-1 flex items-center justify-center px-4 sm:px-6 text-center">
+        <div class="max-w-3xl mx-auto">
+          <div class="mb-12 sm:mb-16">
+            <div class="inline-flex items-center px-3 py-1 bg-primary-50 border border-primary-200 rounded-full text-primary-700 text-sm font-medium mb-6">
+              <el-icon class="mr-1.5" :size="16"><Star /></el-icon> <!-- Using a generic star or idea icon -->
               AI驱动的学术研究平台
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-bold gradient-text mb-8 leading-tight tracking-tight">
-              智能文献
-              <br>
-              <span class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                发现引擎
-              </span>
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
+              智能文献 <span class="text-primary-DEFAULT">发现引擎</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed font-light">
+            <p class="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
               基于AI的学术研究助手，让文献综述变得简单高效。
-              <br class="hidden md:block">
               支持自然语言查询，智能分析，一键生成报告。
             </p>
 
-            <!-- Gemini AI风格CTA按钮 -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
               <button @click="startJourney"
-                      class="group relative px-8 py-4 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white rounded-2xl font-semibold text-lg shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-500 hover:scale-105 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div class="absolute inset-0 bg-gradient-to-r from-purple-400 via-blue-400 to-indigo-400 opacity-0 group-hover:opacity-20 animate-pulse"></div>
-                <span class="relative flex items-center">
-                  开始使用 Tsearch
-                  <svg class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                  </svg>
-                </span>
+                      class="el-button el-button--primary el-button--large w-full sm:w-auto">
+                开始使用 Tsearch <el-icon class="ml-1.5 el-icon--right"><Promotion /></el-icon>
               </button>
               <button @click="scrollToFeatures"
-                      class="px-8 py-4 text-purple-700 border-2 border-purple-200 rounded-2xl font-semibold text-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-300 hover:scale-105">
-                了解更多
+                      class="el-button el-button--large w-full sm:w-auto">
+                了解更多 <el-icon class="ml-1.5 el-icon--right"><InfoFilled /></el-icon>
               </button>
-            </div>
-          </div>
-
-          <!-- Gemini AI风格特性展示 -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24" ref="featuresSection">
-            <div v-for="(feature, index) in features"
-                 :key="index"
-                 class="group relative p-6 bg-white/80 backdrop-blur-sm border border-purple-100/50 rounded-2xl hover:border-purple-200 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 hover:scale-105">
-
-              <!-- Gemini风格渐变背景 -->
-              <div class="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-blue-50/50 to-indigo-50/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-              <div class="relative z-10">
-                <!-- Gemini风格图标设计 -->
-                <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:from-purple-200 group-hover:to-blue-200 transition-all duration-300">
-                  <component :is="feature.icon" class="w-6 h-6 text-purple-600 group-hover:text-purple-700 transition-colors" />
-                </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-3 group-hover:text-purple-900 transition-colors">{{ feature.title }}</h3>
-                <p class="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors">{{ feature.description }}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- 简洁统计数据 - 参考Linear风格 -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-t border-gray-100">
-            <div v-for="(stat, index) in stats"
-                 :key="index"
-                 class="text-center">
-              <div class="text-3xl font-bold text-gray-900 mb-1">{{ stat.value }}</div>
-              <div class="text-sm text-gray-500">{{ stat.label }}</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 现代化底部 -->
-      <footer class="py-12 text-center border-t border-slate-200/50">
-        <div class="max-w-7xl mx-auto px-8">
-          <div class="flex items-center justify-center space-x-2 mb-4">
-            <div class="w-6 h-6 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span class="text-white text-xs font-bold">T</span>
+      <!-- Features Section - Simplified Styling -->
+      <div class="py-12 sm:py-16 bg-white" ref="featuresSection">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-10 sm:mb-12">核心功能</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                <div v-for="(feature, index) in features"
+                    :key="index"
+                    class="bg-gray-50 p-6 rounded-lg border border-gray-200 transition-all duration-300 hover:shadow-lg hover:border-primary-200">
+                    <div class="w-12 h-12 bg-primary-100 text-primary-600 rounded-lg flex items-center justify-center mb-4">
+                        <component :is="feature.icon" class="w-6 h-6" />
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ feature.title }}</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">{{ feature.description }}</p>
+                </div>
             </div>
-            <span class="text-slate-600 font-medium">Tsearch</span>
+        </div>
+      </div>
+
+      <!-- Stats Section - Simplified -->
+      <div class="py-12 sm:py-16 bg-gray-50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+                <div v-for="(stat, index) in stats"
+                    :key="index"
+                    class="text-center bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    <div class="text-3xl font-bold text-primary-DEFAULT mb-1">{{ stat.value }}</div>
+                    <div class="text-sm text-gray-500">{{ stat.label }}</div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- Footer - Simplified -->
+      <footer class="py-8 sm:py-10 text-center border-t border-gray-200 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+          <div class="flex items-center justify-center space-x-2 mb-3">
+            <div class="w-7 h-7 bg-primary-DEFAULT rounded-md flex items-center justify-center">
+              <span class="text-white text-sm font-semibold">T</span>
+            </div>
+            <span class="text-gray-700 font-medium">Tsearch</span>
           </div>
-          <p class="text-sm text-slate-500">© 2025 Tsearch. Created by Terence Qin with ❤️</p>
-          <p class="text-xs text-slate-400 mt-2">Powered by AI • Built for Researchers</p>
+          <p class="text-sm text-gray-500">© {{ new Date().getFullYear() }} Tsearch. Created by Terence Qin.</p>
+          <p class="text-xs text-gray-400 mt-1">Powered by AI • Built for Researchers</p>
         </div>
       </footer>
     </div>
@@ -126,79 +100,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import {
-  Search,
-  DataAnalysis,
-  Document
-} from '@element-plus/icons-vue'
+  Search,      // For features
+  DataAnalysis,// For features
+  Document,    // For features
+  ArrowRightBold, // For nav button
+  Promotion,   // For CTA button
+  InfoFilled,  // For CTA button
+  Star         // For hero badge icon
+} from '@element-plus/icons-vue';
 
-const router = useRouter()
-const featuresSection = ref<HTMLElement>()
+const router = useRouter();
+const featuresSection = ref<HTMLElement | null>(null); // Ensure HTMLElement or null for ref type
 
-// 特性数据
 const features = ref([
   {
-    icon: Search,
+    icon: Search, // Using imported icon component directly
     title: '智能检索',
-    description: '支持自然语言查询，多数据源整合，精准匹配相关文献'
+    description: '支持自然语言查询，多数据源整合，精准匹配相关文献。'
   },
   {
     icon: DataAnalysis,
     title: 'AI分析',
-    description: '深度学习算法分析文献内容，自动提取关键信息'
+    description: '深度学习算法分析文献内容，自动提取关键信息和趋势。'
   },
   {
     icon: Document,
     title: '智能总结',
-    description: '一键生成专业的文献综述报告，提升研究效率'
+    description: '一键生成专业的文献综述报告，大幅提升研究效率。'
   }
-])
+]);
 
-// 统计数据
 const stats = ref([
-  { value: '10K+', label: '文献数据库' },
-  { value: '99%', label: '检索准确率' },
-  { value: '<5s', label: '响应时间' },
-  { value: '24/7', label: '在线服务' }
-])
+  { value: '1M+', label: '文献数据库' }, // Adjusted stat value for example
+  { value: '98%', label: '检索准确率' },
+  { value: '<3s', label: '平均响应' },
+  { value: '24/7', label: '稳定服务' }
+]);
 
-// 方法
 const startJourney = () => {
-  router.push('/search')
-}
+  router.push('/search'); // Assuming '/search' is the route for HomeView
+};
 
 const scrollToFeatures = () => {
   featuresSection.value?.scrollIntoView({
     behavior: 'smooth',
-    block: 'center'
-  })
-}
+    block: 'start' // Changed to start for better scroll position
+  });
+};
 </script>
 
 <style scoped>
-.welcome-container {
-  position: relative;
-  min-height: 100vh;
-}
+/* Scoped styles for WelcomeView - keep minimal, rely on Tailwind and App.vue globals */
 
-/* 简洁的动画效果 */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .welcome-container {
-    font-size: 0.875rem;
-  }
+/* Optional: Add a subtle hover effect for feature cards if not covered by Tailwind */
+.hover\:shadow-lg:hover {
+  /* Tailwind's shadow-lg is usually sufficient */
 }
 </style>

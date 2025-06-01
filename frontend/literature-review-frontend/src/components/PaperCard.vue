@@ -1,207 +1,202 @@
 <template>
-  <div class="paper-card group">
-    <!-- 论文编号和状态 -->
-    <div class="absolute top-6 right-6 flex items-center space-x-2">
-      <div v-if="paper.fullTextRetrieved" class="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="全文已获取"></div>
-      <div class="px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-full text-xs font-semibold border border-blue-200">
+  <div class="paper-card bg-white border border-gray-200 rounded-lg p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <!-- Paper Index and Status -->
+    <div class="absolute top-4 right-4 flex items-center space-x-2">
+      <div v-if="paper.fullTextRetrieved" class="w-2 h-2 bg-green-500 rounded-full" title="全文已获取"></div>
+      <div v-if="paper.isFavorite" @click.stop="toggleFavorite" class="text-yellow-500 hover:text-yellow-400 cursor-pointer" title="取消收藏">
+        <el-icon :size="18"><StarFilled /></el-icon>
+      </div>
+       <div v-else @click.stop="toggleFavorite" class="text-gray-400 hover:text-yellow-500 cursor-pointer" title="点击收藏">
+        <el-icon :size="18"><Star /></el-icon>
+      </div>
+      <div class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
         #{{ index }}
       </div>
     </div>
 
-    <!-- 论文标题 -->
-    <h4 class="text-xl font-bold text-slate-900 mb-4 pr-16 hover:text-blue-600 transition-colors cursor-pointer line-clamp-2 leading-tight"
-        @click="openLink(paper.url)">
+    <!-- Paper Title -->
+    <h4 class="text-lg font-semibold text-gray-800 mb-2 pr-16 hover:text-primary-DEFAULT transition-colors cursor-pointer line-clamp-2 leading-normal"
+        @click="viewDetails">
       {{ paper.title }}
     </h4>
 
-    <!-- 作者和日期信息 -->
-    <div class="flex flex-wrap items-center gap-4 mb-4 text-sm">
-      <div class="flex items-center text-slate-600">
-        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-        </svg>
+    <!-- Authors and Date -->
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-xs sm:text-sm text-gray-500">
+      <div class="flex items-center">
+        <el-icon class="mr-1" :size="14"><User /></el-icon>
         <span>{{ formatAuthors(paper.authors) }}</span>
       </div>
-      <div class="flex items-center text-slate-600">
-        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-        </svg>
+      <div class="flex items-center">
+        <el-icon class="mr-1" :size="14"><Calendar /></el-icon>
         <span>{{ formatDate(paper.publishedDate) }}</span>
       </div>
-      <div class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
+      <div class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs">
         {{ paper.source }}
       </div>
-      <div v-if="paper.citations" class="flex items-center text-orange-600">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-        </svg>
+      <div v-if="paper.citations" class="flex items-center text-gray-600">
+        <el-icon class="mr-0.5" :size="14"><TrendCharts /></el-icon> <!-- Citation icon -->
         <span class="text-xs font-medium">{{ paper.citations }} 引用</span>
       </div>
     </div>
 
-    <!-- 摘要 -->
-    <div class="mb-6">
-      <p class="text-slate-700 leading-relaxed">
-        {{ truncateSummary(paper.summary) }}
+    <!-- Abstract -->
+    <div class="mb-4">
+      <p class="text-sm text-gray-600 leading-relaxed line-clamp-3">
+        {{ paper.summary }} <!-- Removed truncateSummary, rely on line-clamp -->
       </p>
     </div>
 
-    <!-- 关键词 -->
-    <div v-if="paper.keywords && paper.keywords.length > 0" class="mb-6">
-      <div class="flex flex-wrap gap-2">
+    <!-- Keywords -->
+    <div v-if="paper.keywords && paper.keywords.length > 0" class="mb-4">
+      <div class="flex flex-wrap gap-1.5">
         <span
-          v-for="keyword in paper.keywords.slice(0, 5)"
+          v-for="keyword in paper.keywords.slice(0, 4)"
           :key="keyword"
-          class="px-3 py-1 bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 text-purple-700 rounded-full text-xs font-medium border border-purple-200/50 hover:from-purple-100 hover:via-blue-100 hover:to-indigo-100 transition-all duration-200"
+          class="px-2 py-0.5 bg-primary-50 text-primary-700 rounded-full text-xs font-medium border border-primary-100"
         >
           {{ keyword }}
         </span>
         <span
-          v-if="paper.keywords.length > 5"
-          class="px-3 py-1 bg-gradient-to-r from-purple-100 to-blue-100 text-purple-600 rounded-full text-xs font-medium"
+          v-if="paper.keywords.length > 4"
+          class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium"
         >
-          +{{ paper.keywords.length - 5 }}
+          +{{ paper.keywords.length - 4 }}
         </span>
       </div>
     </div>
 
-    <!-- Gemini AI风格操作按钮 -->
-    <div class="flex items-center justify-between pt-4 border-t border-purple-100">
-      <div class="flex items-center space-x-3">
+    <!-- Action Buttons - Gemini Style -->
+    <div class="flex items-center justify-between pt-3 border-t border-gray-200">
+      <div class="flex items-center space-x-2 sm:space-x-3">
         <button
           v-if="paper.url"
-          @click="openLink(paper.url)"
-          class="text-sm text-purple-600 hover:text-purple-800 transition-colors font-medium"
+          @click.stop="openLink(paper.url)"
+          class="action-button-gemini text-primary-600 hover:text-primary-700"
         >
-          查看原文
+          <el-icon :size="16" class="mr-0.5 sm:mr-1"><Link /></el-icon>查看原文
         </button>
         <button
           v-if="paper.pdfUrl"
-          @click="openLink(paper.pdfUrl)"
-          class="text-sm text-blue-600 hover:text-blue-800 transition-colors font-medium"
+          @click.stop="downloadPdf"
+          class="action-button-gemini text-blue-600 hover:text-blue-700"
         >
-          下载PDF
+          <el-icon :size="16" class="mr-0.5 sm:mr-1"><Download /></el-icon>下载PDF
         </button>
       </div>
 
-      <div class="flex items-center space-x-2">
-        <button @click="selectPaper(paper)" class="text-purple-400 hover:text-purple-600 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-          </svg>
+      <div class="flex items-center space-x-1 sm:space-x-2">
+        <button @click.stop="viewDetails" class="icon-button-gemini" title="查看详情">
+          <el-icon :size="18"><View /></el-icon>
         </button>
-        <button class="text-purple-400 hover:text-purple-600 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
-          </svg>
-        </button>
+        <!-- Add other actions like share, cite if needed -->
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// 移除未使用的图标导入，改用SVG图标
+import { StarFilled, Star, User, Calendar, Link, Download, View, TrendCharts } from '@element-plus/icons-vue'; // Ensure all used icons are imported
+import type { PropType } from 'vue'; // Import PropType for better prop typing
 
-export interface Paper {
-  title: string
-  authors: string[]
-  publishedDate: string
-  source: string
-  summary: string
-  keywords?: string[]
-  url?: string
-  pdfUrl?: string
-  fullTextRetrieved?: boolean
-  citations?: number
+export interface Paper { // Ensure this interface matches the one in HomeView or a shared types file
+  id: string; // Added id
+  title: string;
+  authors: string[];
+  publishedDate: string;
+  source: string;
+  summary: string;
+  keywords?: string[];
+  url?: string;
+  pdfUrl?: string;
+  fullTextRetrieved?: boolean;
+  citations?: number;
+  isFavorite?: boolean; // Added for favorite toggle
 }
 
-interface Props {
-  paper: Paper
-  index: number
-}
-
-interface Emits {
-  (e: 'select', paper: Paper): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
-
-// 格式化作者列表
-const formatAuthors = (authors: string[]) => {
-  if (!authors || authors.length === 0) return '未知作者'
-  if (authors.length <= 3) return authors.join(', ')
-  return `${authors.slice(0, 3).join(', ')} 等`
-}
-
-// 格式化日期
-const formatDate = (dateString: string) => {
-  if (!dateString) return '未知日期'
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('zh-CN')
-  } catch {
-    return dateString
+const props = defineProps({
+  paper: {
+    type: Object as PropType<Paper>,
+    required: true
+  },
+  index: {
+    type: Number,
+    required: true
   }
-}
+});
 
-// 截断摘要
-const truncateSummary = (summary: string) => {
-  if (!summary) return '暂无摘要'
-  return summary.length > 300 ? summary.substring(0, 300) + '...' : summary
-}
+const emit = defineEmits([
+  'toggle-favorite',
+  'view-details',
+  'download-pdf'
+]);
 
-// 打开链接
-const openLink = (url: string) => {
-  window.open(url, '_blank')
-}
+const formatAuthors = (authors: string[] | undefined) => {
+  if (!authors || authors.length === 0) return '未知作者';
+  if (authors.length <= 2) return authors.join(', ');
+  return `${authors.slice(0, 1).join(', ')} 等`; // Show first author and '等' for brevity
+};
 
-// 选择论文
-const selectPaper = (paper: Paper) => {
-  emit('select', paper)
-}
-</script>
+const formatDate = (dateString: string | undefined) => {
+  if (!dateString) return '未知日期';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch {
+    return dateString;
+  }
+};
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+const openLink = (url: string | undefined) => {
+  if (url && url !== '#') {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  } else {
+    // Optionally inform user if no link is available, or disable button
+    console.warn('No valid URL provided for openLink');
+  }
+};
 
-export default defineComponent({
-  name: 'PaperCard'
-})
+const toggleFavorite = () => {
+  emit('toggle-favorite', props.paper.id);
+};
+
+const viewDetails = () => {
+  emit('view-details', props.paper);
+};
+
+const downloadPdf = () => {
+  emit('download-pdf', props.paper);
+  // Actual download logic might be in parent or a service if it's complex (e.g. needs auth)
+  // For direct links, this is fine. If pdfUrl is a trigger for parent to fetch and download, that's also fine.
+};
+
 </script>
 
 <style scoped>
 .paper-card {
-  position: relative;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 20px;
-  border: 1px solid rgba(147, 51, 234, 0.1);
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px 0 rgba(147, 51, 234, 0.1), 0 1px 2px 0 rgba(147, 51, 234, 0.06);
+  /* Using Tailwind classes directly in the template for most styling */
 }
 
-.paper-card:hover {
-  border-color: rgba(147, 51, 234, 0.2);
-  box-shadow: 0 10px 15px -3px rgba(147, 51, 234, 0.1), 0 4px 6px -2px rgba(147, 51, 234, 0.05);
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.95);
+.action-button-gemini {
+  @apply flex items-center px-1.5 sm:px-2 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors hover:bg-gray-100;
 }
 
-/* 文本截断 */
+.icon-button-gemini {
+  @apply p-1.5 rounded-full text-gray-500 hover:text-primary-DEFAULT hover:bg-primary-50 transition-colors;
+}
+
+/* Line clamp utility (if not globally available via Tailwind plugin) */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .paper-card {
-    padding: 16px;
-  }
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

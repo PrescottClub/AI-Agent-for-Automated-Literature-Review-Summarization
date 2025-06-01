@@ -1,54 +1,49 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-    <!-- 现代化导航栏 -->
-    <nav class="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 sticky top-0 z-40 shadow-sm shadow-slate-200/20">
+  <div class="min-h-screen bg-gray-50">
+    <!-- Navigation Bar - Simplified for Gemini style -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-6">
         <div class="flex justify-between items-center h-16">
-          <!-- Logo区域 -->
-          <div class="flex items-center space-x-4 cursor-pointer group" @click="goToWelcome">
-            <div class="w-9 h-9 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 rounded-xl flex items-center justify-center relative overflow-hidden shadow-lg shadow-blue-500/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-blue-500/40 group-hover:scale-105">
-              <!-- 动态光效 -->
-              <div class="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent"></div>
-              <div class="absolute top-1 right-1 w-1 h-1 bg-white/40 rounded-full"></div>
-              <div class="absolute bottom-1 left-1 w-0.5 h-0.5 bg-white/30 rounded-full"></div>
-              <!-- T字母 -->
-              <span class="text-white text-sm font-bold relative z-10">T</span>
+          <!-- Logo Area - Simplified -->
+          <div class="flex items-center space-x-3 cursor-pointer group" @click="goToWelcome">
+            <div class="w-9 h-9 bg-primary-DEFAULT rounded-lg flex items-center justify-center shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:scale-105">
+              <!-- Simplified or generic icon if T is too specific, or keep T with simple styling -->
+              <span class="text-white text-lg font-semibold">T</span>
             </div>
             <div>
-              <span class="text-lg font-bold gradient-text">Tsearch</span>
-              <p class="text-xs text-slate-500 font-medium -mt-1">AI Literature Discovery</p>
+              <!-- Removed gradient-text, use primary or darker gray color -->
+              <span class="text-xl font-semibold text-gray-800">Tsearch</span>
+              <p class="text-xs text-gray-500 font-medium -mt-0.5">AI Literature Discovery</p>
             </div>
           </div>
 
-          <!-- 右侧操作按钮 -->
-          <div class="flex items-center space-x-3">
-            <!-- 历史记录 -->
-            <button @click="showHistory = true" class="nav-button relative group">
-              <el-icon><Clock /></el-icon>
-              <span v-if="searchHistory.length > 0" class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-              <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">历史记录</span>
+          <!-- Right Action Buttons - Simplified -->
+          <div class="hidden md:flex items-center space-x-2">
+            <button @click="showHistory = true" class="nav-button-gemini">
+              <el-icon :size="20"><Clock /></el-icon>
+              <span class="ml-1 text-sm">历史</span>
             </button>
-
-            <!-- 系统设置 -->
-            <button @click="showSettings = true" class="nav-button relative group">
-              <el-icon><Setting /></el-icon>
-              <span class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">设置</span>
+            <button @click="showSettings = true" class="nav-button-gemini">
+              <el-icon :size="20"><Setting /></el-icon>
+              <span class="ml-1 text-sm">设置</span>
             </button>
+          </div>
 
-            <!-- 移动端菜单 -->
-            <button @click="showMobileMenu = !showMobileMenu" class="md:hidden nav-button">
-              <el-icon><Menu /></el-icon>
+          <!-- Mobile Menu Button -->
+          <div class="md:hidden">
+            <button @click="showMobileMenu = !showMobileMenu" class="p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-DEFAULT">
+              <el-icon :size="24"><Menu /></el-icon>
             </button>
           </div>
         </div>
 
-        <!-- 移动端菜单 -->
-        <div v-if="showMobileMenu" class="md:hidden border-t border-gray-100 py-3">
-          <div class="flex flex-col space-y-2">
-            <button @click="showHistory = true; showMobileMenu = false" class="mobile-nav-link">
+        <!-- Mobile Menu -->
+        <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200 py-2">
+          <div class="flex flex-col space-y-1">
+            <button @click="showHistory = true; showMobileMenu = false" class="mobile-nav-link-gemini">
               历史记录
             </button>
-            <button @click="showSettings = true; showMobileMenu = false" class="mobile-nav-link">
+            <button @click="showSettings = true; showMobileMenu = false" class="mobile-nav-link-gemini">
               设置
             </button>
           </div>
@@ -56,62 +51,64 @@
       </div>
     </nav>
 
-    <!-- 主要内容区域 -->
-    <div class="max-w-5xl mx-auto px-6 py-16">
-      <!-- 现代化头部 -->
-      <div class="text-center mb-16">
-        <div class="inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-sm font-medium mb-6">
-          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
+    <!-- Main Content Area -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
+      <!-- Header Section - Simplified -->
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center px-3 py-1 bg-primary-50 border border-primary-200 rounded-full text-primary-700 text-xs sm:text-sm font-medium mb-4">
+          <el-icon class="mr-2"><Search /></el-icon> <!-- Using a generic search or lightbulb icon -->
           智能文献搜索
         </div>
-        <h1 class="text-4xl md:text-5xl font-bold gradient-text mb-6 leading-tight">
-          发现学术
-          <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">洞察</span>
+        <!-- Removed gradient-text, use standard text colors -->
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-4 leading-tight">
+          发现学术 <span class="text-primary-DEFAULT">洞察</span>
         </h1>
-        <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">使用自然语言描述您的研究需求，AI将为您找到最相关的学术文献</p>
+        <p class="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          使用自然语言描述您的研究需求，AI将为您找到最相关的学术文献
+        </p>
       </div>
 
-      <!-- Gemini AI风格搜索区域 -->
-      <div class="mb-16">
-        <div class="bg-white/80 backdrop-blur-sm border border-purple-200/50 rounded-2xl overflow-hidden shadow-lg shadow-purple-500/10">
-          <!-- 搜索输入框 -->
-          <div class="p-6">
+      <!-- Search Area - Simplified -->
+      <div class="mb-12">
+        <!-- Simplified card style -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <!-- Search Input -->
+          <div class="p-4 sm:p-6">
             <el-input
               v-model="searchQuery"
               type="textarea"
-              :rows="4"
+              :autosize="{ minRows: 3, maxRows: 6 }"
               placeholder="用自然语言描述您的研究需求，例如：我想了解最近三年人工智能在医疗诊断领域的应用进展"
-              class="w-full border-0 resize-none"
+              class="w-full resize-none focus:border-primary-DEFAULT focus:ring-primary-DEFAULT"
               @keyup.enter.ctrl="startSearch"
             />
-            <!-- 搜索按钮 -->
-            <div class="flex items-center justify-between mt-4">
-              <div class="flex items-center space-x-2 text-sm text-purple-600">
-                <kbd class="px-2 py-1 bg-purple-100 rounded text-xs font-mono">⌘</kbd>
-                <kbd class="px-2 py-1 bg-purple-100 rounded text-xs font-mono">↵</kbd>
-                <span>搜索</span>
+            <!-- Search Button and Shortcut Hint -->
+            <div class="flex flex-col sm:flex-row items-center justify-between mt-4">
+              <div class="flex items-center space-x-1 text-xs text-gray-500 mb-2 sm:mb-0">
+                <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-gray-700 font-mono">Ctrl</kbd>
+                <span>+</span>
+                <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-gray-700 font-mono">Enter</kbd>
+                <span>进行搜索</span>
               </div>
               <button
                 @click="startSearch"
                 :disabled="!searchQuery.trim() || isSearching"
-                class="px-6 py-2 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-purple-500/25"
+                class="w-full sm:w-auto el-button el-button--primary"
               >
-                <el-icon v-if="isSearching" class="animate-spin mr-2"><Loading /></el-icon>
-                {{ isSearching ? '搜索中...' : '搜索' }}
+                <el-icon v-if="isSearching" class="animate-spin mr-1"><Loading /></el-icon>
+                {{ isSearching ? '搜索中...' : '搜索文献' }}
               </button>
             </div>
           </div>
 
-          <!-- 快速建议 -->
-          <div class="px-6 pb-4 border-t border-purple-100">
-            <div class="flex flex-wrap gap-2 mt-3">
+          <!-- Quick Suggestions - Simplified -->
+          <div v-if="naturalLanguageSuggestions.length > 0" class="px-4 sm:px-6 pt-3 pb-4 border-t border-gray-200">
+            <div class="flex flex-wrap gap-2">
               <button
-                v-for="suggestion in naturalLanguageSuggestions.slice(0, 2)"
+                v-for="suggestion in naturalLanguageSuggestions.slice(0, 3)"
                 :key="suggestion"
-                @click="searchQuery = suggestion"
-                class="px-3 py-1 text-sm text-purple-600 bg-purple-50 hover:bg-purple-100 rounded-md transition-colors border border-purple-200/50"
+                @click="searchQuery = suggestion; startSearch()"
+                class="px-2.5 py-1 text-xs sm:text-sm text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-md transition-colors border border-primary-200"
               >
                 {{ suggestion }}
               </button>
@@ -119,24 +116,26 @@
           </div>
         </div>
 
-        <!-- 高级选项（可折叠） -->
-        <div v-if="showAdvancedOptions" class="mb-8">
-          <div class="border border-gray-200 rounded-lg p-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Advanced Options (Collapsible) - Simplified Styling -->
+        <div v-if="showAdvancedOptions" class="mb-6">
+          <!-- Simplified card style for advanced options -->
+          <div class="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">数据源</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">数据源</label>
                 <el-select v-model="selectedSources" multiple placeholder="选择数据源" class="w-full">
                   <el-option label="arXiv" value="arxiv" />
                   <el-option label="Semantic Scholar" value="semantic_scholar" />
+                  <!-- Add more sources if available -->
                 </el-select>
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">论文数量: {{ maxPapers }}</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">论文数量: {{ maxPapers }}</label>
                 <el-slider v-model="maxPapers" :min="5" :max="50" :step="5" />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">选项</label>
-                <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">选项</label>
+                <div class="space-y-2 mt-2">
                   <el-checkbox v-model="retrieveFullText">获取全文</el-checkbox>
                   <el-checkbox v-model="enableAIAnalysis">AI 分析</el-checkbox>
                 </div>
@@ -145,39 +144,43 @@
           </div>
         </div>
 
-        <!-- 高级选项切换 -->
-        <div class="mb-8 text-center">
+        <!-- Toggle Advanced Options Button - Simplified -->
+        <div class="mb-10 text-center">
           <button
             @click="showAdvancedOptions = !showAdvancedOptions"
-            class="text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center mx-auto"
+            class="text-sm text-primary-600 hover:text-primary-700 transition-colors flex items-center justify-center mx-auto px-3 py-1.5 rounded-md hover:bg-primary-50"
           >
             {{ showAdvancedOptions ? '隐藏高级选项' : '显示高级选项' }}
-            <el-icon class="ml-1" :class="{ 'rotate-180': showAdvancedOptions }">
+            <el-icon class="ml-1 transition-transform duration-200" :class="{ 'rotate-180': showAdvancedOptions }">
               <ArrowDown />
             </el-icon>
           </button>
         </div>
       </div>
 
-      <!-- 结果展示区域 -->
-      <div v-if="searchResults.length > 0" class="animate-fade-in">
-        <!-- Gemini AI风格行动计划展示 -->
-        <div v-if="actionPlan && actionPlan.length > 0" class="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border border-purple-200/50 rounded-xl p-4 mb-6 shadow-lg shadow-purple-500/10">
-          <div class="flex items-center mb-3">
-            <div class="w-5 h-5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mr-2">
-              <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
+      <!-- Results Display Area - Apply Gemini Styling -->
+      <div v-if="isSearching || searchResults.length > 0 || (actionPlan && actionPlan.length > 0)" class="animate-fade-in">
+        <!-- Loading State (if isSearching is true and no results yet) -->
+        <div v-if="isSearching && searchResults.length === 0 && (!actionPlan || actionPlan.length === 0)" class="text-center py-10">
+          <el-icon class="text-4xl text-primary-DEFAULT animate-spin mb-4"><Loading /></el-icon>
+          <p class="text-gray-600">正在努力搜索中，请稍候...</p>
+        </div>
+
+        <!-- Action Plan Display - Gemini Style -->
+        <div v-if="actionPlan && actionPlan.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-5 mb-6 shadow-sm">
+          <div class="flex items-center mb-2.5">
+            <div class="w-5 h-5 bg-primary-DEFAULT text-white rounded-full flex items-center justify-center mr-2.5 flex-shrink-0">
+              <el-icon :size="14"><InfoFilled /></el-icon> <!-- Or a more relevant icon -->
             </div>
-            <h3 class="text-sm font-medium bg-gradient-to-r from-purple-700 to-blue-700 bg-clip-text text-transparent">AI生成的行动计划</h3>
+            <h3 class="text-sm font-semibold text-primary-700">AI 生成的行动计划</h3>
           </div>
-          <div class="space-y-2">
+          <div class="space-y-1.5">
             <div
               v-for="(step, index) in actionPlan"
               :key="index"
-              class="flex items-start text-sm text-purple-800"
+              class="flex items-start text-sm text-gray-700"
             >
-              <span class="flex-shrink-0 w-5 h-5 bg-gradient-to-r from-purple-200 to-blue-200 text-purple-800 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">
+              <span class="flex-shrink-0 w-4 h-4 bg-blue-100 text-primary-700 rounded-full flex items-center justify-center text-xs font-medium mr-2.5 mt-0.5">
                 {{ index + 1 }}
               </span>
               <span class="flex-1">{{ step }}</span>
@@ -185,35 +188,42 @@
           </div>
         </div>
 
-        <!-- Gemini AI风格结果头部 -->
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-purple-100">
+        <!-- Search Results Header - Gemini Style -->
+        <div v-if="searchResults.length > 0" class="flex flex-col sm:flex-row items-center justify-between mb-5 pb-3 border-b border-gray-200">
           <div>
-            <h2 class="text-lg font-semibold bg-gradient-to-r from-purple-700 to-blue-700 bg-clip-text text-transparent">搜索结果</h2>
-            <p class="text-sm text-purple-600">找到 {{ searchResults.length }} 篇相关文献</p>
+            <h2 class="text-xl font-semibold text-gray-800">搜索结果</h2>
+            <p class="text-sm text-gray-600">共找到 {{ searchResults.length }} 篇相关文献</p>
           </div>
-          <div class="flex items-center space-x-3">
-            <button
-              @click="generateReport"
-              :disabled="isGeneratingReport"
-              class="px-4 py-2 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all duration-300 shadow-lg shadow-purple-500/25"
-            >
-              {{ isGeneratingReport ? '生成中...' : '生成报告' }}
-            </button>
-            <el-select v-model="sortBy" placeholder="排序" size="small" class="w-24">
-              <el-option label="相关性" value="relevance" />
-              <el-option label="时间" value="date" />
-            </el-select>
-          </div>
+          <button
+            v-if="searchResults.length > 0"
+            @click="generateReport"
+            :disabled="isGeneratingReport"
+            class="el-button el-button--primary mt-3 sm:mt-0 w-full sm:w-auto"
+          >
+            <el-icon v-if="isGeneratingReport" class="animate-spin mr-1"><Loading /></el-icon>
+            {{ isGeneratingReport ? '报告生成中...' : '生成文献报告' }}
+          </button>
         </div>
 
-        <!-- 论文列表 - 简洁设计 -->
-        <div class="space-y-6">
-          <div
-            v-for="(paper, index) in searchResults"
-            :key="index"
-          >
-            <PaperCard :paper="paper" :index="index + 1" @select="togglePaperSelection" />
-          </div>
+        <!-- Results List (Assuming PaperCard is used here) -->
+        <div v-if="searchResults.length > 0" class="space-y-4">
+          <PaperCard
+            v-for="paper in searchResults"
+            :key="paper.id"
+            :paper="paper"
+            @toggle-favorite="toggleFavorite"
+            @view-details="viewDetailsModal"
+            @download-pdf="downloadPdf"
+           />
+        </div>
+
+        <!-- No Results Message (if search is complete and no results) -->
+        <div v-if="!isSearching && searchResults.length === 0 && searchQuery" class="text-center py-10 px-4">
+          <el-icon class="text-5xl text-gray-400 mb-4"><Document /></el-icon>
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">未找到相关文献</h3>
+          <p class="text-gray-500 max-w-md mx-auto">
+            尝试调整您的搜索词或扩展搜索范围。如果您认为这是一个错误，请检查您的网络连接或稍后再试。
+          </p>
         </div>
       </div>
 
@@ -315,15 +325,18 @@ import {
   Clock,
   DocumentRemove,
   Loading,
-  TrendCharts,
   Delete,
   Menu,
-  ArrowDown
+  ArrowDown,
+  Search,
+  InfoFilled,
+  Document
 } from '@element-plus/icons-vue'
 import PaperCard from '../components/PaperCard.vue'
 
 // 定义Paper接口
 interface Paper {
+  id: string;
   title: string
   authors: string[]
   publishedDate: string
@@ -334,6 +347,7 @@ interface Paper {
   pdfUrl?: string
   fullTextRetrieved?: boolean
   citations?: number
+  isFavorite?: boolean
 }
 
 // 定义搜索历史项接口
@@ -366,15 +380,13 @@ const isGeneratingReport = ref(false)
 const hasSearched = ref(false)
 const searchResults = ref<Paper[]>([])
 const searchProgress = ref('')
-const actionPlan = ref<string[]>([])  // 新增行动计划数据
+const actionPlan = ref<string[]>([])
 
 // UI 状态
 const showSettings = ref(false)
 const showHelp = ref(false)
 const showHistory = ref(false)
-const showFilters = ref(false)
 const showMobileMenu = ref(false)
-const isDarkMode = ref(false)
 const showAdvancedOptions = ref(false)
 
 // 筛选和排序
@@ -398,73 +410,7 @@ const naturalLanguageSuggestions = ref([
   '最近三年人工智能在医疗诊断领域的应用进展',
   '寻找关于深度学习优化算法的最新研究，重点关注transformer架构',
   '查找2020年以来量子计算在密码学中的应用研究',
-  '我想了解机器学习在自动驾驶技术中的最新突破',
-  '近期区块链技术在金融科技领域的创新应用有哪些',
-  '自然语言处理在多语言翻译方面的最新进展'
 ])
-
-// 年份快捷选项
-const yearShortcuts = [
-  {
-    text: '最近一年',
-    value: () => [new Date(new Date().getFullYear() - 1, 0, 1), new Date()]
-  },
-  {
-    text: '最近三年',
-    value: () => [new Date(new Date().getFullYear() - 3, 0, 1), new Date()]
-  },
-  {
-    text: '最近五年',
-    value: () => [new Date(new Date().getFullYear() - 5, 0, 1), new Date()]
-  }
-]
-
-// 计算属性
-const fullTextCount = computed(() =>
-  searchResults.value.filter(paper => paper.fullTextRetrieved).length
-)
-
-const totalKeywords = computed(() =>
-  searchResults.value.reduce((total, paper) => total + (paper.keywords?.length || 0), 0)
-)
-
-const uniqueSources = computed(() =>
-  new Set(searchResults.value.map(paper => paper.source)).size
-)
-
-const filteredResults = computed(() => {
-  let results = [...searchResults.value]
-
-  // 应用筛选
-  if (filterAuthor.value) {
-    results = results.filter(paper =>
-      paper.authors.some((author: string) =>
-        author.toLowerCase().includes(filterAuthor.value.toLowerCase())
-      )
-    )
-  }
-
-  if (filterKeyword.value) {
-    results = results.filter(paper =>
-      paper.keywords?.some((keyword: string) =>
-        keyword.toLowerCase().includes(filterKeyword.value.toLowerCase())
-      ) || paper.title.toLowerCase().includes(filterKeyword.value.toLowerCase())
-    )
-  }
-
-  if (filterSource.value) {
-    results = results.filter(paper => paper.source === filterSource.value)
-  }
-
-  // 应用排序
-  if (sortBy.value === 'date') {
-    results.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime())
-  } else if (sortBy.value === 'citations') {
-    results.sort((a, b) => (b.citations || 0) - (a.citations || 0))
-  }
-
-  return results
-})
 
 // 方法
 const startSearch = async () => {
@@ -472,53 +418,48 @@ const startSearch = async () => {
     ElMessage.warning('请输入搜索关键词')
     return
   }
-
   isSearching.value = true
   hasSearched.value = true
+  searchResults.value = []
+  actionPlan.value = []
   searchProgress.value = '正在连接服务器...'
 
   try {
-    const requestData = {
-      rawQuery: searchQuery.value,  // Use natural language query
-      sources: selectedSources.value,
-      maxPapers: maxPapers.value,
-      yearStart: yearRange.value?.[0]?.getFullYear(),
-      yearEnd: yearRange.value?.[1]?.getFullYear(),
-      retrieveFullText: retrieveFullText.value,
-      enableAIAnalysis: enableAIAnalysis.value
-    }
+    // Simulating API call with dummy data for now
+    console.log(`Simulating search for: ${searchQuery.value}, Sources: ${selectedSources.value.join(', ')}, Max Papers: ${maxPapers.value}`);
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    searchProgress.value = '正在检索文献...'
+    actionPlan.value = [
+        '解析用户查询意图',
+        '构建关键词组合: [\"AI\", \"医疗诊断\", \"最新进展\"]',
+        '并行查询 arXiv, Semantic Scholar 数据库',
+        '初步筛选到 87 篇相关文献',
+        '根据摘要和关键词进行相关性排序',
+        '提取关键信息并生成摘要洞察'
+    ];
 
-    const response = await fetch('http://localhost:8000/api/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestData)
-    })
+    searchResults.value = [
+        { id: '1', title: 'AI在肿瘤早期诊断中的应用进展回顾', authors: ['张三', '李四'], publishedDate: '2023-10-15', source: 'arXiv', summary: '本文综述了人工智能技术，特别是深度学习，在多种癌症早期诊断中的最新应用和挑战...', keywords: ['AI', '癌症诊断', '深度学习'], url: '#', pdfUrl: '#', relevance_score: 0.95, isFavorite: false },
+        { id: '2', title: '基于Transformer的医疗影像智能分析平台', authors: ['王五'], publishedDate: '2024-01-20', source: 'Semantic Scholar', summary: '提出了一种基于Transformer架构的医疗影像分析平台，能够有效提升多种疾病的诊断准确率...', keywords: ['Transformer', '医疗影像', '智能诊断'], url: '#', pdfUrl: '#', relevance_score: 0.92, isFavorite: true },
+        { id: '3', title: '可解释AI在临床决策支持系统中的研究', authors: ['赵六', '孙七'], publishedDate: '2023-05-01', source: 'PubMed Central', summary: '探讨了可解释人工智能（XAI）在构建临床决策支持系统（CDSS）中的重要性及其实现方法...', keywords: ['XAI', '临床决策', '可解释性'], url: '#', pdfUrl: '#', relevance_score: 0.88, isFavorite: false }
+    ];
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const data = await response.json()
-    searchResults.value = data.papers || []
-    actionPlan.value = data.actionPlan || []  // 获取行动计划
-
-    // 保存到搜索历史
     const historyItem: SearchHistoryItem = {
       query: searchQuery.value,
       date: new Date().toLocaleDateString('zh-CN'),
       resultCount: searchResults.value.length,
-      params: requestData
-    }
-    searchHistory.value.unshift(historyItem)
+      params: {
+          sources: selectedSources.value,
+          maxPapers: maxPapers.value,
+          retrieveFullText: retrieveFullText.value,
+          enableAIAnalysis: enableAIAnalysis.value
+        }
+    };
+    searchHistory.value.unshift(historyItem);
     if (searchHistory.value.length > 10) {
-      searchHistory.value = searchHistory.value.slice(0, 10)
+      searchHistory.value = searchHistory.value.slice(0, 10);
     }
-
-    ElMessage.success(`检索完成！找到 ${searchResults.value.length} 篇相关论文`)
+    ElMessage.success(`检索完成！找到 ${searchResults.value.length} 篇相关文献`);
 
   } catch (error) {
     console.error('Search error:', error)
@@ -531,77 +472,59 @@ const startSearch = async () => {
 
 const generateReport = async () => {
   if (searchResults.value.length === 0) {
-    ElMessage.warning('没有可用的论文数据')
+    ElMessage.warning('没有可用的论文数据生成报告')
     return
   }
-
   isGeneratingReport.value = true
-
-  try {
-    const response = await fetch('http://localhost:8000/api/generate-report', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        papers: searchResults.value,
-        title: `${searchQuery.value} - 文献综述报告`
-      })
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    // 显示报告内容
-    ElMessageBox.alert(data.report, '综述报告', {
-      dangerouslyUseHTMLString: false,
-      customClass: 'report-dialog'
-    })
-
-  } catch (error) {
-    console.error('Report generation error:', error)
-    ElMessage.error('报告生成失败，请稍后重试')
-  } finally {
-    isGeneratingReport.value = false
-  }
-}
-
-const startVoiceInput = () => {
-  ElMessage.info('语音输入功能开发中...')
-}
-
-const exportResults = () => {
-  const dataStr = JSON.stringify(searchResults.value, null, 2)
-  const dataBlob = new Blob([dataStr], { type: 'application/json' })
-  const url = URL.createObjectURL(dataBlob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `literature_search_${new Date().toISOString().split('T')[0]}.json`
-  link.click()
-  URL.revokeObjectURL(url)
-  ElMessage.success('结果已导出')
+  // Simulate report generation
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  const reportContent = searchResults.value.map(p => `Title: ${p.title}\nAuthors: ${p.authors.join(', ')}\n---`).join('\n\n');
+  ElMessageBox.alert(`<pre>${reportContent}</pre>`, '文献综述报告（模拟）', {
+      dangerouslyUseHTMLString: true,
+      confirmButtonText: '关闭',
+      customClass: 'report-dialog' // Ensure this class is defined in styles if used
+  });
+  isGeneratingReport.value = false;
 }
 
 const clearSearch = () => {
   searchQuery.value = ''
   searchResults.value = []
-  actionPlan.value = []  // 清除行动计划
+  actionPlan.value = []
   hasSearched.value = false
 }
 
-const togglePaperSelection = (paper: Paper) => {
-  // 实现论文选择功能
-  ElMessage.info('论文选择功能开发中...')
-}
+// PaperCard event handlers
+const toggleFavorite = (paperId: string) => {
+  const paper = searchResults.value.find(p => p.id === paperId);
+  if (paper) {
+    paper.isFavorite = !paper.isFavorite;
+    ElMessage.success(paper.isFavorite ? '已收藏' : '取消收藏');
+  }
+};
+
+const viewDetailsModal = (paper: Paper) => {
+  ElMessageBox.alert(JSON.stringify(paper, null, 2), `论文详情: ${paper.title}`, {
+      confirmButtonText: '关闭',
+      customClass: 'report-dialog' // Using existing class for wider dialog
+  });
+};
+
+const downloadPdf = (paper: Paper) => {
+  if (paper.pdfUrl && paper.pdfUrl !== '#'){
+    window.open(paper.pdfUrl, '_blank');
+  } else {
+    ElMessage.info('该论文暂无可用PDF链接。');
+  }
+};
 
 const saveSettings = () => {
-  selectedSources.value = [...defaultSources.value]
-  maxPapers.value = defaultMaxPapers.value
+  // This function implies selectedSources and maxPapers might be set from defaultSources,
+  // but they are directly v-modeled in the advanced search.
+  // Assuming this is for a separate settings dialog not fully shown or used yet.
+  // For now, just closes the dialog if showSettings is for a modal.
   showSettings.value = false
-  ElMessage.success('设置已保存')
+  ElMessage.success('设置已保存 (模拟)')
 }
 
 const loadHistoryItem = (item: SearchHistoryItem) => {
@@ -611,7 +534,8 @@ const loadHistoryItem = (item: SearchHistoryItem) => {
   retrieveFullText.value = item.params.retrieveFullText
   enableAIAnalysis.value = item.params.enableAIAnalysis
   showHistory.value = false
-  ElMessage.success('已加载历史搜索')
+  startSearch(); // Optionally trigger search immediately
+  ElMessage.success('已加载并执行历史搜索')
 }
 
 const removeHistoryItem = (index: number) => {
@@ -619,130 +543,67 @@ const removeHistoryItem = (index: number) => {
   ElMessage.success('已删除历史记录')
 }
 
-const handlePageChange = (page: number) => {
-  currentPage.value = page
-}
-
-// 新增方法
 const goToWelcome = () => {
   router.push('/')
 }
 
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value
-  // 这里可以添加主题切换逻辑
-  ElMessage.info(isDarkMode.value ? '已切换到深色模式' : '已切换到浅色模式')
-}
-
-// 生命周期
+// Lifecycle
 onMounted(() => {
-  // 加载保存的设置
-  const savedSettings = localStorage.getItem('literatureReviewSettings')
+  const savedSettings = localStorage.getItem('literatureReviewSettings');
   if (savedSettings) {
-    const settings = JSON.parse(savedSettings)
-    defaultSources.value = settings.defaultSources || ['arxiv', 'semantic_scholar']
-    defaultMaxPapers.value = settings.defaultMaxPapers || 20
-    language.value = settings.language || 'zh'
+    const settings = JSON.parse(savedSettings);
+    defaultSources.value = settings.defaultSources || ['arxiv', 'semantic_scholar'];
+    defaultMaxPapers.value = settings.defaultMaxPapers || 20;
+    language.value = settings.language || 'zh';
   }
-
-  // 加载搜索历史
-  const savedHistory = localStorage.getItem('searchHistory')
+  const savedHistory = localStorage.getItem('searchHistory');
   if (savedHistory) {
-    searchHistory.value = JSON.parse(savedHistory)
+    searchHistory.value = JSON.parse(savedHistory);
   }
-})
+});
 
-// 监听设置变化并保存
-watch([defaultSources, defaultMaxPapers, language], () => {
-  const settings = {
-    defaultSources: defaultSources.value,
-    defaultMaxPapers: defaultMaxPapers.value,
-    language: language.value
-  }
-  localStorage.setItem('literatureReviewSettings', JSON.stringify(settings))
-}, { deep: true })
+watch([defaultSources, defaultMaxPapers, language], (newValues) => {
+  localStorage.setItem('literatureReviewSettings', JSON.stringify({
+    defaultSources: newValues[0],
+    defaultMaxPapers: newValues[1],
+    language: newValues[2]
+  }));
+}, { deep: true });
 
-// 监听搜索历史变化并保存
-watch(searchHistory, () => {
-  localStorage.setItem('searchHistory', JSON.stringify(searchHistory.value))
-}, { deep: true })
+watch(searchHistory, (newHistory) => {
+  localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+}, { deep: true });
 </script>
 
 <style scoped>
-/* 组件特定样式 */
-.transition-transform {
-  transition: transform 0.3s ease;
+/* Styles from previous step for nav-button-gemini and mobile-nav-link-gemini are assumed here */
+.nav-button-gemini {
+  @apply px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-primary-DEFAULT hover:bg-primary-50 transition-colors flex items-center;
 }
 
-.hover\:scale-105:hover {
-  transform: scale(1.05);
+.mobile-nav-link-gemini {
+  @apply block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-DEFAULT hover:bg-primary-50;
 }
 
-.hover\:scale-\[1\.02\]:hover {
-  transform: scale(1.02);
+:deep(.el-textarea__inner) {
+  border-radius: 0.5rem;
+  border: 1px solid theme('colors.gray.300');
 }
 
-/* 报告对话框样式 */
-:deep(.report-dialog) {
-  max-width: 80vw;
-  max-height: 80vh;
+:deep(.el-textarea__inner:focus) {
+  border-color: theme('colors.primary.DEFAULT');
+  box-shadow: 0 0 0 3px theme('colors.primary.light / 50%');
 }
 
-:deep(.report-dialog .el-message-box__content) {
-  max-height: 60vh;
+/* Custom class for wider dialogs if needed, e.g., for report or details */
+:deep(.report-dialog .el-dialog__body) {
+  max-height: 70vh;
   overflow-y: auto;
-  white-space: pre-wrap;
-  font-family: monospace;
+}
+:deep(.report-dialog pre) {
+  white-space: pre-wrap; /* Ensures long lines wrap in the <pre> tag */
+  word-break: break-all;  /* Breaks long words or URLs */
 }
 
-/* 动画优化 */
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* 现代化导航样式 */
-.nav-button {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-  border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(226, 232, 240, 0.5);
-}
-
-.nav-button:hover {
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-}
-
-.mobile-nav-link {
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
-  color: #374151;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  text-align: left;
-  width: 100%;
-  border: none;
-  background: none;
-  font-size: 14px;
-}
-
-.mobile-nav-link:hover {
-  background-color: #f3f4f6;
-}
+/* Add any additional scoped styles if necessary */
 </style>

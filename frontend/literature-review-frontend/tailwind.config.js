@@ -1,36 +1,61 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
+        gemini: {
+          blue: {
+            light: '#89b4f8', // Lighter blue for highlights or secondary elements
+            DEFAULT: '#1a73e8', // Primary Gemini blue
+            dark: '#1665c0', // Darker blue for hover states or deeper elements
+          },
+          gray: {
+            50: '#f8f9fa', // Renaming from 100 to 50 to match common scale
+            100: '#f1f3f4',
+            200: '#e8eaed',
+            300: '#dadce0',
+            400: '#bdc1c6',
+            500: '#80868b',
+            600: '#5f6368',
+            700: '#3c4043',
+            800: '#202124',
+            900: '#111827', // Darkest gray, almost black
+          },
+          background: '#ffffff', // Default background
+          surface: '#ffffff', // Surface color for cards, dialogs
+          onPrimary: '#ffffff', // Text on primary color
+          onSurface: '#202124', // Text on surface color
+        },
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+          light: '#89b4f8',
+          DEFAULT: '#1a73e8',
+          dark: '#1665c0',
+          // Adding shades for primary based on Gemini blue
+          50: '#e8f0fe',
+          100: '#d1e3fc',
+          200: '#a8c7fa',
+          300: '#8ab4f8',
+          400: '#61a0f5',
+          500: '#3b82f6', // Default from existing primary, similar to Gemini blue
+          600: '#1b6ef3',
+          700: '#1a73e8', // DEFAULT Gemini Blue
+          800: '#1665c0',
+          900: '#0d47a1',
         },
         gray: {
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
+          // Replacing old gray with Gemini gray
+          50: '#f8f9fa',
+          100: '#f1f3f4',
+          200: '#e8eaed',
+          300: '#dadce0',
+          400: '#bdc1c6',
+          500: '#80868b',
+          600: '#5f6368',
+          700: '#3c4043',
+          800: '#202124',
           900: '#111827',
-        }
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -59,7 +84,5 @@ export default {
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
-} 
+  plugins: [() => import('@tailwindcss/typography')],
+}
