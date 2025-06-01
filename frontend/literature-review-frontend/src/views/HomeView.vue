@@ -1,67 +1,34 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-    <!-- 现代化导航栏 -->
-    <nav class="bg-white/90 backdrop-blur-xl border-b border-gray-200/50 sticky top-0 z-40 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
+  <div class="min-h-screen bg-white">
+    <!-- 极简导航栏 -->
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="flex justify-between items-center h-14">
           <!-- Logo区域 -->
           <div class="flex items-center space-x-3 cursor-pointer" @click="goToWelcome">
-            <div class="relative">
-              <div class="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <span class="text-white text-xl font-bold">T</span>
-              </div>
-              <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            <div class="w-7 h-7 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-md flex items-center justify-center relative overflow-hidden">
+              <!-- 科技感背景纹理 -->
+              <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-transparent"></div>
+              <div class="absolute top-0 right-0 w-1.5 h-1.5 bg-blue-300/30 rounded-full"></div>
+              <div class="absolute bottom-0.5 left-0.5 w-0.5 h-0.5 bg-blue-200/40 rounded-full"></div>
+              <!-- T字母 -->
+              <span class="text-white text-xs font-bold relative z-10">T</span>
             </div>
-            <div>
-              <h1 class="text-xl font-bold gradient-text hover:scale-105 transition-transform duration-200">Tsearch</h1>
-              <p class="text-xs text-gray-500">AI Literature Discovery</p>
-            </div>
-          </div>
-
-          <!-- 中间导航链接 -->
-          <div class="hidden md:flex items-center space-x-8">
-            <router-link to="/search" class="nav-link">
-              <el-icon class="mr-1"><Search /></el-icon>
-              搜索
-            </router-link>
-            <router-link to="/about" class="nav-link">
-              <el-icon class="mr-1"><Document /></el-icon>
-              关于
-            </router-link>
+            <span class="text-lg font-medium text-gray-900">Tsearch</span>
           </div>
 
           <!-- 右侧操作按钮 -->
-          <div class="flex items-center space-x-3">
-            <!-- 主题切换 -->
-            <el-tooltip content="切换主题">
-              <button @click="toggleTheme" class="nav-button">
-                <el-icon><Sunny v-if="isDarkMode" /><Moon v-else /></el-icon>
-              </button>
-            </el-tooltip>
+          <div class="flex items-center space-x-2">
+            <!-- 历史记录 -->
+            <button @click="showHistory = true" class="nav-button relative">
+              <el-icon><Clock /></el-icon>
+              <span v-if="searchHistory.length > 0" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            </button>
 
             <!-- 系统设置 -->
-            <el-tooltip content="系统设置">
-              <button @click="showSettings = true" class="nav-button">
-                <el-icon><Setting /></el-icon>
-              </button>
-            </el-tooltip>
-
-            <!-- 使用帮助 -->
-            <el-tooltip content="使用帮助">
-              <button @click="showHelp = true" class="nav-button">
-                <el-icon><QuestionFilled /></el-icon>
-              </button>
-            </el-tooltip>
-
-            <!-- 历史记录 -->
-            <el-tooltip content="历史记录">
-              <button @click="showHistory = true" class="nav-button relative">
-                <el-icon><Clock /></el-icon>
-                <span v-if="searchHistory.length > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {{ searchHistory.length > 9 ? '9+' : searchHistory.length }}
-                </span>
-              </button>
-            </el-tooltip>
+            <button @click="showSettings = true" class="nav-button">
+              <el-icon><Setting /></el-icon>
+            </button>
 
             <!-- 移动端菜单 -->
             <button @click="showMobileMenu = !showMobileMenu" class="md:hidden nav-button">
@@ -71,65 +38,61 @@
         </div>
 
         <!-- 移动端菜单 -->
-        <div v-if="showMobileMenu" class="md:hidden border-t border-gray-200 py-4 animate-slide-down">
-          <div class="flex flex-col space-y-3">
-            <router-link to="/search" class="mobile-nav-link" @click="showMobileMenu = false">
-              <el-icon class="mr-2"><Search /></el-icon>
-              搜索文献
-            </router-link>
-            <router-link to="/about" class="mobile-nav-link" @click="showMobileMenu = false">
-              <el-icon class="mr-2"><Document /></el-icon>
-              关于我们
-            </router-link>
+        <div v-if="showMobileMenu" class="md:hidden border-t border-gray-100 py-3">
+          <div class="flex flex-col space-y-2">
+            <button @click="showHistory = true; showMobileMenu = false" class="mobile-nav-link">
+              历史记录
+            </button>
+            <button @click="showSettings = true; showMobileMenu = false" class="mobile-nav-link">
+              设置
+            </button>
           </div>
         </div>
       </div>
     </nav>
 
     <!-- 主要内容区域 -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- 简洁的头部 -->
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">文献搜索</h1>
-        <p class="text-gray-600">使用自然语言描述您的研究需求</p>
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <!-- 极简的头部 -->
+      <div class="text-center mb-12">
+        <h1 class="text-2xl font-semibold text-gray-900 mb-3">文献搜索</h1>
+        <p class="text-gray-600 text-sm">使用自然语言描述您的研究需求</p>
       </div>
 
       <!-- 搜索区域 -->
-      <div class="max-w-4xl mx-auto mb-8">
-        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm">
+      <div class="mb-12">
+        <div class="border border-gray-200 rounded-lg">
           <!-- 搜索输入框 -->
-          <div class="p-6">
-            <div class="relative">
-              <el-input
-                v-model="searchQuery"
-                type="textarea"
-                :rows="4"
-                placeholder="用自然语言描述您的研究需求，例如：我想了解最近三年人工智能在医疗诊断领域的应用进展"
-                class="w-full border-0 resize-none"
-                @keyup.enter.ctrl="startSearch"
-              />
-              <div class="absolute bottom-3 right-3 flex items-center space-x-2">
-                <span class="text-xs text-gray-400">Ctrl + Enter</span>
-                <button
-                  @click="startSearch"
-                  :disabled="!searchQuery.trim() || isSearching"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <el-icon v-if="isSearching" class="animate-spin mr-1"><Loading /></el-icon>
-                  {{ isSearching ? '搜索中...' : '搜索' }}
-                </button>
-              </div>
+          <div class="p-4">
+            <el-input
+              v-model="searchQuery"
+              type="textarea"
+              :rows="3"
+              placeholder="用自然语言描述您的研究需求，例如：我想了解最近三年人工智能在医疗诊断领域的应用进展"
+              class="w-full border-0 resize-none"
+              @keyup.enter.ctrl="startSearch"
+            />
+            <div class="flex items-center justify-between mt-3">
+              <span class="text-xs text-gray-400">Ctrl + Enter 搜索</span>
+              <button
+                @click="startSearch"
+                :disabled="!searchQuery.trim() || isSearching"
+                class="px-4 py-2 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <el-icon v-if="isSearching" class="animate-spin mr-1"><Loading /></el-icon>
+                {{ isSearching ? '搜索中...' : '搜索' }}
+              </button>
             </div>
           </div>
 
           <!-- 快速建议 -->
-          <div class="px-6 pb-4 border-t border-gray-100">
+          <div class="px-4 pb-4 border-t border-gray-100">
             <div class="flex flex-wrap gap-2 mt-3">
               <button
-                v-for="suggestion in naturalLanguageSuggestions.slice(0, 3)"
+                v-for="suggestion in naturalLanguageSuggestions.slice(0, 2)"
                 :key="suggestion"
                 @click="searchQuery = suggestion"
-                class="px-3 py-1 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                class="px-3 py-1 text-xs text-gray-600 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
               >
                 {{ suggestion }}
               </button>
@@ -138,9 +101,9 @@
         </div>
 
         <!-- 高级选项（可折叠） -->
-        <div v-if="showAdvancedOptions" class="max-w-4xl mx-auto mb-6">
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div v-if="showAdvancedOptions" class="mb-8">
+          <div class="border border-gray-200 rounded-lg p-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">数据源</label>
                 <el-select v-model="selectedSources" multiple placeholder="选择数据源" class="w-full">
@@ -164,10 +127,10 @@
         </div>
 
         <!-- 高级选项切换 -->
-        <div class="max-w-4xl mx-auto mb-8 text-center">
+        <div class="mb-8 text-center">
           <button
             @click="showAdvancedOptions = !showAdvancedOptions"
-            class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            class="text-sm text-gray-600 hover:text-gray-900 transition-colors flex items-center mx-auto"
           >
             {{ showAdvancedOptions ? '隐藏高级选项' : '显示高级选项' }}
             <el-icon class="ml-1" :class="{ 'rotate-180': showAdvancedOptions }">
@@ -180,18 +143,18 @@
       <!-- 结果展示区域 -->
       <div v-if="searchResults.length > 0" class="animate-fade-in">
         <!-- 行动计划展示 -->
-        <div v-if="actionPlan && actionPlan.length > 0" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 card-shadow mb-6">
-          <div class="flex items-center mb-4">
-            <el-icon class="text-2xl text-blue-600 mr-3"><TrendCharts /></el-icon>
-            <h3 class="text-xl font-bold text-gray-900">🤖 AI生成的行动计划</h3>
+        <div v-if="actionPlan && actionPlan.length > 0" class="bg-gray-50 rounded-lg p-4 mb-6">
+          <div class="flex items-center mb-3">
+            <el-icon class="text-lg text-gray-600 mr-2"><TrendCharts /></el-icon>
+            <h3 class="text-base font-medium text-gray-900">AI生成的行动计划</h3>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="space-y-2">
             <div
               v-for="(step, index) in actionPlan"
               :key="index"
-              class="flex items-start p-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+              class="flex items-start p-2 bg-white rounded border border-gray-100"
             >
-              <div class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-semibold mr-3">
+              <div class="flex-shrink-0 w-6 h-6 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">
                 {{ index + 1 }}
               </div>
               <div class="flex-1 text-sm text-gray-700">
@@ -199,25 +162,25 @@
               </div>
             </div>
           </div>
-          <div class="mt-4 text-xs text-gray-500 text-center">
-            💡 此计划由AI根据您的查询自动生成，展示了文献检索和分析的主要步骤
+          <div class="mt-3 text-xs text-gray-500">
+            此计划由AI根据您的查询自动生成
           </div>
         </div>
 
         <!-- 简洁的结果头部 -->
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-semibold text-gray-900">
+          <h2 class="text-lg font-medium text-gray-900">
             找到 {{ searchResults.length }} 篇相关文献
           </h2>
           <div class="flex items-center space-x-3">
             <button
               @click="generateReport"
               :disabled="isGeneratingReport"
-              class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+              class="px-3 py-1.5 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
             >
               {{ isGeneratingReport ? '生成中...' : '生成报告' }}
             </button>
-            <el-select v-model="sortBy" placeholder="排序" size="small" class="w-24">
+            <el-select v-model="sortBy" placeholder="排序" size="small" class="w-20">
               <el-option label="相关性" value="relevance" />
               <el-option label="时间" value="date" />
             </el-select>
@@ -330,22 +293,13 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Search,
-  Document,
   Setting,
-  QuestionFilled,
   Clock,
-  DataAnalysis,
   DocumentRemove,
   Loading,
   TrendCharts,
-  Microphone,
-  Download,
-  Filter,
   Delete,
   Menu,
-  Sunny,
-  Moon,
   ArrowDown
 } from '@element-plus/icons-vue'
 import PaperCard from '../components/PaperCard.vue'
@@ -734,19 +688,37 @@ watch(searchHistory, () => {
 }
 
 /* 导航样式 */
-.nav-link {
-  @apply flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200;
-}
-
-.nav-link.router-link-active {
-  @apply text-blue-600 bg-blue-50;
-}
-
 .nav-button {
-  @apply w-10 h-10 flex items-center justify-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.nav-button:hover {
+  color: #374151;
+  background-color: #f3f4f6;
 }
 
 .mobile-nav-link {
-  @apply flex items-center px-4 py-3 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  color: #374151;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  border: none;
+  background: none;
+  font-size: 14px;
+}
+
+.mobile-nav-link:hover {
+  background-color: #f3f4f6;
 }
 </style>
