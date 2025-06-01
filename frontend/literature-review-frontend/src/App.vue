@@ -191,4 +191,117 @@ body {
 /* Remove background grid pattern if not desired, or use subtle Gemini grays */
 /* .bg-grid-pattern { ... } */
 
+/* Modern UI Components */
+.modern-nav-button {
+  @apply flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white/60 border border-gray-200/50 rounded-lg hover:bg-white/80 hover:text-brand-600 hover:border-brand-300 transition-all duration-200 backdrop-blur-sm;
+}
+
+.mobile-nav-link-modern {
+  @apply flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 hover:bg-white/60 hover:text-brand-600 rounded-lg transition-all duration-200;
+}
+
+.modern-search-button {
+  @apply relative px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold rounded-xl shadow-lg hover:from-brand-600 hover:to-brand-700 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden;
+}
+
+.modern-action-button {
+  @apply relative px-5 py-2.5 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-medium rounded-lg shadow-md hover:from-gray-700 hover:to-gray-800 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden;
+}
+
+.modern-textarea .el-textarea__inner {
+  @apply border-2 border-gray-200 rounded-xl bg-gray-50/50 backdrop-blur-sm focus:border-brand-400 focus:bg-white transition-all duration-200 resize-none font-medium;
+  min-height: 120px !important;
+}
+
+.modern-kbd {
+  @apply px-2 py-1 bg-gray-100 border border-gray-300 rounded-md text-gray-700 font-mono text-xs shadow-sm;
+}
+
+.suggestion-chip {
+  @apply relative px-4 py-2 text-sm font-medium text-brand-700 bg-gradient-to-r from-brand-50 to-purple-50 border border-brand-200/50 rounded-full hover:border-brand-300 hover:shadow-md transition-all duration-200 animate-fade-in-up overflow-hidden;
+}
+
+.advanced-toggle-button {
+  @apply relative inline-flex items-center px-6 py-3 text-sm font-medium text-gray-600 bg-white/60 border border-gray-200/50 rounded-full hover:text-brand-600 hover:border-brand-300 hover:bg-white/80 transition-all duration-200 backdrop-blur-sm overflow-hidden;
+}
+
+.modern-select .el-select__wrapper {
+  @apply border-2 border-gray-200 rounded-lg bg-gray-50/50 backdrop-blur-sm hover:border-gray-300 focus:border-brand-400 transition-all duration-200;
+}
+
+.modern-slider .el-slider__runway {
+  @apply bg-gray-200 rounded-full;
+}
+
+.modern-slider .el-slider__bar {
+  @apply bg-gradient-to-r from-brand-400 to-brand-500 rounded-full;
+}
+
+.modern-slider .el-slider__button {
+  @apply border-2 border-white shadow-lg bg-gradient-to-r from-brand-400 to-brand-500;
+}
+
+.modern-checkbox .el-checkbox__input.is-checked .el-checkbox__inner {
+  @apply bg-gradient-to-r from-brand-400 to-brand-500 border-brand-500;
+}
+
+.modern-checkbox-label {
+  @apply flex items-center cursor-pointer hover:text-brand-600 transition-colors duration-200;
+}
+
+/* Enhanced animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
+  background: linear-gradient(110deg, #f0f0f0 8%, #e0e0e0 18%, #f0f0f0 33%);
+  background-size: 200px 100%;
+}
+
+/* Glass morphism effects */
+.glass-card {
+  backdrop-filter: blur(20px) saturate(180%);
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+/* Gradient text utilities */
+.text-gradient-brand {
+  background: linear-gradient(135deg, #1a73e8 0%, #4285f4 50%, #8ab4f8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .modern-search-button {
+    @apply w-full justify-center;
+  }
+
+  .suggestion-chip {
+    @apply text-xs px-3 py-1.5;
+  }
+}
+
 </style>

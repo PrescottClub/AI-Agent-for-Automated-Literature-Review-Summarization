@@ -4,14 +4,77 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Modern brand colors inspired by Notion/Linear
+        brand: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+          950: '#082f49',
+        },
+        accent: {
+          50: '#fdf4ff',
+          100: '#fae8ff',
+          200: '#f5d0fe',
+          300: '#f0abfc',
+          400: '#e879f9',
+          500: '#d946ef',
+          600: '#c026d3',
+          700: '#a21caf',
+          800: '#86198f',
+          900: '#701a75',
+        },
+        success: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+        },
+        warning: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+        },
+        danger: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+        },
+        // Enhanced Gemini-inspired colors
         gemini: {
           blue: {
-            light: '#89b4f8', // Lighter blue for highlights or secondary elements
-            DEFAULT: '#1a73e8', // Primary Gemini blue
-            dark: '#1665c0', // Darker blue for hover states or deeper elements
+            light: '#89b4f8',
+            DEFAULT: '#1a73e8',
+            dark: '#1665c0',
           },
           gray: {
-            50: '#f8f9fa', // Renaming from 100 to 50 to match common scale
+            50: '#f8f9fa',
             100: '#f1f3f4',
             200: '#e8eaed',
             300: '#dadce0',
@@ -20,31 +83,25 @@ export default {
             600: '#5f6368',
             700: '#3c4043',
             800: '#202124',
-            900: '#111827', // Darkest gray, almost black
+            900: '#111827',
           },
-          background: '#ffffff', // Default background
-          surface: '#ffffff', // Surface color for cards, dialogs
-          onPrimary: '#ffffff', // Text on primary color
-          onSurface: '#202124', // Text on surface color
         },
         primary: {
           light: '#89b4f8',
-          DEFAULT: '#1a73e8',
+          DEFAULT: '#1a73e9',
           dark: '#1665c0',
-          // Adding shades for primary based on Gemini blue
           50: '#e8f0fe',
           100: '#d1e3fc',
           200: '#a8c7fa',
           300: '#8ab4f8',
           400: '#61a0f5',
-          500: '#3b82f6', // Default from existing primary, similar to Gemini blue
+          500: '#3b82f6',
           600: '#1b6ef3',
-          700: '#1a73e8', // DEFAULT Gemini Blue
+          700: '#1a73e8',
           800: '#1665c0',
           900: '#0d47a1',
         },
         gray: {
-          // Replacing old gray with Gemini gray
           50: '#f8f9fa',
           100: '#f1f3f4',
           200: '#e8eaed',
@@ -58,21 +115,75 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'Menlo', 'Monaco', 'monospace'],
+        display: ['Cal Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        xs: ['0.75rem', { lineHeight: '1rem' }],
+        sm: ['0.875rem', { lineHeight: '1.25rem' }],
+        base: ['1rem', { lineHeight: '1.5rem' }],
+        lg: ['1.125rem', { lineHeight: '1.75rem' }],
+        xl: ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+        '5xl': ['3rem', { lineHeight: '1' }],
+        '6xl': ['3.75rem', { lineHeight: '1' }],
+        '7xl': ['4.5rem', { lineHeight: '1' }],
+        '8xl': ['6rem', { lineHeight: '1' }],
+        '9xl': ['8rem', { lineHeight: '1' }],
+      },
+      spacing: {
+        18: '4.5rem',
+        88: '22rem',
+        128: '32rem',
+      },
+      borderRadius: {
+        '4xl': '2rem',
+        '5xl': '2.5rem',
+      },
+      boxShadow: {
+        sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        DEFAULT: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+        md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+        '2xl': '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+        inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+        glow: '0 0 0 1px rgb(255 255 255 / 0.05), 0 1px 0 0 rgb(255 255 255 / 0.05), 0 0 0 1px rgb(0 0 0 / 0.08), 0 2px 2px 0 rgb(0 0 0 / 0.1), 0 4px 4px 0 rgb(0 0 0 / 0.1), 0 8px 8px 0 rgb(0 0 0 / 0.1)',
+        'glow-lg':
+          '0 0 0 1px rgb(255 255 255 / 0.05), 0 1px 0 0 rgb(255 255 255 / 0.05), 0 0 0 1px rgb(0 0 0 / 0.08), 0 4px 4px 0 rgb(0 0 0 / 0.1), 0 8px 8px 0 rgb(0 0 0 / 0.1), 0 16px 16px 0 rgb(0 0 0 / 0.1)',
+        brand: '0 10px 40px -10px rgb(26 115 232 / 0.3)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'fade-in': 'fadeIn 0.5s ease-out',
+        'fade-in-up': 'fadeInUp 0.5s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
+        'slide-down': 'slideDown 0.3s ease-out',
         'bounce-in': 'bounceIn 0.6s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+        shimmer: 'shimmer 2s linear infinite',
+        float: 'float 3s ease-in-out infinite',
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        wiggle: 'wiggle 1s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
         slideUp: {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideDown: {
+          '0%': { transform: 'translateY(-20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         bounceIn: {
@@ -81,8 +192,64 @@ export default {
           '70%': { transform: 'scale(0.9)' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        scaleIn: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        },
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'mesh-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        aurora:
+          'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #667eea 50%, #764ba2 75%, #667eea 100%)',
       },
     },
   },
-  plugins: [() => import('@tailwindcss/typography')],
+  plugins: [
+    import('@tailwindcss/typography'),
+    import('@tailwindcss/forms'),
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.text-gradient': {
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          '-webkit-background-clip': 'text',
+          '-webkit-text-fill-color': 'transparent',
+          'background-clip': 'text',
+        },
+        '.text-brand-gradient': {
+          background: 'linear-gradient(135deg, #1a73e8 0%, #4285f4 100%)',
+          '-webkit-background-clip': 'text',
+          '-webkit-text-fill-color': 'transparent',
+          'background-clip': 'text',
+        },
+        '.glass': {
+          'backdrop-filter': 'blur(16px) saturate(180%)',
+          'background-color': 'rgba(255, 255, 255, 0.75)',
+          border: '1px solid rgba(209, 213, 219, 0.3)',
+        },
+        '.glass-dark': {
+          'backdrop-filter': 'blur(16px) saturate(180%)',
+          'background-color': 'rgba(17, 24, 39, 0.8)',
+          border: '1px solid rgba(75, 85, 99, 0.3)',
+        },
+      }
+      addUtilities(newUtilities)
+    },
+  ],
 }
