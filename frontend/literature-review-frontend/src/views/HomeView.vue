@@ -73,55 +73,45 @@
         <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">使用自然语言描述您的研究需求，AI将为您找到最相关的学术文献</p>
       </div>
 
-      <!-- 现代化搜索区域 -->
+      <!-- 简洁搜索区域 - 参考Linear/Stripe风格 -->
       <div class="mb-16">
-        <div class="relative bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-3xl shadow-xl shadow-slate-200/20 overflow-hidden">
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <!-- 搜索输入框 -->
-          <div class="p-8">
-            <div class="relative">
-              <el-input
-                v-model="searchQuery"
-                type="textarea"
-                :rows="4"
-                placeholder="用自然语言描述您的研究需求，例如：我想了解最近三年人工智能在医疗诊断领域的应用进展"
-                class="w-full border-0 resize-none text-lg"
-                @keyup.enter.ctrl="startSearch"
-              />
-              <!-- 搜索按钮 -->
-              <div class="flex items-center justify-between mt-6">
-                <div class="flex items-center space-x-2 text-sm text-slate-500">
-                  <kbd class="px-2 py-1 bg-slate-100 rounded text-xs">Ctrl</kbd>
-                  <span>+</span>
-                  <kbd class="px-2 py-1 bg-slate-100 rounded text-xs">Enter</kbd>
-                  <span>快速搜索</span>
-                </div>
-                <button
-                  @click="startSearch"
-                  :disabled="!searchQuery.trim() || isSearching"
-                  class="group relative px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 overflow-hidden"
-                >
-                  <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <span class="relative flex items-center">
-                    <el-icon v-if="isSearching" class="animate-spin mr-2"><Loading /></el-icon>
-                    {{ isSearching ? '搜索中...' : '开始搜索' }}
-                    <svg v-if="!isSearching" class="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                  </span>
-                </button>
+          <div class="p-6">
+            <el-input
+              v-model="searchQuery"
+              type="textarea"
+              :rows="4"
+              placeholder="用自然语言描述您的研究需求，例如：我想了解最近三年人工智能在医疗诊断领域的应用进展"
+              class="w-full border-0 resize-none"
+              @keyup.enter.ctrl="startSearch"
+            />
+            <!-- 搜索按钮 -->
+            <div class="flex items-center justify-between mt-4">
+              <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">⌘</kbd>
+                <kbd class="px-2 py-1 bg-gray-100 rounded text-xs font-mono">↵</kbd>
+                <span>搜索</span>
               </div>
+              <button
+                @click="startSearch"
+                :disabled="!searchQuery.trim() || isSearching"
+                class="px-6 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <el-icon v-if="isSearching" class="animate-spin mr-2"><Loading /></el-icon>
+                {{ isSearching ? '搜索中...' : '搜索' }}
+              </button>
             </div>
           </div>
 
           <!-- 快速建议 -->
-          <div class="px-8 pb-6 border-t border-slate-100">
-            <div class="flex flex-wrap gap-3 mt-4">
-              <span class="text-sm text-slate-500 font-medium">快速开始：</span>
+          <div class="px-6 pb-4 border-t border-gray-100">
+            <div class="flex flex-wrap gap-2 mt-3">
               <button
                 v-for="suggestion in naturalLanguageSuggestions.slice(0, 2)"
                 :key="suggestion"
                 @click="searchQuery = suggestion"
-                class="px-4 py-2 text-sm text-slate-600 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors border border-slate-200 hover:border-slate-300"
+                class="px-3 py-1 text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors"
               >
                 {{ suggestion }}
               </button>
@@ -171,57 +161,56 @@
 
       <!-- 结果展示区域 -->
       <div v-if="searchResults.length > 0" class="animate-fade-in">
-        <!-- 行动计划展示 -->
-        <div v-if="actionPlan && actionPlan.length > 0" class="bg-gray-50 rounded-lg p-4 mb-6">
+        <!-- 行动计划展示 - 简洁设计 -->
+        <div v-if="actionPlan && actionPlan.length > 0" class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6">
           <div class="flex items-center mb-3">
-            <el-icon class="text-lg text-gray-600 mr-2"><TrendCharts /></el-icon>
-            <h3 class="text-base font-medium text-gray-900">AI生成的行动计划</h3>
+            <div class="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center mr-2">
+              <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-sm font-medium text-blue-900">AI生成的行动计划</h3>
           </div>
           <div class="space-y-2">
             <div
               v-for="(step, index) in actionPlan"
               :key="index"
-              class="flex items-start p-2 bg-white rounded border border-gray-100"
+              class="flex items-start text-sm text-blue-800"
             >
-              <div class="flex-shrink-0 w-6 h-6 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">
+              <span class="flex-shrink-0 w-5 h-5 bg-blue-200 text-blue-800 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">
                 {{ index + 1 }}
-              </div>
-              <div class="flex-1 text-sm text-gray-700">
-                {{ step }}
-              </div>
+              </span>
+              <span class="flex-1">{{ step }}</span>
             </div>
-          </div>
-          <div class="mt-3 text-xs text-gray-500">
-            此计划由AI根据您的查询自动生成
           </div>
         </div>
 
         <!-- 简洁的结果头部 -->
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-medium text-gray-900">
-            找到 {{ searchResults.length }} 篇相关文献
-          </h2>
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900">搜索结果</h2>
+            <p class="text-sm text-gray-500">找到 {{ searchResults.length }} 篇相关文献</p>
+          </div>
           <div class="flex items-center space-x-3">
             <button
               @click="generateReport"
               :disabled="isGeneratingReport"
-              class="px-3 py-1.5 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {{ isGeneratingReport ? '生成中...' : '生成报告' }}
             </button>
-            <el-select v-model="sortBy" placeholder="排序" size="small" class="w-20">
+            <el-select v-model="sortBy" placeholder="排序" size="small" class="w-24">
               <el-option label="相关性" value="relevance" />
               <el-option label="时间" value="date" />
             </el-select>
           </div>
         </div>
 
-        <!-- 论文列表 -->
-        <div class="space-y-4">
+        <!-- 论文列表 - 简洁设计 -->
+        <div class="space-y-6">
           <div
             v-for="(paper, index) in searchResults"
             :key="index"
-            class="transition-all duration-200"
           >
             <PaperCard :paper="paper" :index="index + 1" @select="togglePaperSelection" />
           </div>
