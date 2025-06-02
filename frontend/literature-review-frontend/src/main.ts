@@ -1,9 +1,13 @@
 import './assets/main.css'
+import './assets/styles/base.css'
+import './assets/styles/animations.css'
+import './assets/styles/utilities.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+import './assets/styles/element-plus.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 import App from './App.vue'

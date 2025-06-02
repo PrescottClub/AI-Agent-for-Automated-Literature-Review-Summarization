@@ -1,42 +1,29 @@
 <template>
-  <div class="min-h-screen overflow-hidden">
-    <!-- Dynamic Background with Mesh Gradient -->
-    <div class="fixed inset-0 z-0">
-      <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"></div>
-      <div class="absolute inset-0 bg-pattern opacity-40"></div>
-      <div class="floating-orbs">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-      </div>
-    </div>
-
+  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
     <!-- Navigation -->
-    <nav class="relative z-50 glass-nav border-b border-white/10">
+    <nav class="sticky top-0 z-50 backdrop-blur-md bg-white/5 border-b border-white/10">
       <div class="max-w-7xl mx-auto px-6">
-        <div class="flex justify-between items-center h-20">
-          <!-- Logo with 3D effect -->
-          <div class="flex items-center space-x-4 cursor-pointer group" @click="goToWelcome">
-            <div class="logo-container">
-              <div class="logo-3d">
-                <span class="text-white text-xl font-black">T</span>
-              </div>
+        <div class="flex justify-between items-center h-16">
+          <!-- Logo -->
+          <div class="flex items-center space-x-3 cursor-pointer group" @click="goToWelcome">
+            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span class="text-white text-lg font-bold">T</span>
             </div>
             <div>
-              <h1 class="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 Tsearch
               </h1>
-              <p class="text-xs text-gray-300 font-medium -mt-1">AI Literature Discovery</p>
+              <p class="text-xs text-gray-400 -mt-1">AI Literature Discovery</p>
             </div>
           </div>
 
           <!-- Navigation items -->
-          <div class="hidden md:flex items-center space-x-8">
-            <button @click="showHistory = true" class="nav-link">
+          <div class="hidden md:flex items-center space-x-6">
+            <button @click="showHistory = true" class="flex items-center text-gray-300 hover:text-white transition-colors">
               <el-icon class="mr-2"><Clock /></el-icon>
               历史
             </button>
-            <button @click="showSettings = true" class="nav-link">
+            <button @click="showSettings = true" class="flex items-center text-gray-300 hover:text-white transition-colors">
               <el-icon class="mr-2"><Setting /></el-icon>
               设置
             </button>
@@ -46,89 +33,88 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="relative z-10 pt-20 pb-32">
+    <div class="relative z-10 pt-12 pb-20">
       <div class="max-w-7xl mx-auto px-6">
-        <!-- Hero Section with 3D Cards -->
-        <div class="text-center mb-20">
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
           <!-- Badge -->
-          <div class="hero-badge">
-            <div class="pulse-dot"></div>
-            <span>Powered by Advanced AI</span>
+          <div class="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/20 rounded-full px-4 py-2 mb-8">
+            <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+            <span class="text-blue-300 text-sm">Powered by Advanced AI</span>
           </div>
 
-          <!-- Main Title with Gradient Animation -->
-          <h1 class="hero-title">
+          <!-- Main Title -->
+          <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
             <span class="block">Discover Academic</span>
-            <span class="hero-highlight">
+            <span class="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Insights
             </span>
-            <span class="block text-5xl md:text-6xl text-gray-300 font-light">
+            <span class="block text-3xl md:text-4xl text-gray-300 font-light mt-2">
               Beyond Imagination
             </span>
           </h1>
 
           <!-- Subtitle -->
-          <p class="hero-subtitle">
+          <p class="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed mb-12">
             Transform your research with AI-powered literature discovery.
-            <br class="hidden md:block" />
             Find, analyze, and synthesize academic papers with unprecedented precision.
           </p>
 
           <!-- Stats Grid -->
-          <div class="stats-grid">
-            <div class="stat-card" data-stat="10M+">
-              <div class="stat-icon">📚</div>
-              <div class="stat-number">10M+</div>
-              <div class="stat-label">Papers Indexed</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto mb-16">
+            <div class="bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 text-center">
+              <div class="text-2xl mb-2">📚</div>
+              <div class="text-2xl font-bold text-white">10M+</div>
+              <div class="text-sm text-gray-400">Papers Indexed</div>
             </div>
-            <div class="stat-card" data-stat="99.2%">
-              <div class="stat-icon">🎯</div>
-              <div class="stat-number">99.2%</div>
-              <div class="stat-label">Accuracy</div>
+            <div class="bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 text-center">
+              <div class="text-2xl mb-2">🎯</div>
+              <div class="text-2xl font-bold text-white">99.2%</div>
+              <div class="text-sm text-gray-400">Accuracy</div>
             </div>
-            <div class="stat-card" data-stat="2.3s">
-              <div class="stat-icon">⚡</div>
-              <div class="stat-number">2.3s</div>
-              <div class="stat-label">Avg Response</div>
+            <div class="bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6 text-center">
+              <div class="text-2xl mb-2">⚡</div>
+              <div class="text-2xl font-bold text-white">2.3s</div>
+              <div class="text-sm text-gray-400">Avg Response</div>
             </div>
           </div>
         </div>
 
         <!-- Search Interface -->
-        <div class="search-container">
-          <div class="search-card">
-            <div class="search-header">
-              <h3 class="text-xl font-bold text-white mb-2">
+        <div class="max-w-4xl mx-auto mb-16">
+          <div class="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-8">
+            <div class="text-center mb-8">
+              <h3 class="text-2xl font-bold text-white mb-2">
                 Describe Your Research
               </h3>
-              <p class="text-gray-300 text-sm">
+              <p class="text-gray-300">
                 Use natural language to express your research needs
               </p>
             </div>
 
-            <div class="search-input-wrapper">
-              <div class="search-gradient-border">
+            <div class="mb-6">
+              <div class="relative">
                 <el-input
                   v-model="searchQuery"
                   type="textarea"
                   :autosize="{ minRows: 4, maxRows: 8 }"
                   placeholder="例如：探索深度学习在医疗影像诊断中的最新突破，特别关注肺部疾病检测的创新方法..."
-                  class="search-textarea"
+                  class="search-input"
                   @keyup.enter.ctrl="startSearch"
                 />
               </div>
             </div>
 
-            <div class="search-actions">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div class="flex items-center space-x-4 text-sm text-gray-400">
                 <div class="flex items-center space-x-2">
-                  <kbd class="kbd">Ctrl</kbd>
+                  <kbd class="px-2 py-1 bg-gray-700 text-gray-300 rounded text-xs">Ctrl</kbd>
                   <span>+</span>
-                  <kbd class="kbd">Enter</kbd>
+                  <kbd class="px-2 py-1 bg-gray-700 text-gray-300 rounded text-xs">Enter</kbd>
                   <span>to search</span>
                 </div>
-                <div class="ai-indicator">
-                  <div class="ai-dot"></div>
+                <div class="flex items-center space-x-2">
+                  <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <span>AI Ready</span>
                 </div>
               </div>
@@ -136,9 +122,9 @@
               <button
                 @click="startSearch"
                 :disabled="!searchQuery.trim() || isSearching"
-                class="search-button"
+                class="relative px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <div class="button-content">
+                <div class="flex items-center">
                   <el-icon v-if="isSearching" class="animate-spin mr-2">
                     <Loading />
                   </el-icon>
@@ -147,20 +133,18 @@
                   </el-icon>
                   <span>{{ isSearching ? 'Searching...' : 'Search Literature' }}</span>
                 </div>
-                <div class="button-glow"></div>
               </button>
             </div>
 
             <!-- Quick Suggestions -->
-            <div v-if="naturalLanguageSuggestions.length > 0" class="suggestions">
-              <p class="suggestions-title">Quick Start</p>
-              <div class="suggestions-grid">
+            <div v-if="naturalLanguageSuggestions.length > 0" class="mt-8">
+              <p class="text-sm text-gray-400 mb-4">Quick Start</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 <button
-                  v-for="(suggestion, index) in naturalLanguageSuggestions.slice(0, 3)"
+                  v-for="suggestion in naturalLanguageSuggestions.slice(0, 3)"
                   :key="suggestion"
                   @click="searchQuery = suggestion; startSearch()"
-                  class="suggestion-pill"
-                  :style="{ animationDelay: `${index * 0.1}s` }"
+                  class="p-3 bg-white/5 border border-white/10 rounded-lg text-left text-sm text-gray-300 hover:bg-white/10 hover:border-white/20 transition-all"
                 >
                   {{ suggestion }}
                 </button>
@@ -169,96 +153,97 @@
           </div>
 
           <!-- Advanced Options -->
-          <div v-if="showAdvancedOptions" class="advanced-panel">
-            <div class="advanced-header">
-              <h4 class="text-lg font-semibold text-white">Advanced Settings</h4>
-              <button @click="showAdvancedOptions = false" class="close-button">
-                <el-icon><Close /></el-icon>
-              </button>
-            </div>
-
-            <div class="advanced-grid">
-              <div class="option-group">
-                <label class="option-label">Data Sources</label>
-                <el-select v-model="selectedSources" multiple class="advanced-select">
-                  <el-option label="arXiv" value="arxiv" />
-                  <el-option label="Semantic Scholar" value="semantic_scholar" />
-                </el-select>
-              </div>
-
-              <div class="option-group">
-                <label class="option-label">Papers: {{ maxPapers }}</label>
-                <el-slider v-model="maxPapers" :min="5" :max="50" :step="5" class="advanced-slider" />
-              </div>
-
-              <div class="option-group">
-                <label class="option-label">Features</label>
-                <div class="checkbox-group">
-                  <label class="checkbox-item">
-                    <el-checkbox v-model="retrieveFullText" />
-                    <span>Full Text</span>
-                  </label>
-                  <label class="checkbox-item">
-                    <el-checkbox v-model="enableAIAnalysis" />
-                    <span>AI Analysis</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="text-center mt-8">
-            <button @click="showAdvancedOptions = !showAdvancedOptions" class="toggle-advanced">
+          <div class="text-center mt-6">
+            <button
+              @click="showAdvancedOptions = !showAdvancedOptions"
+              class="text-gray-400 hover:text-white transition-colors"
+            >
               {{ showAdvancedOptions ? 'Hide' : 'Show' }} Advanced Options
               <el-icon class="ml-2 transition-transform" :class="{ 'rotate-180': showAdvancedOptions }">
                 <ArrowDown />
               </el-icon>
             </button>
           </div>
+
+          <div v-if="showAdvancedOptions" class="mt-6 bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6">
+            <h4 class="text-lg font-semibold text-white mb-6">Advanced Settings</h4>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm text-gray-300 mb-2">Data Sources</label>
+                <el-select v-model="selectedSources" multiple placeholder="Select sources" class="w-full">
+                  <el-option label="arXiv" value="arxiv" />
+                  <el-option label="Semantic Scholar" value="semantic_scholar" />
+                </el-select>
+              </div>
+
+              <div>
+                <label class="block text-sm text-gray-300 mb-2">Papers: {{ maxPapers }}</label>
+                <el-slider v-model="maxPapers" :min="5" :max="50" :step="5" class="mt-2" />
+              </div>
+
+              <div class="md:col-span-2">
+                <div class="flex flex-wrap gap-4">
+                  <label class="flex items-center text-gray-300">
+                    <el-checkbox v-model="retrieveFullText" />
+                    <span class="ml-2">Full Text</span>
+                  </label>
+                  <label class="flex items-center text-gray-300">
+                    <el-checkbox v-model="enableAIAnalysis" />
+                    <span class="ml-2">AI Analysis</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Results Section -->
-        <div v-if="isSearching || searchResults.length > 0 || (actionPlan && actionPlan.length > 0)" class="results-section">
+        <div v-if="isSearching || searchResults.length > 0 || (actionPlan && actionPlan.length > 0)" class="max-w-7xl mx-auto">
           <!-- Loading Animation -->
-          <div v-if="isSearching && searchResults.length === 0" class="loading-animation">
-            <div class="loading-orb">
-              <div class="loading-core"></div>
-              <div class="loading-ring"></div>
-              <div class="loading-particles">
-                <div class="particle" v-for="i in 12" :key="i" :style="{ '--i': i }"></div>
-              </div>
+          <div v-if="isSearching && searchResults.length === 0" class="text-center py-16">
+            <div class="relative inline-block">
+              <div class="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+              <div class="absolute inset-0 w-16 h-16 border-4 border-purple-500/20 border-b-purple-500 rounded-full animate-spin animate-reverse"></div>
             </div>
-            <h3 class="loading-title">AI Processing Your Query</h3>
-            <p class="loading-text">Analyzing requirements and searching literature...</p>
+            <h3 class="text-xl font-semibold text-white mt-6">AI Processing Your Query</h3>
+            <p class="text-gray-400 mt-2">Analyzing requirements and searching literature...</p>
           </div>
 
           <!-- Action Plan -->
-          <div v-if="actionPlan && actionPlan.length > 0" class="action-plan">
-            <div class="plan-header">
-              <div class="plan-icon">🤖</div>
-              <h3>AI Execution Plan</h3>
-            </div>
-            <div class="plan-steps">
-              <div
-                v-for="(step, index) in actionPlan"
-                :key="index"
-                class="plan-step"
-                :style="{ animationDelay: `${index * 0.2}s` }"
-              >
-                <div class="step-number">{{ index + 1 }}</div>
-                <div class="step-text">{{ step }}</div>
+          <div v-if="actionPlan && actionPlan.length > 0" class="mb-12">
+            <div class="bg-white/5 backdrop-blur border border-white/10 rounded-xl p-6">
+              <div class="flex items-center mb-6">
+                <div class="text-2xl mr-3">🤖</div>
+                <h3 class="text-xl font-semibold text-white">AI Execution Plan</h3>
+              </div>
+              <div class="space-y-3">
+                <div
+                  v-for="(step, index) in actionPlan"
+                  :key="index"
+                  class="flex items-start space-x-3"
+                >
+                  <div class="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+                    {{ index + 1 }}
+                  </div>
+                  <p class="text-gray-300">{{ step }}</p>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Results Grid -->
-          <div v-if="searchResults.length > 0" class="results-container">
-            <div class="results-header">
+          <div v-if="searchResults.length > 0" class="space-y-8">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h2 class="results-title">Research Results</h2>
-                <p class="results-count">{{ searchResults.length }} papers found</p>
+                <h2 class="text-2xl font-bold text-white">Research Results</h2>
+                <p class="text-gray-400">{{ searchResults.length }} papers found</p>
               </div>
-              <button @click="generateReport" :disabled="isGeneratingReport" class="generate-report-btn">
+              <button
+                @click="generateReport"
+                :disabled="isGeneratingReport"
+                class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors disabled:opacity-50"
+              >
                 <el-icon v-if="isGeneratingReport" class="animate-spin mr-2">
                   <Loading />
                 </el-icon>
@@ -269,7 +254,7 @@
               </button>
             </div>
 
-            <div class="papers-grid">
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               <PaperCard
                 v-for="(paper, index) in searchResults"
                 :key="paper.id"
@@ -278,7 +263,7 @@
                 @toggle-favorite="toggleFavorite"
                 @view-details="viewDetailsModal"
                 @download-pdf="downloadPdf"
-                class="paper-card-animated"
+                class="animate-fade-in-up"
                 :style="{ animationDelay: `${index * 0.1}s` }"
               />
             </div>
@@ -287,15 +272,47 @@
       </div>
     </div>
 
-    <!-- Dialogs remain the same but styled -->
-    <!-- Settings Dialog -->
-    <el-dialog v-model="showSettings" title="Settings" width="600px" class="custom-dialog">
-      <!-- Settings content -->
+    <!-- Dialogs -->
+    <el-dialog v-model="showSettings" title="Settings" width="600px">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Default Sources</label>
+          <el-select v-model="defaultSources" multiple class="w-full">
+            <el-option label="arXiv" value="arxiv" />
+            <el-option label="Semantic Scholar" value="semantic_scholar" />
+          </el-select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Default Max Papers</label>
+          <el-input-number v-model="defaultMaxPapers" :min="5" :max="50" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Language</label>
+          <el-select v-model="language" class="w-full">
+            <el-option label="中文" value="zh" />
+            <el-option label="English" value="en" />
+          </el-select>
+        </div>
+      </div>
     </el-dialog>
 
-    <!-- History Dialog -->
-    <el-dialog v-model="showHistory" title="Search History" width="600px" class="custom-dialog">
-      <!-- History content -->
+    <el-dialog v-model="showHistory" title="Search History" width="600px">
+      <div v-if="searchHistory.length === 0" class="text-center text-gray-500 py-8">
+        暂无搜索历史
+      </div>
+      <div v-else class="space-y-4">
+        <div
+          v-for="(item, index) in searchHistory"
+          :key="index"
+          class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+          @click="searchQuery = item.query"
+        >
+          <div class="font-medium">{{ item.query }}</div>
+          <div class="text-sm text-gray-500 mt-1">
+            {{ item.date }} - {{ item.resultCount }} results
+          </div>
+        </div>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -307,50 +324,13 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Setting,
   Clock,
-  DocumentRemove,
   Loading,
-  Delete,
-  Menu,
   ArrowDown,
   Search,
-  InfoFilled,
-  Document,
-  Edit,
-  Tools,
-  Close
+  Document
 } from '@element-plus/icons-vue'
 import PaperCard from '../components/PaperCard.vue'
-
-// 定义Paper接口
-interface Paper {
-  id: string;
-  title: string
-  authors: string[]
-  publishedDate: string
-  source: string
-  summary: string
-  keywords?: string[]
-  url?: string
-  pdfUrl?: string
-  fullTextRetrieved?: boolean
-  citations?: number
-  isFavorite?: boolean
-}
-
-// 定义搜索历史项接口
-interface SearchHistoryItem {
-  query: string
-  date: string
-  resultCount: number
-  params: {
-    sources: string[]
-    maxPapers: number
-    retrieveFullText: boolean
-    enableAIAnalysis: boolean
-    yearStart?: number
-    yearEnd?: number
-  }
-}
+import type { Paper, SearchHistoryItem } from '@/types/paper'
 
 // 路由
 const router = useRouter()
@@ -370,9 +350,7 @@ const actionPlan = ref<string[]>([])
 
 // UI 状态
 const showSettings = ref(false)
-const showHelp = ref(false)
 const showHistory = ref(false)
-const showMobileMenu = ref(false)
 const showAdvancedOptions = ref(false)
 
 // 设置
@@ -465,12 +443,7 @@ const generateReport = async () => {
   isGeneratingReport.value = false;
 }
 
-const clearSearch = () => {
-  searchQuery.value = ''
-  searchResults.value = []
-  actionPlan.value = []
-  hasSearched.value = false
-}
+
 
 // PaperCard event handlers
 const toggleFavorite = (paperId: string) => {
@@ -496,30 +469,7 @@ const downloadPdf = (paper: Paper) => {
   }
 };
 
-const saveSettings = () => {
-  // This function implies selectedSources and maxPapers might be set from defaultSources,
-  // but they are directly v-modeled in the advanced search.
-  // Assuming this is for a separate settings dialog not fully shown or used yet.
-  // For now, just closes the dialog if showSettings is for a modal.
-  showSettings.value = false
-  ElMessage.success('设置已保存 (模拟)')
-}
-
-const loadHistoryItem = (item: SearchHistoryItem) => {
-  searchQuery.value = item.query
-  selectedSources.value = item.params.sources
-  maxPapers.value = item.params.maxPapers
-  retrieveFullText.value = item.params.retrieveFullText
-  enableAIAnalysis.value = item.params.enableAIAnalysis
-  showHistory.value = false
-  startSearch(); // Optionally trigger search immediately
-  ElMessage.success('已加载并执行历史搜索')
-}
-
-const removeHistoryItem = (index: number) => {
-  searchHistory.value.splice(index, 1)
-  ElMessage.success('已删除历史记录')
-}
+// 移除未使用的函数，这些功能将在后续的组件拆分中实现
 
 const goToWelcome = () => {
   router.push('/')

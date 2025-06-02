@@ -1,0 +1,46 @@
+/* Element Plus 组件样式定制 */
+
+.el-button--primary {
+  background-color: #1a73e8;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition:
+    background-color 0.2s ease-out,
+    transform 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.el-button--primary:hover {
+  background-color: #1665c0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.07);
+}
+
+.el-button--primary:focus,
+.el-button--primary:active {
+  background-color: #1665c0;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.3);
+}
+
+.el-input__wrapper {
+  border-radius: 8px;
+  border: 1px solid #dadce0;
+  transition:
+    border-color 0.2s ease-out,
+    box-shadow 0.2s ease-out,
+    background-color 0.2s ease-out;
+  background-color: #ffffff;
+}
+
+.el-input__wrapper:hover {
+  border-color: #bdc1c6;
+  background-color: #ffffff;
+}
+
+.el-input__wrapper.is-focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.3);
+  background-color: #ffffff;
+}

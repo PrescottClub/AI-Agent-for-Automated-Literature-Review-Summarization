@@ -1,0 +1,226 @@
+[build-system]
+requires = ["hatchling>=1.21.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tsearch"
+dynamic = ["version"]
+description = "AI智能文献综述与摘要生成系统 - AI Literature Review & Summary Generation System"
+authors = [
+    { name = "Tsearch Team", email = "tsearch@example.com" }
+]
+maintainers = [
+    { name = "Tsearch Team", email = "tsearch@example.com" }
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["ai", "literature", "review", "summary", "nlp", "research"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+dependencies = [
+    # Core AI and LLM dependencies
+    "langchain>=0.1.0",
+    "langchain-openai>=0.1.0",
+    "langchain-community>=0.0.20",
+    "openai>=1.30.0",
+    "chromadb>=0.4.20",
+    
+    # HTTP and async support
+    "httpx[http2]>=0.25.0",
+    "aiohttp>=3.8.0",
+    "aiofiles>=23.0.0",
+    
+    # Data processing and analysis
+    "pandas>=2.0.0",
+    "numpy>=1.24.0,<2.0.0",
+    "requests>=2.31.0",
+    "arxiv>=2.1.0",
+    
+    # Text processing and NLP
+    "spacy>=3.7.0",
+    "nltk>=3.8.0",
+    "sentence-transformers>=2.2.0",
+    
+    # PDF processing
+    "PyPDF2>=3.0.0",
+    "pdfminer.six>=20221105",
+    
+    # Web frameworks
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "streamlit>=1.25.0",
+    "mcp[cli]>=1.9.1",
+    
+    # Caching
+    "redis[hiredis]>=5.0.0",
+    
+    # Configuration and utilities
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=0.1.0",
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "tqdm>=4.66.0",
+    "loguru>=0.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.7.0",
+    "flake8>=6.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.3.0",
+    "types-requests>=2.31.0",
+    "types-redis>=4.6.0",
+]
+
+testing = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-mock>=3.11.0",
+    "httpx>=0.25.0",
+]
+
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "myst-parser>=2.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/tsearch"
+"Bug Reports" = "https://github.com/yourusername/tsearch/issues"
+"Source" = "https://github.com/yourusername/tsearch"
+"Documentation" = "https://tsearch.readthedocs.io/"
+
+[project.scripts]
+tsearch = "lit_review_agent.cli:app"
+tsearch-server = "lit_review_agent.api_server:main"
+tsearch-streamlit = "lit_review_agent.app:main"
+tsearch-mcp = "lit_review_agent.mcp_server:main"
+
+[tool.hatch.version]
+path = "src/lit_review_agent/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lit_review_agent"]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["lit_review_agent"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "arxiv.*",
+    "chromadb.*",
+    "sentence_transformers.*",
+    "spacy.*",
+    "nltk.*",
+    "PyPDF2.*",
+    "pdfminer.*",
+    "streamlit.*",
+    "mcp.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--cov=src/lit_review_agent",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "async_test: marks tests as async tests",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/env/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+] 
