@@ -4,6 +4,7 @@ import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import re
 
 from .ai_core.llm_manager import LLMManager
 from .processing.text_processor import TextProcessor
@@ -18,6 +19,7 @@ from .utils.display import display, print_status, print_error, print_success
 from .ai_core.summarizer import Summarizer
 
 logger = get_logger(__name__)
+
 
 class LiteratureAgent(LoggerMixin):
     """Main agent for automated literature review and summarization."""
@@ -55,7 +57,8 @@ class LiteratureAgent(LoggerMixin):
 
         self.pdf_processor = PDFProcessor()
 
-        self.semantic_scholar_client = SemanticScholarClient(config=self.config)
+        self.semantic_scholar_client = SemanticScholarClient(
+            config=self.config)
 
         self.summarizer = Summarizer(
             llm_manager=self.llm_manager,
@@ -166,14 +169,14 @@ class LiteratureAgent(LoggerMixin):
 
             research_topic = parsed_params.get("topic")
             if not research_topic:
-                print_error("Could not determine the main research topic from the query.")
+                print_error(
+                    "Could not determine the main research topic from the query.")
                 return {"error": "Missing research topic"}
 
             # Handle time constraints if specified
             time_limit = parsed_params.get("time_limit")
             if time_limit and not year_start and not year_end:
                 # Simple time parsing - can be enhanced later
-                from datetime import datetime
                 current_year = datetime.now().year
 
                 if "last year" in time_limit.lower():
@@ -184,14 +187,13 @@ class LiteratureAgent(LoggerMixin):
                     year_end = current_year
                 elif "since" in time_limit.lower():
                     # Try to extract year from "since YYYY"
-                    import re
-                    year_match = re.search(r'since\s+(\d{4})', time_limit.lower())
+                    year_match = re.search(
+                        r'since\s+(\d{4})', time_limit.lower())
                     if year_match:
                         year_start = int(year_match.group(1))
                         year_end = current_year
                 else:
                     # Handle "YYYY to YYYY" format and other patterns
-                    import re
                     if re.search(r'\d{4}\s+to\s+\d{4}', time_limit.lower()):
                         years = re.findall(r'\d{4}', time_limit)
                         if len(years) >= 2:
@@ -203,7 +205,8 @@ class LiteratureAgent(LoggerMixin):
             if focus:
                 # Enhance the research topic with focus keywords
                 research_topic = f"{research_topic} {focus}"
-                print_status(f"Enhanced search query with focus: {research_topic}")
+                print_status(
+                    f"Enhanced search query with focus: {research_topic}")
 
         elif research_topic and not raw_query:
             # Legacy mode - use research_topic directly
@@ -218,7 +221,8 @@ class LiteratureAgent(LoggerMixin):
             f"Max Papers: {max_papers} | Full Text: {'Yes' if retrieve_full_text else 'No'}"
         )
 
-        self.logger.info(f"Starting literature review for topic: '{research_topic}'")
+        self.logger.info(
+            f"Starting literature review for topic: '{research_topic}'")
         self.logger.debug(
             f"Parameters: max_papers={max_papers}, sources={sources}, retrieve_full_text={retrieve_full_text}, "
             f"year_start={year_start}, year_end={year_end}"
@@ -245,64 +249,82 @@ class LiteratureAgent(LoggerMixin):
         for i, step in enumerate(action_plan, 1):
             print(f"  {i}. {step}")
 
-        self.logger.info(f"Generated action plan with {len(action_plan)} steps")
+        self.logger.info(
+            f"Generated action plan with {len(action_plan)} steps")
 
         if sources is None:
             sources = self.config.default_retrieval_sources
             print_status(f"Using default sources: {sources}")
-            self.logger.info(f"No sources specified, using default sources from config: {sources}")
+            self.logger.info(
+                f"No sources specified, using default sources from config: {sources}")
 
         # Ensure sources is a list, even if it's from config as a string
         if isinstance(sources, str):
-            sources = [s.strip().lower() for s in sources.split(',') if s.strip()]
+            sources = [s.strip().lower()
+                       for s in sources.split(',') if s.strip()]
 
         retrieved_items: List[LiteratureItem] = []
         processed_papers = []
 
         active_sources_count = 0
-        if "arxiv" in sources and self.arxiv_client: active_sources_count +=1
-        if "semantic_scholar" in sources and self.semantic_scholar_client: active_sources_count += 1
+        if "arxiv" in sources and self.arxiv_client:
+            active_sources_count += 1
+        if "semantic_scholar" in sources and self.semantic_scholar_client:
+            active_sources_count += 1
         # Add other sources here when they are implemented
 
         papers_per_source = max_papers // active_sources_count if active_sources_count > 0 else max_papers
-        if papers_per_source == 0 and max_papers > 0 : papers_per_source = 1
+        if papers_per_source == 0 and max_papers > 0:
+            papers_per_source = 1
 
-        print_status(f"Active sources: {active_sources_count}, Papers per source: {papers_per_source}")
-        self.logger.debug(f"Active sources: {active_sources_count}, Papers per source: {papers_per_source}")
+        print_status(
+            f"Active sources: {active_sources_count}, Papers per source: {papers_per_source}")
+        self.logger.debug(
+            f"Active sources: {active_sources_count}, Papers per source: {papers_per_source}")
 
         # Create progress bar for retrieval
-        total_steps = len([s for s in sources if s in ["arxiv", "semantic_scholar"]])
+        total_steps = len([s for s in sources if s in [
+                          "arxiv", "semantic_scholar"]])
         if retrieve_full_text:
             total_steps += 1  # Add step for full text processing
         total_steps += 1  # Add step for AI processing
 
-        progress = display.create_progress_bar("Retrieving literature...", total=total_steps)
+        progress = display.create_progress_bar(
+            "Retrieving literature...", total=total_steps)
         progress.start()
 
         try:
             if "arxiv" in sources and self.arxiv_client:
                 try:
                     display.update_progress(description="🔍 Searching arXiv...")
-                    print_status(f"Retrieving up to {papers_per_source} papers from arXiv...")
-                    self.logger.info(f"Retrieving up to {papers_per_source} papers from arXiv for topic: '{research_topic}'")
+                    print_status(
+                        f"Retrieving up to {papers_per_source} papers from arXiv...")
+                    self.logger.info(
+                        f"Retrieving up to {papers_per_source} papers from arXiv for topic: '{research_topic}'")
 
                     arxiv_papers_items = await self.arxiv_client.search(
                         query=research_topic,
                         max_results=papers_per_source
                     )
                     retrieved_items.extend(arxiv_papers_items)
-                    print_success(f"Retrieved {len(arxiv_papers_items)} items from arXiv")
-                    self.logger.info(f"Retrieved {len(arxiv_papers_items)} items from arXiv.")
+                    print_success(
+                        f"Retrieved {len(arxiv_papers_items)} items from arXiv")
+                    self.logger.info(
+                        f"Retrieved {len(arxiv_papers_items)} items from arXiv.")
                     display.update_progress(advance=1)
                 except Exception as e:
                     print_error(f"Error retrieving from arXiv: {e}")
-                    self.logger.error(f"Error retrieving from arXiv: {e}", exc_info=True)
+                    self.logger.error(
+                        f"Error retrieving from arXiv: {e}", exc_info=True)
 
             if "semantic_scholar" in sources and self.semantic_scholar_client:
                 try:
-                    display.update_progress(description="🔍 Searching Semantic Scholar...")
-                    print_status(f"Retrieving up to {papers_per_source} papers from Semantic Scholar...")
-                    self.logger.info(f"Retrieving up to {papers_per_source} papers from Semantic Scholar for topic: '{research_topic}'")
+                    display.update_progress(
+                        description="🔍 Searching Semantic Scholar...")
+                    print_status(
+                        f"Retrieving up to {papers_per_source} papers from Semantic Scholar...")
+                    self.logger.info(
+                        f"Retrieving up to {papers_per_source} papers from Semantic Scholar for topic: '{research_topic}'")
 
                     s2_papers_items = await self.semantic_scholar_client.search(
                         query=research_topic,
@@ -310,17 +332,24 @@ class LiteratureAgent(LoggerMixin):
                         year_start=year_start,
                         year_end=year_end
                     )
-                    retrieved_items.extend(s2_papers_items) # Will deduplicate later
-                    print_success(f"Retrieved {len(s2_papers_items)} items from Semantic Scholar")
-                    self.logger.info(f"Retrieved {len(s2_papers_items)} items from Semantic Scholar (pre-deduplication)." )
+                    # Will deduplicate later
+                    retrieved_items.extend(s2_papers_items)
+                    print_success(
+                        f"Retrieved {len(s2_papers_items)} items from Semantic Scholar")
+                    self.logger.info(
+                        f"Retrieved {len(s2_papers_items)} items from Semantic Scholar (pre-deduplication).")
                     display.update_progress(advance=1)
                 except Exception as e:
                     print_error(f"Error retrieving from Semantic Scholar: {e}")
-                    self.logger.error(f"Error retrieving from Semantic Scholar: {e}", exc_info=True)
+                    self.logger.error(
+                        f"Error retrieving from Semantic Scholar: {e}", exc_info=True)
 
-            display.update_progress(description="🔄 Processing and deduplicating results...")
-            print_status(f"Total items retrieved from all sources: {len(retrieved_items)}")
-            self.logger.info(f"Total items retrieved from all sources before deduplication: {len(retrieved_items)}")
+            display.update_progress(
+                description="🔄 Processing and deduplicating results...")
+            print_status(
+                f"Total items retrieved from all sources: {len(retrieved_items)}")
+            self.logger.info(
+                f"Total items retrieved from all sources before deduplication: {len(retrieved_items)}")
 
             # Deduplication Stage 1: Based on unique identifiers (DOI, ArXiv ID)
             temp_deduped_items_by_id: List[LiteratureItem] = []
@@ -329,102 +358,133 @@ class LiteratureAgent(LoggerMixin):
                 unique_id = None
                 if item.doi:
                     unique_id = item.doi.lower()
-                elif item.arxiv_id: # Ensure arxiv_id from S2 is comparable to arxiv_client's (e.g. no "arxiv:" prefix for s2's internal)
+                # Ensure arxiv_id from S2 is comparable to arxiv_client's (e.g. no "arxiv:" prefix for s2's internal)
+                elif item.arxiv_id:
                     # ArxivClient stores arxiv_id without prefix. S2 Client also stores it without prefix after parsing.
                     unique_id = item.arxiv_id.lower()
                 # If item.id is already prefixed (e.g. "arxiv:xxxx" or "s2:yyyy"), consider using it as part of dedup key
                 # For now, DOI and ArXiv ID are primary for cross-source deduplication.
 
                 if unique_id and unique_id in seen_ids_for_dedup:
-                    self.logger.debug(f"Deduplicating item by ID ({unique_id}): '{item.title}'")
+                    self.logger.debug(
+                        f"Deduplicating item by ID ({unique_id}): '{item.title}'")
                     continue
                 if unique_id:
                     seen_ids_for_dedup.add(unique_id)
                 temp_deduped_items_by_id.append(item)
             retrieved_items = temp_deduped_items_by_id
-            print_status(f"{len(retrieved_items)} items after ID-based deduplication")
-            self.logger.info(f"{len(retrieved_items)} items after ID-based deduplication (DOI/ArXiv ID)." )
+            print_status(
+                f"{len(retrieved_items)} items after ID-based deduplication")
+            self.logger.info(
+                f"{len(retrieved_items)} items after ID-based deduplication (DOI/ArXiv ID).")
 
             # Deduplication Stage 2: Softer deduplication (e.g., normalized title and first author name)
             final_deduped_items: List[LiteratureItem] = []
             seen_title_author_hash = set()
             for item in retrieved_items:
-                norm_title = ''.join(e for e in item.title.lower() if e.isalnum() or e.isspace()).strip()
-                first_author_norm = item.authors[0].lower().strip() if item.authors else "unknown_author"
+                norm_title = ''.join(e for e in item.title.lower(
+                ) if e.isalnum() or e.isspace()).strip()
+                first_author_norm = item.authors[0].lower(
+                ).strip() if item.authors else "unknown_author"
                 # Create a hash or tuple for the pair
                 title_author_key = hash((norm_title, first_author_norm))
 
                 if title_author_key in seen_title_author_hash:
-                    self.logger.debug(f"Deduplicating item by title/author ('{norm_title}' / '{first_author_norm}'): '{item.title}'")
+                    self.logger.debug(
+                        f"Deduplicating item by title/author ('{norm_title}' / '{first_author_norm}'): '{item.title}'")
                     continue
                 seen_title_author_hash.add(title_author_key)
                 final_deduped_items.append(item)
             retrieved_items = final_deduped_items
-            print_success(f"{len(retrieved_items)} unique items after complete deduplication")
-            self.logger.info(f"{len(retrieved_items)} items after title/author soft deduplication.")
+            print_success(
+                f"{len(retrieved_items)} unique items after complete deduplication")
+            self.logger.info(
+                f"{len(retrieved_items)} items after title/author soft deduplication.")
 
             if len(retrieved_items) > max_papers:
-                print_status(f"Limiting {len(retrieved_items)} deduplicated items to {max_papers}")
-                self.logger.info(f"Limiting {len(retrieved_items)} deduplicated items to {max_papers}.")
+                print_status(
+                    f"Limiting {len(retrieved_items)} deduplicated items to {max_papers}")
+                self.logger.info(
+                    f"Limiting {len(retrieved_items)} deduplicated items to {max_papers}.")
                 # TODO: Implement sorting by relevance or date before truncating if needed.
                 # For now, just take the first N. A more sophisticated approach might involve scoring.
                 retrieved_items = retrieved_items[:max_papers]
 
             if retrieve_full_text:
-                display.update_progress(description="📄 Retrieving full text content...")
-                print_status(f"Attempting to retrieve full text for {len(retrieved_items)} items...")
-                self.logger.info(f"Attempting to retrieve full text for {len(retrieved_items)} items...")
+                display.update_progress(
+                    description="📄 Retrieving full text content...")
+                print_status(
+                    f"Attempting to retrieve full text for {len(retrieved_items)} items...")
+                self.logger.info(
+                    f"Attempting to retrieve full text for {len(retrieved_items)} items...")
 
                 success_count = 0
                 for i, item in enumerate(retrieved_items):
-                    display.update_progress(description=f"📄 Processing PDF {i+1}/{len(retrieved_items)}: {item.title[:25]}...")
+                    display.update_progress(
+                        description=f"📄 Processing PDF {i+1}/{len(retrieved_items)}: {item.title[:25]}...")
 
                     if item.pdf_url:
-                        self.logger.debug(f"Processing PDF for: '{item.title}' from {item.pdf_url}")
+                        self.logger.debug(
+                            f"Processing PDF for: '{item.title}' from {item.pdf_url}")
                         try:
                             full_text_content = await self.pdf_processor.extract_text_from_url(item.pdf_url)
                             if full_text_content:
                                 retrieved_items[i].full_text = full_text_content
                                 success_count += 1
-                                self.logger.info(f"Extracted full text for: '{item.title}' ({len(full_text_content)} chars)")
+                                self.logger.info(
+                                    f"Extracted full text for: '{item.title}' ({len(full_text_content)} chars)")
                             else:
-                                self.logger.warning(f"Could not extract full text for: '{item.title}' (empty content from PDF processor). URL: {item.pdf_url}")
+                                self.logger.warning(
+                                    f"Could not extract full text for: '{item.title}' (empty content from PDF processor). URL: {item.pdf_url}")
                         except Exception as pdf_e:
-                            self.logger.error(f"Error processing PDF for '{item.title}' from {item.pdf_url}: {pdf_e}", exc_info=False)
-                    elif not item.full_text: # If full_text wasn't already populated by the retriever (e.g. arXiv summary sometimes is in full_text)
-                         self.logger.debug(f"No PDF URL for item: '{item.title}', skipping full text retrieval.")
+                            self.logger.error(
+                                f"Error processing PDF for '{item.title}' from {item.pdf_url}: {pdf_e}", exc_info=False)
+                    # If full_text wasn't already populated by the retriever (e.g. arXiv summary sometimes is in full_text)
+                    elif not item.full_text:
+                        self.logger.debug(
+                            f"No PDF URL for item: '{item.title}', skipping full text retrieval.")
 
-                print_success(f"Successfully extracted full text for {success_count}/{len(retrieved_items)} papers")
+                print_success(
+                    f"Successfully extracted full text for {success_count}/{len(retrieved_items)} papers")
                 display.update_progress(advance=1)
 
             # AI Processing stage
             display.update_progress(description="🤖 Processing with AI...")
-            print_status(f"Starting AI processing for {len(retrieved_items)} papers...")
+            print_status(
+                f"Starting AI processing for {len(retrieved_items)} papers...")
 
             for i, item in enumerate(retrieved_items):
-                display.update_progress(description=f"🤖 AI processing {i+1}/{len(retrieved_items)}: {item.title[:25]}...")
-                self.logger.debug(f"Final processing stage for item: '{item.title}' (ID: {item.id})")
+                display.update_progress(
+                    description=f"🤖 AI processing {i+1}/{len(retrieved_items)}: {item.title[:25]}...")
+                self.logger.debug(
+                    f"Final processing stage for item: '{item.title}' (ID: {item.id})")
                 text_for_ai = item.full_text if item.full_text else item.abstract
                 if not text_for_ai:
-                    self.logger.warning(f"No text (full or abstract) available for AI processing of '{item.title}'.")
+                    self.logger.warning(
+                        f"No text (full or abstract) available for AI processing of '{item.title}'.")
                     ai_summary = "No text content available for summarization."
                     keywords = []
                 else:
-                    self.logger.debug(f"Using text (len: {len(text_for_ai)}) for AI processing of '{item.title}'. Full text used: {bool(item.full_text)}.")
+                    self.logger.debug(
+                        f"Using text (len: {len(text_for_ai)}) for AI processing of '{item.title}'. Full text used: {bool(item.full_text)}.")
                     try:
-                        keywords = self.text_processor.extract_research_keywords(text_for_ai, max_keywords=10)
+                        keywords = self.text_processor.extract_research_keywords(
+                            text_for_ai, max_keywords=10)
                     except Exception as kw_e:
-                        self.logger.error(f"Error extracting keywords for {item.title}: {kw_e}", exc_info=True)
+                        self.logger.error(
+                            f"Error extracting keywords for {item.title}: {kw_e}", exc_info=True)
                         keywords = []
                     try:
                         summary_type_for_llm = "key_findings" if item.full_text else "abstract_enhancement"
-                        self.logger.debug(f"Requesting '{summary_type_for_llm}' summary for '{item.title}'")
+                        self.logger.debug(
+                            f"Requesting '{summary_type_for_llm}' summary for '{item.title}'")
                         ai_summary = await self.summarizer.summarize_text(
                             text=text_for_ai,
                             summary_type=summary_type_for_llm,
                         )
                     except Exception as summ_e:
-                        self.logger.error(f"Error using Summarizer for {item.title}: {summ_e}", exc_info=True)
+                        self.logger.error(
+                            f"Error using Summarizer for {item.title}: {summ_e}", exc_info=True)
                         ai_summary = "AI summary generation failed."
 
                 processed_papers.append({
@@ -446,7 +506,8 @@ class LiteratureAgent(LoggerMixin):
 
         except Exception as e:
             print_error(f"Error during literature review: {e}")
-            self.logger.error(f"Error during literature review: {e}", exc_info=True)
+            self.logger.error(
+                f"Error during literature review: {e}", exc_info=True)
         finally:
             display.finish_progress()
 
@@ -468,14 +529,16 @@ class LiteratureAgent(LoggerMixin):
             papers_table = display.create_papers_table(processed_papers)
             display.console.print(papers_table)
 
-        print_success(f"Literature review completed! Processed {len(processed_papers)} papers")
-        self.logger.info(f"Literature review completed. Processed {len(processed_papers)} papers.")
+        print_success(
+            f"Literature review completed! Processed {len(processed_papers)} papers")
+        self.logger.info(
+            f"Literature review completed. Processed {len(processed_papers)} papers.")
 
         return results
 
     async def search_similar_papers(self,
-                                  query: str,
-                                  n_results: int = 10) -> List[Dict[str, Any]]:
+                                    query: str,
+                                    n_results: int = 10) -> List[Dict[str, Any]]:
         """
         Search for papers similar to a query using vector similarity.
 
@@ -502,8 +565,8 @@ class LiteratureAgent(LoggerMixin):
             return []
 
     async def generate_custom_summary(self,
-                                    paper_ids: List[str],
-                                    summary_type: str = "executive") -> Optional[str]:
+                                      paper_ids: List[str],
+                                      summary_type: str = "executive") -> Optional[str]:
         """
         Generate a custom summary for specific papers.
 
@@ -515,7 +578,8 @@ class LiteratureAgent(LoggerMixin):
             Generated summary or None if failed
         """
         try:
-            self.logger.info(f"Generating custom summary for {len(paper_ids)} papers")
+            self.logger.info(
+                f"Generating custom summary for {len(paper_ids)} papers")
 
             # Retrieve papers from vector store
             paper_texts = []
@@ -525,7 +589,8 @@ class LiteratureAgent(LoggerMixin):
                     paper_texts.append(paper_data["document"])
 
             if not paper_texts:
-                self.logger.warning("No paper texts found for summary generation")
+                self.logger.warning(
+                    "No paper texts found for summary generation")
                 return None
 
             # Combine texts
@@ -546,9 +611,9 @@ class LiteratureAgent(LoggerMixin):
             return None
 
     async def export_results(self,
-                           results: Dict[str, Any],
-                           output_format: str = "markdown",
-                           output_file: Optional[str] = None) -> bool:
+                             results: Dict[str, Any],
+                             output_format: str = "markdown",
+                             output_file: Optional[str] = None) -> bool:
         """
         Export literature review results to file.
 
@@ -564,8 +629,10 @@ class LiteratureAgent(LoggerMixin):
             # Generate output filename if not provided
             if not output_file:
                 from datetime import timezone
-                timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-                topic_safe = "".join(c for c in results.get("topic", "review") if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                timestamp = datetime.now(
+                    timezone.utc).strftime("%Y%m%d_%H%M%S")
+                topic_safe = "".join(c for c in results.get(
+                    "topic", "review") if c.isalnum() or c in (' ', '-', '_')).rstrip()
                 topic_safe = topic_safe.replace(' ', '_')[:50]
 
                 output_file = f"{self.config.output_dir}/literature_review_{topic_safe}_{timestamp}.{output_format}"
@@ -594,9 +661,9 @@ class LiteratureAgent(LoggerMixin):
             return False
 
     async def generate_full_report(self,
-                                 papers: List[LiteratureItem],
-                                 topic: str,
-                                 output_format: str = "markdown") -> Dict[str, Any]:
+                                   papers: List[LiteratureItem],
+                                   topic: str,
+                                   output_format: str = "markdown") -> Dict[str, Any]:
         """
         Generates a comprehensive literature review report using ReportGenerator.
 
@@ -608,7 +675,8 @@ class LiteratureAgent(LoggerMixin):
         Returns:
             A dictionary containing the report content and metadata.
         """
-        self.logger.info(f"Generating full report for topic '{topic}' in {output_format} format.")
+        self.logger.info(
+            f"Generating full report for topic '{topic}' in {output_format} format.")
 
         try:
             # Import ReportGenerator and TrendAnalyzer here to avoid circular imports
@@ -634,7 +702,8 @@ class LiteratureAgent(LoggerMixin):
                 topic=topic,
                 output_format=output_format
             )
-            self.logger.info(f"Successfully generated full report for topic '{topic}'.")
+            self.logger.info(
+                f"Successfully generated full report for topic '{topic}'.")
             return report_data
         except Exception as e:
             self.logger.error(f"Error generating full report: {e}")
@@ -666,7 +735,8 @@ class LiteratureAgent(LoggerMixin):
         """Generate a markdown report from results."""
         lines = []
 
-        lines.append(f"# Literature Review: {results.get('topic', 'Unknown Topic')}")
+        lines.append(
+            f"# Literature Review: {results.get('topic', 'Unknown Topic')}")
         lines.append(f"\nGenerated on: {results.get('timestamp', 'Unknown')}")
         lines.append("\n---\n")
 
@@ -698,7 +768,8 @@ class LiteratureAgent(LoggerMixin):
 
             if stats.get("date_range"):
                 dr = stats["date_range"]
-                lines.append(f"- Date Range: {dr.get('earliest', 'Unknown')} - {dr.get('latest', 'Unknown')}")
+                lines.append(
+                    f"- Date Range: {dr.get('earliest', 'Unknown')} - {dr.get('latest', 'Unknown')}")
 
             if stats.get("top_categories"):
                 lines.append("\n### Top Categories")
@@ -736,7 +807,8 @@ class LiteratureAgent(LoggerMixin):
         """Generate a plain text report from results."""
         lines = []
 
-        lines.append(f"LITERATURE REVIEW: {results.get('topic', 'Unknown Topic').upper()}")
+        lines.append(
+            f"LITERATURE REVIEW: {results.get('topic', 'Unknown Topic').upper()}")
         lines.append("=" * 80)
         lines.append(f"Generated on: {results.get('timestamp', 'Unknown')}")
         lines.append("")
@@ -773,11 +845,13 @@ class LiteratureAgent(LoggerMixin):
 
             if stats.get("date_range"):
                 dr = stats["date_range"]
-                lines.append(f"Date Range: {dr.get('earliest', 'Unknown')} - {dr.get('latest', 'Unknown')}")
+                lines.append(
+                    f"Date Range: {dr.get('earliest', 'Unknown')} - {dr.get('latest', 'Unknown')}")
 
             lines.append("")
 
         return "\n".join(lines)
+
 
 if __name__ == '__main__':
     import asyncio
@@ -805,14 +879,16 @@ if __name__ == '__main__':
 
         topic = "transformers in natural language processing"
         print_status(f"Starting literature review for: '{topic}'")
-        print_status(f"Using sources: {custom_config.default_retrieval_sources}")
+        print_status(
+            f"Using sources: {custom_config.default_retrieval_sources}")
 
         # The conduct_literature_review method now handles all the display automatically
         review_results = await agent.conduct_literature_review(
             topic,
             max_papers=6,
-            retrieve_full_text=False, # Set to True to test PDF processing too
-            sources=custom_config.default_retrieval_sources, # Test with default sources (arxiv, s2)
+            retrieve_full_text=False,  # Set to True to test PDF processing too
+            # Test with default sources (arxiv, s2)
+            sources=custom_config.default_retrieval_sources,
             year_start=2022,
             year_end=2023
         )
@@ -821,7 +897,8 @@ if __name__ == '__main__':
         if review_results.get("processed_papers"):
             display.print_rule("Detailed Paper Information")
 
-            for i, paper in enumerate(review_results["processed_papers"][:3], 1):  # Show only first 3 in detail
+            # Show only first 3 in detail
+            for i, paper in enumerate(review_results["processed_papers"][:3], 1):
                 display.print_paper_details(paper, i)
 
         # Show completion message
@@ -832,7 +909,8 @@ if __name__ == '__main__':
         asyncio.run(main())
     except RuntimeError as e:
         if "cannot be called from a running event loop" in str(e):
-            print_error("Could not run asyncio.run(main()) directly, possibly due to existing event loop.")
+            print_error(
+                "Could not run asyncio.run(main()) directly, possibly due to existing event loop.")
         else:
             print_error(f"Runtime error: {e}")
             raise e
