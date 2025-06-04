@@ -39,7 +39,7 @@ class PDFProcessor(LoggerMixin):
                 response.raise_for_status()
 
             # Save to temporary file
-            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_file:
                 temp_file.write(response.content)
                 temp_path = temp_file.name
 
@@ -52,8 +52,7 @@ class PDFProcessor(LoggerMixin):
                 Path(temp_path).unlink(missing_ok=True)
 
         except Exception as e:
-            self.logger.error(
-                f"Error extracting text from PDF URL {pdf_url}: {e}")
+            self.logger.error(f"Error extracting text from PDF URL {pdf_url}: {e}")
             return None
 
     async def extract_text_from_file(self, file_path: str) -> Optional[str]:
@@ -76,16 +75,17 @@ class PDFProcessor(LoggerMixin):
                 if text and text.strip():
                     cleaned_text = clean_text(text)
                     self.logger.info(
-                        f"Extracted {len(cleaned_text)} characters using pdfminer")
+                        f"Extracted {len(cleaned_text)} characters using pdfminer"
+                    )
                     return cleaned_text
             except Exception as e:
-                self.logger.warning(
-                    f"pdfminer extraction failed: {e}, trying PyPDF2")
+                self.logger.warning(f"pdfminer extraction failed: {e}, trying PyPDF2")
 
             # Fallback to PyPDF2 - also run in executor for async
             try:
+
                 def _extract_with_pypdf2(file_path):
-                    with open(file_path, 'rb') as file:
+                    with open(file_path, "rb") as file:
                         reader = PdfReader(file)
                         text = ""
 
@@ -105,19 +105,18 @@ class PDFProcessor(LoggerMixin):
                 if text and text.strip():
                     cleaned_text = clean_text(text)
                     self.logger.info(
-                        f"Extracted {len(cleaned_text)} characters using PyPDF2")
+                        f"Extracted {len(cleaned_text)} characters using PyPDF2"
+                    )
                     return cleaned_text
 
             except Exception as e:
                 self.logger.error(f"PyPDF2 extraction failed: {e}")
 
-            self.logger.error(
-                f"All PDF extraction methods failed for: {file_path}")
+            self.logger.error(f"All PDF extraction methods failed for: {file_path}")
             return None
 
         except Exception as e:
-            self.logger.error(
-                f"Error extracting text from PDF file {file_path}: {e}")
+            self.logger.error(f"Error extracting text from PDF file {file_path}: {e}")
             return None
 
     async def extract_text_from_bytes(self, pdf_bytes: bytes) -> Optional[str]:
@@ -132,7 +131,7 @@ class PDFProcessor(LoggerMixin):
         """
         try:
             # Save bytes to temporary file and extract
-            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_file:
                 temp_file.write(pdf_bytes)
                 temp_path = temp_file.name
 
@@ -163,7 +162,7 @@ class PDFProcessor(LoggerMixin):
         # Simple heuristics
         url_lower = url.lower()
         return (
-            url_lower.endswith('.pdf') or
-            'pdf' in url_lower or
-            'arxiv.org/pdf' in url_lower
+            url_lower.endswith(".pdf")
+            or "pdf" in url_lower
+            or "arxiv.org/pdf" in url_lower
         )

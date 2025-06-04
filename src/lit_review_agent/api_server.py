@@ -28,6 +28,7 @@ except ImportError as e:
     LiteratureAgent = None
     Config = None
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理"""
@@ -56,12 +57,13 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             print(f">> 资源清理异常: {e}")
 
+
 # 创建 FastAPI 应用
 app = FastAPI(
     title="AI Literature Review API",
     description="智能文献综述系统 API",
     version="3.1.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # 配置 CORS
@@ -75,6 +77,7 @@ app.add_middleware(
 
 # 简化版本 - 移除复杂中间件
 
+
 # 请求模型
 class SearchRequest(BaseModel):
     query: Optional[str] = None  # Legacy structured query field
@@ -86,9 +89,11 @@ class SearchRequest(BaseModel):
     retrieveFullText: bool = False
     enableAIAnalysis: bool = True
 
+
 class ReportRequest(BaseModel):
     papers: List[Dict]
     title: str
+
 
 # 响应模型
 class Paper(BaseModel):
@@ -102,6 +107,7 @@ class Paper(BaseModel):
     pdfUrl: Optional[str] = None
     fullTextRetrieved: Optional[bool] = False
 
+
 class SearchResult(BaseModel):
     papers: List[Paper]
     totalCount: int
@@ -109,8 +115,10 @@ class SearchResult(BaseModel):
     summary: Optional[str] = None
     actionPlan: Optional[List[str]] = None
 
+
 # 全局变量
 literature_agent = None
+
 
 def get_agent():
     """获取文献代理实例"""
@@ -131,15 +139,15 @@ def get_agent():
     return literature_agent
 
 
-
 @app.get("/")
 async def root():
     """根路径"""
     return {
         "message": "AI Literature Review API",
         "version": "3.1.0",
-        "status": "running"
+        "status": "running",
     }
+
 
 @app.get("/health")
 async def health_check():
@@ -155,16 +163,17 @@ async def health_check():
             "services": {
                 "api": "running",
                 "agent": agent_status,
-                "database": "connected" if agent else "unavailable"
-            }
+                "database": "connected" if agent else "unavailable",
+            },
         }
     except Exception as e:
         return {
             "status": "error",
             "timestamp": datetime.now().isoformat(),
             "error": str(e),
-            "agent_status": "error"
+            "agent_status": "error",
         }
+
 
 @app.get("/api/status")
 async def get_status():
@@ -173,8 +182,9 @@ async def get_status():
     return {
         "status": "healthy" if agent else "demo",
         "timestamp": datetime.now().isoformat(),
-        "agent_initialized": agent is not None
+        "agent_initialized": agent is not None,
     }
+
 
 @app.post("/api/search", response_model=SearchResult)
 async def search_literature(request: SearchRequest):
@@ -187,7 +197,9 @@ async def search_literature(request: SearchRequest):
         # Determine which query to use
         query_to_use = request.rawQuery or request.query
         if not query_to_use:
-            raise HTTPException(status_code=400, detail="Either 'query' or 'rawQuery' must be provided")
+            raise HTTPException(
+                status_code=400, detail="Either 'query' or 'rawQuery' must be provided"
+            )
 
         print(f"开始检索: {query_to_use}")
 
@@ -201,7 +213,7 @@ async def search_literature(request: SearchRequest):
                     sources=request.sources,
                     retrieve_full_text=request.retrieveFullText,
                     year_start=request.yearStart,
-                    year_end=request.yearEnd
+                    year_end=request.yearEnd,
                 )
             else:
                 # Use legacy structured query
@@ -211,7 +223,7 @@ async def search_literature(request: SearchRequest):
                     sources=request.sources,
                     retrieve_full_text=request.retrieveFullText,
                     year_start=request.yearStart,
-                    year_end=request.yearEnd
+                    year_end=request.yearEnd,
                 )
 
             # 转换结果格式
@@ -225,11 +237,13 @@ async def search_literature(request: SearchRequest):
                         authors=paper_data.get("authors", []),
                         publishedDate=paper_data.get("published_date", ""),
                         source=paper_data.get("source", "unknown"),
-                        summary=paper_data.get("ai_enhanced_summary", paper_data.get("summary", "")),
+                        summary=paper_data.get(
+                            "ai_enhanced_summary", paper_data.get("summary", "")
+                        ),
                         keywords=paper_data.get("keywords", []),
                         url=paper_data.get("url", ""),
                         pdfUrl=paper_data.get("pdf_url", ""),
-                        fullTextRetrieved=paper_data.get("full_text_retrieved", False)
+                        fullTextRetrieved=paper_data.get("full_text_retrieved", False),
                     )
                     papers.append(paper)
 
@@ -247,7 +261,7 @@ async def search_literature(request: SearchRequest):
                     summary=f"本文深入研究了人工智能技术在{query_to_use}领域的最新应用。",
                     keywords=["人工智能", "机器学习", query_to_use],
                     url="https://arxiv.org/abs/2401.12345",
-                    fullTextRetrieved=True
+                    fullTextRetrieved=True,
                 ),
                 Paper(
                     title=f"{query_to_use}中的机器学习方法综述",
@@ -257,8 +271,8 @@ async def search_literature(request: SearchRequest):
                     summary=f"本综述分析了{query_to_use}领域中机器学习方法的发展现状。",
                     keywords=["机器学习", "数据分析"],
                     url="https://example.com/paper2",
-                    fullTextRetrieved=False
-                )
+                    fullTextRetrieved=False,
+                ),
             ]
 
             # 生成模拟的行动计划
@@ -269,7 +283,7 @@ async def search_literature(request: SearchRequest):
                 "📊 分析论文元数据：标题、作者、摘要、引用数等",
                 "📈 识别研究趋势：发表时间分布、热点关键词",
                 "🤖 AI智能分析：生成综合性研究洞察",
-                "📝 生成最终报告：整理发现和建议"
+                "📝 生成最终报告：整理发现和建议",
             ]
 
         processing_time = time.time() - start_time
@@ -281,12 +295,13 @@ async def search_literature(request: SearchRequest):
             totalCount=len(papers),
             processingTime=processing_time,
             summary=f"基于'{query_to_use}'的文献检索完成，共找到{len(papers)}篇相关论文。",
-            actionPlan=action_plan
+            actionPlan=action_plan,
         )
 
     except Exception as e:
         print(f"检索失败: {e}")
         raise HTTPException(status_code=500, detail=f"检索失败: {str(e)}")
+
 
 @app.post("/api/generate-report")
 async def generate_report(request: ReportRequest):
@@ -329,13 +344,9 @@ async def generate_report(request: ReportRequest):
         print(f"报告生成失败: {e}")
         raise HTTPException(status_code=500, detail=f"报告生成失败: {str(e)}")
 
+
 if __name__ == "__main__":
     import uvicorn
+
     print("启动 FastAPI 服务器...")
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        reload=False,
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False, log_level="info")

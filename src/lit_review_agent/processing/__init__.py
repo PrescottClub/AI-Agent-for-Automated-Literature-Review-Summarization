@@ -7,7 +7,7 @@ from .vector_store import VectorStore
 
 __all__ = [
     "TextProcessor",
-    "EmbeddingsManager", 
+    "EmbeddingsManager",
     "ChunkingStrategy",
     "VectorStore",
-] 
+]

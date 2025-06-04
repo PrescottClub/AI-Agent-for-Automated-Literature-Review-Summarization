@@ -7,8 +7,8 @@ from .base_retriever import BaseRetriever, LiteratureItem
 
 __all__ = [
     "ArxivClient",
-    "SemanticScholarClient", 
+    "SemanticScholarClient",
     "PDFProcessor",
     "BaseRetriever",
     "LiteratureItem",
-] 
+]

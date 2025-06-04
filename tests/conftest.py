@@ -28,7 +28,7 @@ def mock_config():
         debug=True,
         log_level="DEBUG",
         chroma_persist_directory=tempfile.mkdtemp(),
-        output_dir=tempfile.mkdtemp()
+        output_dir=tempfile.mkdtemp(),
     )
 
 
@@ -50,21 +50,21 @@ def sample_papers() -> List[Dict[str, Any]]:
             "doi": "10.1000/123456",
             "arxiv_id": "2301.12345",
             "url": "https://arxiv.org/abs/2301.12345",
-            "source": "arxiv"
+            "source": "arxiv",
         },
         {
             "title": "Transformer Architecture for Text Generation",
             "authors": [
                 {"name": "Jane Smith", "affiliation": "Stanford"},
-                {"name": "Bob Johnson", "affiliation": "Google"}
+                {"name": "Bob Johnson", "affiliation": "Google"},
             ],
             "abstract": "We propose improvements to transformer architecture.",
             "publication_date": "2023-02-20",
             "doi": "10.1000/654321",
             "semantic_scholar_id": "abc123",
             "url": "https://semanticscholar.org/paper/abc123",
-            "source": "semantic_scholar"
-        }
+            "source": "semantic_scholar",
+        },
     ]
 
 
@@ -77,9 +77,9 @@ def sample_search_response():
             "papers": [],
             "total_found": 0,
             "search_time": 0.5,
-            "query": "test query"
+            "query": "test query",
         },
-        "message": "Search completed successfully"
+        "message": "Search completed successfully",
     }
 
 
@@ -91,15 +91,11 @@ def mock_api_response():
             {
                 "message": {
                     "role": "assistant",
-                    "content": "This is a mock response for testing."
+                    "content": "This is a mock response for testing.",
                 }
             }
         ],
-        "usage": {
-            "prompt_tokens": 10,
-            "completion_tokens": 15,
-            "total_tokens": 25
-        }
+        "usage": {"prompt_tokens": 10, "completion_tokens": 15, "total_tokens": 25},
     }
 
 
@@ -114,15 +110,16 @@ async def async_mock():
 def cleanup_temp_files():
     """Cleanup temporary files after each test."""
     temp_dirs = []
-    
+
     def track_temp_dir(path):
         temp_dirs.append(path)
         return path
-    
+
     yield track_temp_dir
-    
+
     # Cleanup
     import shutil
+
     for temp_dir in temp_dirs:
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir, ignore_errors=True)
@@ -135,7 +132,9 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "integration: mark test as an integration test")
     config.addinivalue_line("markers", "e2e: mark test as an end-to-end test")
     config.addinivalue_line("markers", "slow: mark test as slow running")
-    config.addinivalue_line("markers", "requires_api: mark test as requiring external API")
+    config.addinivalue_line(
+        "markers", "requires_api: mark test as requiring external API"
+    )
 
 
 # Test data constants
@@ -143,4 +142,4 @@ TEST_SEARCH_QUERY = "machine learning natural language processing"
 TEST_MAX_RESULTS = 5
 TEST_PAPER_ID = "test_paper_123"
 TEST_DOI = "10.1000/test.123"
-TEST_ARXIV_ID = "2301.12345" 
+TEST_ARXIV_ID = "2301.12345"

@@ -9,6 +9,7 @@ from loguru import logger
 # Import Rich handler if available
 try:
     from .display import get_rich_handler
+
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
@@ -53,7 +54,7 @@ def setup_logger(
 
         # Configure loguru to forward to standard logging
         logger.add(
-            lambda message: logging_logger.info(message.rstrip('\n')),
+            lambda message: logging_logger.info(message.rstrip("\n")),
             level=log_level,
             format="{message}",
             colorize=False,
@@ -64,9 +65,9 @@ def setup_logger(
             sys.stderr,
             level=log_level,
             format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-                   "<level>{level: <8}</level> | "
-                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
-                   "<level>{message}</level>",
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>",
             colorize=True,
         )
 
@@ -79,9 +80,9 @@ def setup_logger(
             log_path,
             level=log_level,
             format="{time:YYYY-MM-DD HH:mm:ss} | "
-                   "{level: <8} | "
-                   "{name}:{function}:{line} - "
-                   "{message}",
+            "{level: <8} | "
+            "{name}:{function}:{line} - "
+            "{message}",
             rotation=rotation,
             retention=retention,
             compression="zip",
@@ -147,5 +148,4 @@ def log_error_with_context(error: Exception, context: str = "") -> None:
 def log_performance(operation: str, duration: float, **metrics) -> None:
     """Log performance metrics."""
     metric_str = ", ".join(f"{k}={v}" for k, v in metrics.items())
-    logger.info(
-        f"Performance: {operation} took {duration:.2f}s ({metric_str})")
+    logger.info(f"Performance: {operation} took {duration:.2f}s ({metric_str})")

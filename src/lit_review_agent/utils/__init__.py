@@ -11,9 +11,9 @@ from .helpers import (
 
 __all__ = [
     "Config",
-    "setup_logger", 
+    "setup_logger",
     "clean_text",
     "extract_keywords",
     "validate_email",
     "safe_filename",
-] 
+]

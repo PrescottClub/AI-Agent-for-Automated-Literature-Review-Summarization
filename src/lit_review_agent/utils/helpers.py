@@ -25,7 +25,7 @@ def _get_spacy_model(model_name: str = "en_core_web_sm"):
     return _SPACY_MODEL_CACHE[model_name]
 
 
-def _get_stopwords(language: str = 'english'):
+def _get_stopwords(language: str = "english"):
     """Get cached stopwords or load them if not cached."""
     if language not in _STOPWORDS_CACHE:
         try:
@@ -50,16 +50,16 @@ def clean_text(text: str, remove_special_chars: bool = True) -> str:
         return ""
 
     # Normalize unicode characters
-    text = unicodedata.normalize('NFKD', text)
+    text = unicodedata.normalize("NFKD", text)
 
     # Remove extra whitespace and newlines
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
     text = text.strip()
 
     # Remove special characters if requested
     if remove_special_chars:
         # Keep alphanumeric, spaces, and basic punctuation
-        text = re.sub(r'[^\w\s\.\,\;\:\!\?\-\(\)]', '', text)
+        text = re.sub(r"[^\w\s\.\,\;\:\!\?\-\(\)]", "", text)
 
     return text
 
@@ -68,7 +68,7 @@ def extract_keywords(
     text: str,
     max_keywords: int = 10,
     min_length: int = 3,
-    custom_stopwords: Optional[Set[str]] = None
+    custom_stopwords: Optional[Set[str]] = None,
 ) -> List[str]:
     """
     Extract keywords from text using NLP techniques.
@@ -94,7 +94,7 @@ def extract_keywords(
         doc = nlp(text.lower())
 
         # Get cached stopwords
-        stop_words = _get_stopwords('english')
+        stop_words = _get_stopwords("english")
         if custom_stopwords:
             stop_words.update(custom_stopwords)
 
@@ -103,18 +103,22 @@ def extract_keywords(
 
         # Add named entities
         for ent in doc.ents:
-            if (ent.label_ in ['PERSON', 'ORG', 'GPE', 'PRODUCT', 'EVENT'] and
-                len(ent.text) >= min_length and
-                    ent.text.lower() not in stop_words):
+            if (
+                ent.label_ in ["PERSON", "ORG", "GPE", "PRODUCT", "EVENT"]
+                and len(ent.text) >= min_length
+                and ent.text.lower() not in stop_words
+            ):
                 keywords.append(ent.text.lower())
 
         # Add important nouns and adjectives
         for token in doc:
-            if (token.pos_ in ['NOUN', 'PROPN', 'ADJ'] and
-                not token.is_stop and
-                not token.is_punct and
-                len(token.text) >= min_length and
-                    token.text.lower() not in stop_words):
+            if (
+                token.pos_ in ["NOUN", "PROPN", "ADJ"]
+                and not token.is_stop
+                and not token.is_punct
+                and len(token.text) >= min_length
+                and token.text.lower() not in stop_words
+            ):
                 keywords.append(token.lemma_.lower())
 
         # Remove duplicates and limit results
@@ -125,15 +129,16 @@ def extract_keywords(
     except OSError:
         # Fallback to simple tokenization if spaCy model is not available
         tokens = word_tokenize(text.lower())
-        stop_words = _get_stopwords('english')
+        stop_words = _get_stopwords("english")
         if custom_stopwords:
             stop_words.update(custom_stopwords)
 
         keywords = [
-            token for token in tokens
-            if (len(token) >= min_length and
-                token.isalpha() and
-                token not in stop_words)
+            token
+            for token in tokens
+            if (
+                len(token) >= min_length and token.isalpha() and token not in stop_words
+            )
         ]
 
         return list(dict.fromkeys(keywords))[:max_keywords]
@@ -152,7 +157,7 @@ def validate_email(email: str) -> bool:
     if not email:
         return False
 
-    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(email_pattern, email))
 
 
@@ -171,16 +176,16 @@ def safe_filename(filename: str, max_length: int = 200) -> str:
         return "untitled"
 
     # Remove/replace invalid characters
-    safe_chars = re.sub(r'[<>:"/\\|?*]', '_', filename)
+    safe_chars = re.sub(r'[<>:"/\\|?*]', "_", filename)
 
     # Remove control characters
-    safe_chars = re.sub(r'[\x00-\x1f\x7f]', '', safe_chars)
+    safe_chars = re.sub(r"[\x00-\x1f\x7f]", "", safe_chars)
 
     # Collapse multiple underscores
-    safe_chars = re.sub(r'_+', '_', safe_chars)
+    safe_chars = re.sub(r"_+", "_", safe_chars)
 
     # Strip leading/trailing spaces and dots
-    safe_chars = safe_chars.strip(' .')
+    safe_chars = safe_chars.strip(" .")
 
     # Ensure it's not empty
     if not safe_chars:
@@ -188,16 +193,13 @@ def safe_filename(filename: str, max_length: int = 200) -> str:
 
     # Truncate if too long
     if len(safe_chars) > max_length:
-        safe_chars = safe_chars[:max_length].rstrip('_')
+        safe_chars = safe_chars[:max_length].rstrip("_")
 
     return safe_chars
 
 
 def chunk_text(
-    text: str,
-    chunk_size: int = 1000,
-    overlap: int = 200,
-    separator: str = "\n\n"
+    text: str, chunk_size: int = 1000, overlap: int = 200, separator: str = "\n\n"
 ) -> List[str]:
     """
     Split text into overlapping chunks for processing.
@@ -235,14 +237,14 @@ def chunk_text(
             chunk_end = start + sep_pos + len(separator)
         else:
             # Look for sentence endings
-            for punct in ['. ', '! ', '? ']:
+            for punct in [". ", "! ", "? "]:
                 punct_pos = text[start:end].rfind(punct)
                 if punct_pos > chunk_size // 2:
                     chunk_end = start + punct_pos + len(punct)
                     break
             else:
                 # Look for word boundaries
-                space_pos = text[start:end].rfind(' ')
+                space_pos = text[start:end].rfind(" ")
                 if space_pos > chunk_size // 2:
                     chunk_end = start + space_pos + 1
 
@@ -304,13 +306,13 @@ def truncate_text(text: str, max_tokens: int, chars_per_token: float = 4.0) -> s
     truncated = text[:max_chars]
 
     # Find the last sentence ending
-    for punct in ['. ', '! ', '? ']:
+    for punct in [". ", "! ", "? "]:
         last_punct = truncated.rfind(punct)
         if last_punct > max_chars * 0.8:  # Only if we don't lose too much text
-            return truncated[:last_punct + 1].strip()
+            return truncated[: last_punct + 1].strip()
 
     # If no good sentence boundary, truncate at word boundary
-    last_space = truncated.rfind(' ')
+    last_space = truncated.rfind(" ")
     if last_space > max_chars * 0.8:
         return truncated[:last_space].strip()
 

@@ -12,7 +12,7 @@ from src.lit_review_agent.utils.helpers import (
     estimate_tokens,
     chunk_text,
     safe_filename,
-    validate_email
+    validate_email,
 )
 from src.lit_review_agent.exceptions import LiteratureReviewError, ConfigurationError
 
@@ -30,11 +30,7 @@ class TestConfig:
 
     def test_config_with_custom_values(self):
         """Test config with custom values."""
-        config = Config(
-            llm_provider="openai",
-            debug=True,
-            log_level="DEBUG"
-        )
+        config = Config(llm_provider="openai", debug=True, log_level="DEBUG")
         assert config.llm_provider == "openai"
         assert config.debug is True
         assert str(config.log_level) == "DEBUG"
@@ -66,7 +62,7 @@ class TestHelpers:
         assert "world" in clean
         assert "@#$" not in clean
 
-    @patch('src.lit_review_agent.utils.helpers._get_spacy_model')
+    @patch("src.lit_review_agent.utils.helpers._get_spacy_model")
     def test_extract_keywords_fallback(self, mock_spacy):
         """Test keyword extraction fallback when spaCy is not available."""
         mock_spacy.return_value = None
@@ -130,8 +126,7 @@ class TestExceptions:
 
     def test_configuration_error(self):
         """Test configuration specific error."""
-        error = ConfigurationError(
-            "Missing API key", config_key="openai_api_key")
+        error = ConfigurationError("Missing API key", config_key="openai_api_key")
         assert "Missing API key" in str(error)
         assert error.details["config_key"] == "openai_api_key"
 
@@ -166,7 +161,7 @@ class TestProjectStructure:
             directories = [
                 temp_path / "data",
                 temp_path / "logs",
-                temp_path / "outputs"
+                temp_path / "outputs",
             ]
 
             for directory in directories:
@@ -183,6 +178,7 @@ class TestModelLoading:
         """Test that sentence transformer can be loaded."""
         try:
             from sentence_transformers import SentenceTransformer
+
             model = SentenceTransformer("all-MiniLM-L6-v2")
 
             # Test basic encoding
@@ -195,7 +191,7 @@ class TestModelLoading:
         except Exception as e:
             pytest.skip(f"SentenceTransformer not available: {e}")
 
-    @patch('spacy.load')
+    @patch("spacy.load")
     def test_spacy_model_loading(self, mock_spacy_load):
         """Test spaCy model loading (mocked)."""
         mock_nlp = Mock()

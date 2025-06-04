@@ -11,6 +11,7 @@ from datetime import datetime
 try:
     from mcp.server.fastmcp import FastMCP
     from mcp.server.fastmcp.tool_provider import ToolArgument
+
     MCP_AVAILABLE = True
 except ImportError:
     print("Warning: MCP dependencies not available. MCP server will not work.")
@@ -27,6 +28,7 @@ from .utils.config import Config
 agent_config: Optional[Config] = None
 literature_agent: Optional[LiteratureAgent] = None
 
+
 def create_mcp_server():
     """创建MCP服务器实例"""
     if not MCP_AVAILABLE:
@@ -35,7 +37,7 @@ def create_mcp_server():
 
     server = FastMCP(
         name="LiteratureReviewAgent",
-        description="AI-powered literature review and analysis server"
+        description="AI-powered literature review and analysis server",
     )
 
     @server.lifespan()
@@ -63,36 +65,36 @@ def create_mcp_server():
                 name="research_topic",
                 description="The research topic to review",
                 type="string",
-                is_required=True
+                is_required=True,
             ),
             ToolArgument(
                 name="max_papers",
                 description="Maximum number of papers to retrieve (1-100)",
                 type="integer",
                 is_required=False,
-                default_value=20
+                default_value=20,
             ),
             ToolArgument(
                 name="sources",
                 description="Comma-separated list of sources (arxiv,semantic_scholar)",
                 type="string",
-                is_required=False
+                is_required=False,
             ),
             ToolArgument(
                 name="retrieve_full_text",
                 description="Whether to download full PDF texts",
                 type="boolean",
                 is_required=False,
-                default_value=False
-            )
-        ]
+                default_value=False,
+            ),
+        ],
     )
     async def conduct_review(
         research_topic: str = None,
         raw_query: str = None,
         max_papers: int = 20,
         sources: Optional[str] = None,
-        retrieve_full_text: bool = False
+        retrieve_full_text: bool = False,
     ) -> Dict[str, Any]:
         """执行文献综述"""
         if not literature_agent:
@@ -110,7 +112,7 @@ def create_mcp_server():
         # 处理数据源
         source_list = None
         if sources:
-            source_list = [s.strip() for s in sources.split(',')]
+            source_list = [s.strip() for s in sources.split(",")]
 
         try:
             print(f"🔍 Starting literature review for: {query_to_use}")
@@ -120,7 +122,7 @@ def create_mcp_server():
                     raw_query=raw_query,
                     max_papers=max_papers,
                     sources=source_list,
-                    retrieve_full_text=retrieve_full_text
+                    retrieve_full_text=retrieve_full_text,
                 )
             else:
                 # 使用传统结构化查询
@@ -128,14 +130,14 @@ def create_mcp_server():
                     research_topic=research_topic,
                     max_papers=max_papers,
                     sources=source_list,
-                    retrieve_full_text=retrieve_full_text
+                    retrieve_full_text=retrieve_full_text,
                 )
 
             # 确保结果可序列化
-            if 'papers' in results:
-                results['papers'] = [
-                    paper.model_dump() if hasattr(paper, 'model_dump') else paper
-                    for paper in results['papers']
+            if "papers" in results:
+                results["papers"] = [
+                    paper.model_dump() if hasattr(paper, "model_dump") else paper
+                    for paper in results["papers"]
                 ]
 
             print(f"✅ Review completed. Found {len(results.get('papers', []))} papers")
@@ -153,16 +155,16 @@ def create_mcp_server():
                 name="query",
                 description="Search query",
                 type="string",
-                is_required=True
+                is_required=True,
             ),
             ToolArgument(
                 name="n_results",
                 description="Number of results to return (1-50)",
                 type="integer",
                 is_required=False,
-                default_value=10
-            )
-        ]
+                default_value=10,
+            ),
+        ],
     )
     async def search_similar(query: str, n_results: int = 10) -> Dict[str, Any]:
         """搜索相似论文"""
@@ -174,11 +176,7 @@ def create_mcp_server():
 
         try:
             results = await literature_agent.search_similar_papers(query, n_results)
-            return {
-                "query": query,
-                "results": results,
-                "count": len(results)
-            }
+            return {"query": query, "results": results, "count": len(results)}
         except Exception as e:
             return {"error": str(e)}
 
@@ -192,7 +190,7 @@ def create_mcp_server():
         return {
             "paper_id": paper_id,
             "message": "Paper retrieval feature coming soon",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     @server.resource("collections://literature")
@@ -206,15 +204,17 @@ def create_mcp_server():
             return {
                 "collection": "literature",
                 "statistics": stats,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
             raise Exception(f"Failed to get statistics: {e}")
 
     return server
 
+
 # 创建服务器实例
 mcp_server = create_mcp_server() if MCP_AVAILABLE else None
+
 
 async def run_mcp_server():
     """运行MCP服务器"""
@@ -224,6 +224,7 @@ async def run_mcp_server():
 
     print("🚀 Starting MCP Literature Review Server...")
     await mcp_server.run_async()
+
 
 if __name__ == "__main__":
     if MCP_AVAILABLE:

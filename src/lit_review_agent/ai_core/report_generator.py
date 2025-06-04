@@ -15,10 +15,12 @@ from ..utils.logger import LoggerMixin
 class ReportGenerator(LoggerMixin):
     """Generator for comprehensive literature review reports."""
 
-    def __init__(self,
-                 llm_manager: LLMManager,
-                 summarizer: Summarizer,
-                 trend_analyzer: TrendAnalyzer):
+    def __init__(
+        self,
+        llm_manager: LLMManager,
+        summarizer: Summarizer,
+        trend_analyzer: TrendAnalyzer,
+    ):
         """
         Initialize the report generator.
 
@@ -32,10 +34,9 @@ class ReportGenerator(LoggerMixin):
         self.trend_analyzer = trend_analyzer
         self.logger.info("Initialized Report Generator")
 
-    async def generate_comprehensive_report(self,
-                                          papers: List[LiteratureItem],
-                                          topic: str,
-                                          output_format: str = "markdown") -> Dict[str, Any]:
+    async def generate_comprehensive_report(
+        self, papers: List[LiteratureItem], topic: str, output_format: str = "markdown"
+    ) -> Dict[str, Any]:
         """
         Generate a comprehensive literature review report.
 
@@ -51,7 +52,9 @@ class ReportGenerator(LoggerMixin):
             self.logger.warning("No papers provided for report generation")
             return {"error": "No papers to analyze"}
 
-        self.logger.info(f"Generating comprehensive report for {len(papers)} papers on topic: {topic}")
+        self.logger.info(
+            f"Generating comprehensive report for {len(papers)} papers on topic: {topic}"
+        )
 
         # Generate all report sections concurrently
         tasks = [
@@ -59,14 +62,31 @@ class ReportGenerator(LoggerMixin):
             ("literature_overview", self._generate_literature_overview(papers)),
             ("temporal_analysis", self.trend_analyzer.analyze_temporal_trends(papers)),
             ("keyword_analysis", self.trend_analyzer.analyze_keyword_trends(papers)),
-            ("methodology_analysis", self.trend_analyzer.analyze_methodological_trends(papers)),
-            ("collaboration_analysis", self.trend_analyzer.analyze_collaboration_patterns(papers)),
+            (
+                "methodology_analysis",
+                self.trend_analyzer.analyze_methodological_trends(papers),
+            ),
+            (
+                "collaboration_analysis",
+                self.trend_analyzer.analyze_collaboration_patterns(papers),
+            ),
             ("emerging_topics", self.trend_analyzer.identify_emerging_topics(papers)),
-            ("key_findings", self.summarizer.generate_key_findings_summary([p.abstract or p.full_text[:1000] for p in papers if p.abstract or p.full_text]))
+            (
+                "key_findings",
+                self.summarizer.generate_key_findings_summary(
+                    [
+                        p.abstract or p.full_text[:1000]
+                        for p in papers
+                        if p.abstract or p.full_text
+                    ]
+                ),
+            ),
         ]
 
         # Execute tasks concurrently
-        results = await asyncio.gather(*[task[1] for task in tasks], return_exceptions=True)
+        results = await asyncio.gather(
+            *[task[1] for task in tasks], return_exceptions=True
+        )
 
         # Compile results
         report_sections = {}
@@ -78,7 +98,9 @@ class ReportGenerator(LoggerMixin):
                 report_sections[section_name] = results[i]
 
         # Generate the final report
-        report_content = await self._compile_report(report_sections, topic, papers, output_format)
+        report_content = await self._compile_report(
+            report_sections, topic, papers, output_format
+        )
 
         return {
             "content": report_content,
@@ -87,15 +109,14 @@ class ReportGenerator(LoggerMixin):
                 "paper_count": len(papers),
                 "generation_date": datetime.now().isoformat(),
                 "format": output_format,
-                "sections": list(report_sections.keys())
+                "sections": list(report_sections.keys()),
             },
-            "sections": report_sections
+            "sections": report_sections,
         }
 
-    async def generate_section_report(self,
-                                    papers: List[LiteratureItem],
-                                    section_type: str,
-                                    topic: str) -> Optional[str]:
+    async def generate_section_report(
+        self, papers: List[LiteratureItem], section_type: str, topic: str
+    ) -> Optional[str]:
         """
         Generate a specific section of the report.
 
@@ -108,12 +129,18 @@ class ReportGenerator(LoggerMixin):
             Generated section content
         """
         section_generators = {
-            "executive_summary": lambda: self._generate_executive_summary(papers, topic),
+            "executive_summary": lambda: self._generate_executive_summary(
+                papers, topic
+            ),
             "literature_overview": lambda: self._generate_literature_overview(papers),
-            "methodology_summary": lambda: self.summarizer.generate_methodology_summary([p.abstract or "" for p in papers]),
-            "key_findings": lambda: self.summarizer.generate_key_findings_summary([p.abstract or "" for p in papers]),
+            "methodology_summary": lambda: self.summarizer.generate_methodology_summary(
+                [p.abstract or "" for p in papers]
+            ),
+            "key_findings": lambda: self.summarizer.generate_key_findings_summary(
+                [p.abstract or "" for p in papers]
+            ),
             "trend_analysis": lambda: self._generate_trend_summary(papers),
-            "recommendations": lambda: self._generate_recommendations(papers, topic)
+            "recommendations": lambda: self._generate_recommendations(papers, topic),
         }
 
         if section_type not in section_generators:
@@ -126,9 +153,9 @@ class ReportGenerator(LoggerMixin):
             self.logger.error(f"Error generating {section_type}: {e}")
             return None
 
-    async def generate_citation_report(self,
-                                     papers: List[LiteratureItem],
-                                     citation_style: str = "apa") -> str:
+    async def generate_citation_report(
+        self, papers: List[LiteratureItem], citation_style: str = "apa"
+    ) -> str:
         """
         Generate a formatted citation list.
 
@@ -148,16 +175,18 @@ class ReportGenerator(LoggerMixin):
         citation_header = f"# References ({citation_style.upper()} Style)\n\n"
         return citation_header + "\n".join(citations)
 
-    async def _generate_executive_summary(self,
-                                        papers: List[LiteratureItem],
-                                        topic: str) -> Optional[str]:
+    async def _generate_executive_summary(
+        self, papers: List[LiteratureItem], topic: str
+    ) -> Optional[str]:
         """Generate executive summary section."""
         # Combine abstracts for analysis
         abstracts = [paper.abstract for paper in papers if paper.abstract]
         if not abstracts:
             return "No abstracts available for executive summary generation."
 
-        combined_abstracts = "\n\n---\n\n".join(abstracts[:10])  # Limit for token constraints
+        combined_abstracts = "\n\n---\n\n".join(
+            abstracts[:10]
+        )  # Limit for token constraints
 
         system_prompt = (
             "You are an expert research analyst creating an executive summary "
@@ -172,13 +201,12 @@ class ReportGenerator(LoggerMixin):
         )
 
         return await self.llm_manager.generate_completion(
-            prompt=user_prompt,
-            system_prompt=system_prompt,
-            temperature=0.4
+            prompt=user_prompt, system_prompt=system_prompt, temperature=0.4
         )
 
-    async def _generate_literature_overview(self,
-                                          papers: List[LiteratureItem]) -> Optional[str]:
+    async def _generate_literature_overview(
+        self, papers: List[LiteratureItem]
+    ) -> Optional[str]:
         """Generate literature overview section."""
         # Prepare paper statistics
         total_papers = len(papers)
@@ -202,12 +230,13 @@ class ReportGenerator(LoggerMixin):
         # Create overview text
         overview_parts = [
             f"This literature review encompasses {total_papers} research papers published between {year_range}.",
-            f"The analysis includes work from {unique_authors} unique authors across various venues and journals."
+            f"The analysis includes work from {unique_authors} unique authors across various venues and journals.",
         ]
 
         if top_venues:
-            venue_text = "The most prominent publication venues include: " + \
-                        ", ".join([f"{venue} ({count} papers)" for venue, count in top_venues[:3]])
+            venue_text = "The most prominent publication venues include: " + ", ".join(
+                [f"{venue} ({count} papers)" for venue, count in top_venues[:3]]
+            )
             overview_parts.append(venue_text)
 
         # Add paper abstracts for AI analysis
@@ -227,9 +256,7 @@ class ReportGenerator(LoggerMixin):
             )
 
             ai_overview = await self.llm_manager.generate_completion(
-                prompt=user_prompt,
-                system_prompt=system_prompt,
-                temperature=0.3
+                prompt=user_prompt, system_prompt=system_prompt, temperature=0.3
             )
 
             if ai_overview:
@@ -237,7 +264,9 @@ class ReportGenerator(LoggerMixin):
 
         return "\n\n".join(overview_parts)
 
-    async def _generate_trend_summary(self, papers: List[LiteratureItem]) -> Optional[str]:
+    async def _generate_trend_summary(
+        self, papers: List[LiteratureItem]
+    ) -> Optional[str]:
         """Generate trend analysis summary."""
         temporal_trends = await self.trend_analyzer.analyze_temporal_trends(papers)
         keyword_trends = await self.trend_analyzer.analyze_keyword_trends(papers)
@@ -246,31 +275,40 @@ class ReportGenerator(LoggerMixin):
         trend_parts = []
 
         # Temporal trends
-        if temporal_trends.get('publication_growth'):
-            growth_data = temporal_trends['publication_growth']
-            growth_rate = growth_data.get('average_growth_rate', 0)
-            trend_parts.append(f"Publication activity shows an average growth rate of {growth_rate:.1f}% per year.")
+        if temporal_trends.get("publication_growth"):
+            growth_data = temporal_trends["publication_growth"]
+            growth_rate = growth_data.get("average_growth_rate", 0)
+            trend_parts.append(
+                f"Publication activity shows an average growth rate of {growth_rate:.1f}% per year."
+            )
 
         # Top keywords
-        if keyword_trends.get('top_keywords'):
-            top_kw = keyword_trends['top_keywords'][:5]
-            kw_text = "The most frequent research keywords are: " + \
-                     ", ".join([f"{kw} ({count})" for kw, count in top_kw])
+        if keyword_trends.get("top_keywords"):
+            top_kw = keyword_trends["top_keywords"][:5]
+            kw_text = "The most frequent research keywords are: " + ", ".join(
+                [f"{kw} ({count})" for kw, count in top_kw]
+            )
             trend_parts.append(kw_text)
 
         # Emerging topics
-        if emerging_topics.get('ai_emerging_analysis'):
+        if emerging_topics.get("ai_emerging_analysis"):
             trend_parts.append("Emerging Research Directions:")
-            trend_parts.append(emerging_topics['ai_emerging_analysis'])
+            trend_parts.append(emerging_topics["ai_emerging_analysis"])
 
-        return "\n\n".join(trend_parts) if trend_parts else "No significant trends identified."
+        return (
+            "\n\n".join(trend_parts)
+            if trend_parts
+            else "No significant trends identified."
+        )
 
-    async def _generate_recommendations(self,
-                                      papers: List[LiteratureItem],
-                                      topic: str) -> Optional[str]:
+    async def _generate_recommendations(
+        self, papers: List[LiteratureItem], topic: str
+    ) -> Optional[str]:
         """Generate research recommendations and future directions."""
         # Analyze recent papers for gaps and opportunities
-        recent_papers = [p for p in papers if p.publication_date and p.publication_date.year >= 2022]
+        recent_papers = [
+            p for p in papers if p.publication_date and p.publication_date.year >= 2022
+        ]
 
         if not recent_papers:
             recent_papers = papers[-10:]  # Use most recent 10 papers
@@ -293,16 +331,16 @@ class ReportGenerator(LoggerMixin):
         )
 
         return await self.llm_manager.generate_completion(
-            prompt=user_prompt,
-            system_prompt=system_prompt,
-            temperature=0.5
+            prompt=user_prompt, system_prompt=system_prompt, temperature=0.5
         )
 
-    async def _compile_report(self,
-                            sections: Dict[str, Any],
-                            topic: str,
-                            papers: List[LiteratureItem],
-                            output_format: str) -> str:
+    async def _compile_report(
+        self,
+        sections: Dict[str, Any],
+        topic: str,
+        papers: List[LiteratureItem],
+        output_format: str,
+    ) -> str:
         """Compile all sections into a final report."""
         if output_format.lower() == "markdown":
             return self._compile_markdown_report(sections, topic, papers)
@@ -313,10 +351,9 @@ class ReportGenerator(LoggerMixin):
         else:
             return self._compile_markdown_report(sections, topic, papers)
 
-    def _compile_markdown_report(self,
-                               sections: Dict[str, Any],
-                               topic: str,
-                               papers: List[LiteratureItem]) -> str:
+    def _compile_markdown_report(
+        self, sections: Dict[str, Any], topic: str, papers: List[LiteratureItem]
+    ) -> str:
         """Compile report in Markdown format."""
         report_parts = [
             f"# Literature Review: {topic}",
@@ -325,91 +362,82 @@ class ReportGenerator(LoggerMixin):
             f"**Total Papers Analyzed:** {len(papers)}",
             f"",
             "---",
-            ""
+            "",
         ]
 
         # Executive Summary
-        if sections.get('executive_summary'):
-            report_parts.extend([
-                "## Executive Summary",
-                "",
-                sections['executive_summary'],
-                "",
-                "---",
-                ""
-            ])
+        if sections.get("executive_summary"):
+            report_parts.extend(
+                [
+                    "## Executive Summary",
+                    "",
+                    sections["executive_summary"],
+                    "",
+                    "---",
+                    "",
+                ]
+            )
 
         # Literature Overview
-        if sections.get('literature_overview'):
-            report_parts.extend([
-                "## Literature Overview",
-                "",
-                sections['literature_overview'],
-                "",
-                "---",
-                ""
-            ])
+        if sections.get("literature_overview"):
+            report_parts.extend(
+                [
+                    "## Literature Overview",
+                    "",
+                    sections["literature_overview"],
+                    "",
+                    "---",
+                    "",
+                ]
+            )
 
         # Temporal Analysis
-        if sections.get('temporal_analysis'):
-            temporal = sections['temporal_analysis']
-            report_parts.extend([
-                "## Temporal Analysis",
-                "",
-                "### Publication Trends",
-                ""
-            ])
+        if sections.get("temporal_analysis"):
+            temporal = sections["temporal_analysis"]
+            report_parts.extend(
+                ["## Temporal Analysis", "", "### Publication Trends", ""]
+            )
 
-            if temporal.get('yearly_summary'):
+            if temporal.get("yearly_summary"):
                 report_parts.append("**Publications by Year:**")
-                for year, count in sorted(temporal['yearly_summary'].items()):
+                for year, count in sorted(temporal["yearly_summary"].items()):
                     report_parts.append(f"- {year}: {count} papers")
                 report_parts.append("")
 
-            if temporal.get('ai_insights'):
-                report_parts.extend([
-                    "### Trend Insights",
-                    "",
-                    temporal['ai_insights'],
-                    ""
-                ])
+            if temporal.get("ai_insights"):
+                report_parts.extend(
+                    ["### Trend Insights", "", temporal["ai_insights"], ""]
+                )
 
             report_parts.extend(["---", ""])
 
         # Keyword Analysis
-        if sections.get('keyword_analysis'):
-            keywords = sections['keyword_analysis']
-            report_parts.extend([
-                "## Keyword Analysis",
-                "",
-                "### Most Frequent Keywords",
-                ""
-            ])
+        if sections.get("keyword_analysis"):
+            keywords = sections["keyword_analysis"]
+            report_parts.extend(
+                ["## Keyword Analysis", "", "### Most Frequent Keywords", ""]
+            )
 
-            if keywords.get('top_keywords'):
-                for i, (keyword, count) in enumerate(keywords['top_keywords'][:10], 1):
+            if keywords.get("top_keywords"):
+                for i, (keyword, count) in enumerate(keywords["top_keywords"][:10], 1):
                     report_parts.append(f"{i}. **{keyword}** ({count} occurrences)")
                 report_parts.append("")
 
-            if keywords.get('keyword_cooccurrence'):
-                report_parts.extend([
-                    "### Frequently Co-occurring Keywords",
-                    ""
-                ])
-                for i, ((kw1, kw2), count) in enumerate(keywords['keyword_cooccurrence'][:5], 1):
+            if keywords.get("keyword_cooccurrence"):
+                report_parts.extend(["### Frequently Co-occurring Keywords", ""])
+                for i, ((kw1, kw2), count) in enumerate(
+                    keywords["keyword_cooccurrence"][:5], 1
+                ):
                     report_parts.append(f"{i}. {kw1} + {kw2} ({count} times)")
                 report_parts.append("")
 
             report_parts.extend(["---", ""])
 
         # Key Findings
-        if sections.get('key_findings'):
-            findings = sections['key_findings']
+        if sections.get("key_findings"):
+            findings = sections["key_findings"]
             if findings:
-                report_parts.extend([
-                    "## Key Findings",
-                    ""
-                ])
+                report_parts.extend(["## Key Findings", ""])
 
                 for i, finding in enumerate(findings, 1):
                     report_parts.append(f"{i}. {finding}")
@@ -417,70 +445,76 @@ class ReportGenerator(LoggerMixin):
                 report_parts.extend(["", "---", ""])
 
         # Methodology Analysis
-        if sections.get('methodology_analysis'):
-            methodology = sections['methodology_analysis']
-            if methodology.get('ai_methodology_analysis'):
-                report_parts.extend([
-                    "## Methodological Trends",
-                    "",
-                    methodology['ai_methodology_analysis'],
-                    "",
-                    "---",
-                    ""
-                ])
+        if sections.get("methodology_analysis"):
+            methodology = sections["methodology_analysis"]
+            if methodology.get("ai_methodology_analysis"):
+                report_parts.extend(
+                    [
+                        "## Methodological Trends",
+                        "",
+                        methodology["ai_methodology_analysis"],
+                        "",
+                        "---",
+                        "",
+                    ]
+                )
 
         # Emerging Topics
-        if sections.get('emerging_topics'):
-            emerging = sections['emerging_topics']
-            if emerging.get('ai_emerging_analysis'):
-                report_parts.extend([
-                    "## Emerging Topics and Future Directions",
-                    "",
-                    emerging['ai_emerging_analysis'],
-                    "",
-                    "---",
-                    ""
-                ])
+        if sections.get("emerging_topics"):
+            emerging = sections["emerging_topics"]
+            if emerging.get("ai_emerging_analysis"):
+                report_parts.extend(
+                    [
+                        "## Emerging Topics and Future Directions",
+                        "",
+                        emerging["ai_emerging_analysis"],
+                        "",
+                        "---",
+                        "",
+                    ]
+                )
 
         # Collaboration Analysis
-        if sections.get('collaboration_analysis'):
-            collab = sections['collaboration_analysis']
-            report_parts.extend([
-                "## Collaboration Patterns",
-                "",
-                f"**Total Unique Authors:** {collab.get('total_unique_authors', 0)}",
-                f"**Average Team Size:** {collab.get('average_team_size', 0)} authors per paper",
-                ""
-            ])
+        if sections.get("collaboration_analysis"):
+            collab = sections["collaboration_analysis"]
+            report_parts.extend(
+                [
+                    "## Collaboration Patterns",
+                    "",
+                    f"**Total Unique Authors:** {collab.get('total_unique_authors', 0)}",
+                    f"**Average Team Size:** {collab.get('average_team_size', 0)} authors per paper",
+                    "",
+                ]
+            )
 
-            if collab.get('most_productive_authors'):
-                report_parts.extend([
-                    "### Most Productive Authors",
-                    ""
-                ])
-                for i, (author, count) in enumerate(collab['most_productive_authors'][:5], 1):
+            if collab.get("most_productive_authors"):
+                report_parts.extend(["### Most Productive Authors", ""])
+                for i, (author, count) in enumerate(
+                    collab["most_productive_authors"][:5], 1
+                ):
                     report_parts.append(f"{i}. {author} ({count} papers)")
                 report_parts.append("")
 
             report_parts.extend(["---", ""])
 
         # Footer
-        report_parts.extend([
-            "## Report Generation Details",
-            "",
-            f"- **Analysis Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-            f"- **Papers Analyzed:** {len(papers)}",
-            f"- **Topic:** {topic}",
-            f"- **Generator:** AI Literature Review Agent",
-            ""
-        ])
+        report_parts.extend(
+            [
+                "## Report Generation Details",
+                "",
+                f"- **Analysis Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                f"- **Papers Analyzed:** {len(papers)}",
+                f"- **Topic:** {topic}",
+                f"- **Generator:** AI Literature Review Agent",
+                "",
+            ]
+        )
 
         return "\n".join(report_parts)
 
-    def _compile_html_report(self,
-                           sections: Dict[str, Any],
-                           topic: str,
-                           papers: List[LiteratureItem]) -> str:
+    def _compile_html_report(
+        self, sections: Dict[str, Any], topic: str, papers: List[LiteratureItem]
+    ) -> str:
         """Compile report in HTML format."""
         # Convert markdown to HTML (simplified version)
         markdown_content = self._compile_markdown_report(sections, topic, papers)
@@ -512,10 +546,9 @@ class ReportGenerator(LoggerMixin):
 """
         return html_content
 
-    def _compile_latex_report(self,
-                            sections: Dict[str, Any],
-                            topic: str,
-                            papers: List[LiteratureItem]) -> str:
+    def _compile_latex_report(
+        self, sections: Dict[str, Any], topic: str, papers: List[LiteratureItem]
+    ) -> str:
         """Compile report in LaTeX format."""
         # Basic LaTeX template
         latex_content = f"""
