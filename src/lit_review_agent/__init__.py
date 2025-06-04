@@ -26,7 +26,7 @@ from .exceptions import (
     DatabaseError,
     FileOperationError,
     AuthenticationError,
-    TimeoutError,
+    OperationTimeoutError,
 )
 
 __all__ = [
@@ -46,5 +46,5 @@ __all__ = [
     "DatabaseError",
     "FileOperationError",
     "AuthenticationError",
-    "TimeoutError",
+    "OperationTimeoutError",
 ]

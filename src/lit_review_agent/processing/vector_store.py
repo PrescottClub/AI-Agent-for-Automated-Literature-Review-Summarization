@@ -2,14 +2,15 @@
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import chromadb
-import numpy as np
 from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer
 
 from ..utils.logger import LoggerMixin
+from ..utils.cache_manager import get_cache_manager, cache_embeddings
+from ..utils.performance_monitor import monitor_performance, get_performance_monitor
 from ..retrieval.base_retriever import LiteratureItem
 
 
@@ -65,10 +66,14 @@ class VectorStore(LoggerMixin):
         try:
             self.embedding_model = SentenceTransformer(embedding_model)
             self.logger.info(f"Loaded embedding model: {embedding_model}")
-        except Exception as e:
+        except (OSError, ImportError, ValueError) as e:
             self.logger.error(f"Failed to load embedding model: {e}")
             self.embedding_model = None
+        except Exception as e:
+            self.logger.error(f"Unexpected error loading embedding model: {e}")
+            self.embedding_model = None
 
+    @monitor_performance
     def add_literature_item(self, item: LiteratureItem) -> bool:
         """
         Add a literature item to the vector store.
@@ -106,9 +111,13 @@ class VectorStore(LoggerMixin):
                 f"Added literature item to vector store: {item.id}")
             return True
 
+        except (ValueError, TypeError) as e:
+            self.logger.error(
+                f"Invalid data for item {item.id}: {e}")
+            return False
         except Exception as e:
             self.logger.error(
-                f"Error adding item {item.id} to vector store: {e}")
+                f"Unexpected error adding item {item.id} to vector store: {e}")
             return False
 
     def add_literature_items(self, items: List[LiteratureItem]) -> int:
@@ -178,6 +187,7 @@ class VectorStore(LoggerMixin):
             f"Successfully added {successful_additions}/{len(items)} items")
         return successful_additions
 
+    @monitor_performance
     def search_similar(self,
                        query: str,
                        n_results: int = 10,
@@ -223,8 +233,11 @@ class VectorStore(LoggerMixin):
                 f"Found {len(formatted_results)} similar items for query")
             return formatted_results
 
+        except (ValueError, TypeError) as e:
+            self.logger.error(f"Invalid search parameters: {e}")
+            return []
         except Exception as e:
-            self.logger.error(f"Error searching vector store: {e}")
+            self.logger.error(f"Unexpected error searching vector store: {e}")
             return []
 
     def get_item_by_id(self, item_id: str) -> Optional[Dict[str, Any]]:
@@ -307,13 +320,14 @@ class VectorStore(LoggerMixin):
             self.logger.error(f"Error resetting collection: {e}")
             return False
 
-        def _prepare_text_for_embedding(self, item: LiteratureItem) -> str:
+    @cache_embeddings
+    def _prepare_text_for_embedding(self, item: LiteratureItem) -> str:
         """
         Prepare text content for embedding generation.
-        
+
         Args:
             item: Literature item
-            
+
         Returns:
             Text content for embedding
         """
