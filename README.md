@@ -1,13 +1,13 @@
 # 🤖 Tsearch - AI 智能文献综述与摘要生成系统
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.0+-green.svg)](https://vuejs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-red.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![DeepSeek](https://img.shields.io/badge/Powered_by-DeepSeek-orange.svg)](https://platform.deepseek.com/)
 [![Status](https://img.shields.io/badge/Status-Production_Ready-green.svg)](#)
 
-> **🚀 Tsearch - 让学术研究更高效的 AI 智能助手** > **Created by Terence Qin | 由 Terence Qin 创建**
+> **🚀 Tsearch - 让学术研究更高效的 AI 智能助手** | **Created by Terence Qin | 由 Terence Qin 创建**
 
 **Tsearch：重新定义学术研究的生产力边界。** 作为新一代 AI Native 的文献发现引擎，Tsearch 深度整合了多模态大语言模型、向量检索、知识图谱等前沿技术栈，构建了端到端的智能研究工作流。通过突破性的自然语言交互范式，彻底解决了传统文献检索中的"关键词依赖"、"信息茧房"、"认知负载"等核心痛点，为科研工作者打造了一个具备"理解-推理-生成"全链路能力的 AI Research Copilot。
 
@@ -101,7 +101,7 @@ graph TD
 
 ### 环境要求
 
-- **Python**: 3.8 或更高版本
+- **Python**: 3.9 或更高版本
 - **Node.js**: 16.0 或更高版本
 - **npm**: 8.0 或更高版本
 
@@ -138,7 +138,7 @@ venv\Scripts\activate
 source venv/bin/activate
 
 # 安装依赖
-pip install -r requirements.txt
+pip install -e .
 
 # 下载spaCy模型
 python -m spacy download en_core_web_sm
@@ -148,9 +148,9 @@ python -m spacy download en_core_web_sm
 
 ```bash
 # 复制环境变量模板
-copy config\config.example.env .env
+cp config/config.example.env config/config.env
 
-# 编辑.env文件，设置以下配置：
+# 编辑 config/config.env 文件，设置以下配置：
 # LLM_PROVIDER=deepseek
 # DEEPSEEK_API_KEY=your_deepseek_api_key_here
 # OPENAI_API_KEY=your_openai_api_key_here  # 用于嵌入
@@ -170,6 +170,8 @@ npm install
 
 ```bash
 # 在项目根目录
+python scripts/start_backend_only.py
+# 或者直接运行
 python src/lit_review_agent/api_server.py
 ```
 
@@ -181,8 +183,6 @@ python src/lit_review_agent/api_server.py
 # 在frontend/literature-review-frontend目录
 cd frontend/literature-review-frontend
 npm run dev
-# 或者使用
-npx vite
 ```
 
 前端将在 `http://localhost:5173` 启动
@@ -194,6 +194,27 @@ npx vite
 - **后端**: 控制台显示 "✅ 文献代理初始化成功" 和 "Uvicorn running on http://0.0.0.0:8000"
 - **前端**: 控制台显示 "VITE v6.3.5 ready" 和 "Local: http://localhost:5173/"
 - **API 文档**: 访问 http://localhost:8000/docs 查看交互式 API 文档
+
+### 🏥 项目健康检查
+
+运行全面的项目健康检查，确保所有组件正常工作：
+
+```bash
+# 运行健康检查脚本
+python scripts/health_check.py
+```
+
+健康检查将验证：
+
+- ✅ 项目结构完整性
+- ✅ Python 依赖和语法
+- ✅ 配置文件状态
+- ✅ 前端依赖
+- ✅ 核心模块导入
+- ✅ 性能基准测试
+- ✅ 数据目录创建
+
+检查结果将保存到 `data/health_check_results.json`
 
 ## 📖 使用指南
 
@@ -242,31 +263,28 @@ npx vite
 
 8. **生成报告**: 基于搜索结果生成综合综述报告
 
-### 命令行界面使用
+### 多种使用方式
 
-#### 基本文献综述
+#### Web 界面（推荐）
+
+访问 `http://localhost:5173` 使用现代化的 Web 界面
+
+#### Streamlit 应用
 
 ```bash
-python -m src.lit_review_agent.cli review "人工智能在医疗领域的应用" ^
-  --max-papers 15 ^
-  --output-format json ^
-  --output data/ai_healthcare.json
+python src/lit_review_agent/app.py
 ```
 
-#### 生成综合报告
+#### MCP 服务器
 
 ```bash
-python -m src.lit_review_agent.cli generate-report ^
-  "AI医疗应用综述报告" ^
-  --input data/ai_healthcare.json ^
-  --output reports/ai_healthcare_report.md ^
-  --format markdown
+python src/lit_review_agent/mcp_server.py
 ```
 
-#### 搜索知识库
+#### 命令行界面
 
 ```bash
-python -m src.lit_review_agent.cli search "机器学习药物发现"
+python src/lit_review_agent/cli.py --help
 ```
 
 ## 🔧 配置说明
@@ -312,12 +330,18 @@ Tsearch/
 ├── 📁 config/                    # 配置文件
 │   └── config.example.env
 ├── 📁 data/                      # 数据存储
+│   ├── cache/                   # 缓存目录
 │   ├── chroma_db/               # 向量数据库
-│   └── outputs/                 # 输出文件
+│   ├── outputs/                 # 输出文件
+│   ├── reports/                 # 生成报告
+│   └── vector_store/            # 向量存储
+├── 📁 docs/                      # 文档
+│   └── optimization_summary.md  # 优化总结
 ├── 📁 frontend/                  # Vue3前端
 │   └── literature-review-frontend/
 ├── 📁 scripts/                   # 启动脚本
 │   ├── cleanup_project.py       # 项目清理
+│   ├── health_check.py          # 健康检查
 │   ├── start_all.py            # 一键启动
 │   ├── start_backend_only.py   # 后端启动
 │   └── quick_start.py          # 快速启动
@@ -326,31 +350,33 @@ Tsearch/
 │       ├── agent.py             # 主Agent (含自然语言处理)
 │       ├── api_server.py        # API服务器 (含行动计划)
 │       ├── app.py              # Streamlit应用
+│       ├── cli.py              # 命令行界面
+│       ├── mcp_server.py       # MCP服务器
 │       ├── ai_core/            # AI核心模块
 │       ├── processing/         # 数据处理
 │       ├── retrieval/          # 文献检索
-│       └── utils/              # 工具函数
+│       └── utils/              # 工具函数 (含缓存和性能监控)
 ├── 📁 tests/                     # 测试代码
-├── 📁 venv/                      # Python虚拟环境
-├── 📄 README.md                 # 项目说明
-└── 📄 requirements.txt          # Python依赖
+├── � README.md                 # 项目说明
+├── 📄 pyproject.toml            # Python项目配置
+└── 📄 docker-compose.yml        # Docker配置
 ```
 
 ## 🛠️ 技术栈深度解析
 
 ### 🧠 AI 引擎层
 
-- **LLM 底座** - DeepSeek-V3/GPT-4o，支持多模态理解和推理
-- **Embedding 模型** - text-embedding-3-large，1536 维向量空间
-- **检索框架** - LangChain + FAISS，混合检索架构
-- **推理引擎** - Chain-of-Thought + ReAct，可解释 AI 决策
+- **LLM 底座** - DeepSeek-V3/OpenAI GPT，支持多模态理解和推理
+- **Embedding 模型** - SentenceTransformers，高质量语义向量
+- **检索框架** - ChromaDB 向量检索，毫秒级相似度搜索
+- **推理引擎** - Chain-of-Thought 推理，可解释 AI 决策
 
 ### ⚡ 服务架构层
 
 - **API 网关** - FastAPI + Uvicorn，异步高并发架构
-- **数据持久化** - ChromaDB 向量库 + SQLite 元数据存储
-- **缓存策略** - Redis 分布式缓存，毫秒级响应优化
-- **监控体系** - Prometheus + Grafana，全链路可观测性
+- **数据持久化** - ChromaDB 向量库，本地文件存储
+- **缓存策略** - 文件缓存系统，TTL 自动过期管理
+- **监控体系** - 内置性能监控，实时指标收集
 
 ### 🎨 前端技术栈
 
@@ -361,12 +387,25 @@ Tsearch/
 
 ### 🔧 工程化体系
 
-- **代码质量** - ESLint + Prettier + Husky，自动化代码规范
-- **依赖管理** - Poetry + pnpm，确定性依赖锁定
-- **容器化** - Docker 多阶段构建，镜像体积优化
-- **部署策略** - 支持本地部署、云原生 K8s、Serverless 等多种模式
+- **代码质量** - 内置健康检查，自动化代码规范验证
+- **依赖管理** - pyproject.toml + npm，现代化依赖管理
+- **性能监控** - 实时性能指标收集和分析
+- **部署策略** - 支持本地部署、Docker 容器化部署
 
 ## 🆕 最新更新
+
+### v3.7.0 (2025-06-04) - 代码质量与性能优化版本
+
+- 🔧 **语法错误修复** - 修复所有 Python 语法错误，确保代码 100%可编译
+- 🚀 **性能监控系统** - 新增实时性能监控，支持函数级性能分析和系统资源监控
+- 💾 **智能缓存系统** - 实现基于 TTL 的文件缓存，大幅减少重复计算和 API 调用
+- 🛡️ **异常处理增强** - 改进异常处理机制，使用具体异常类型替代通用异常
+- 🏥 **健康检查系统** - 新增全面的项目健康检查脚本，自动检测和诊断问题
+- 🧹 **代码质量提升** - 清理未使用导入，优化代码结构，符合现代 Python 最佳实践
+- 📊 **性能基准测试** - 集成性能基准测试，实时监控系统性能指标
+- 🔍 **自动化诊断** - 支持一键项目状态检查，自动生成健康报告
+- ⚡ **响应速度优化** - 通过缓存和性能监控，显著提升系统响应速度
+- 📈 **可观测性增强** - 全面的性能指标收集和分析，支持长期性能优化
 
 ### v3.6.0 (2025-05-29) - 项目结构优化版本
 
