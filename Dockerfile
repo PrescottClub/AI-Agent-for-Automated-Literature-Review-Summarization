@@ -40,11 +40,11 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# 复制 Python 依赖文件
-COPY requirements.txt .
+# 复制项目配置文件
+COPY pyproject.toml .
 
-# 安装 Python 依赖
-RUN pip install --no-cache-dir -r requirements.txt
+# 安装项目依赖
+RUN pip install --no-cache-dir -e .
 
 # 安装 spaCy 模型
 RUN python -m spacy download en_core_web_sm
@@ -55,7 +55,6 @@ RUN mkdir -p /app/data /app/logs /app/config
 # 复制应用代码
 COPY src/ ./src/
 COPY config/ ./config/
-COPY setup.py ./
 
 # 从前端构建阶段复制静态文件
 COPY --from=frontend-builder /app/frontend/dist ./static/
@@ -76,11 +75,11 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # 暴露端口
 EXPOSE 8000
 
-# 设置启动命令
+# 设置启动命令 (worker数量可通过环境变量配置)
 CMD ["python", "-m", "uvicorn", "src.lit_review_agent.api_server:app", \
      "--host", "0.0.0.0", \
      "--port", "8000", \
-     "--workers", "1"]
+     "--workers", "${UVICORN_WORKERS:-1}"]
 
 # 元数据标签
 LABEL version="3.1.0" \

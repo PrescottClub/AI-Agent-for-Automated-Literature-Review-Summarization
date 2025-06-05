@@ -105,14 +105,24 @@ graph TD
 - **Node.js**: 16.0 或更高版本
 - **npm**: 8.0 或更高版本
 
-### 方式一：一键启动（推荐）
+### 方式一：智能启动（推荐）⭐ **最新**
 
 ```bash
 # 克隆项目
 git clone https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization.git
 cd AI-Agent-for-Automated-Literature-Review-Summarization
 
-# 一键启动所有服务
+# 配置环境变量
+cp config/config.example.env .env
+# 编辑 .env 文件，添加您的 API 密钥
+
+# 查看功能状态
+python scripts/smart_start.py --mode status
+
+# Docker 启动（推荐）
+python scripts/smart_start.py --mode docker --env development
+
+# 或传统一键启动
 python scripts/start_all.py
 ```
 
@@ -148,13 +158,16 @@ python -m spacy download en_core_web_sm
 
 ```bash
 # 复制环境变量模板
-cp config/config.example.env config/config.env
+cp config/config.example.env .env
 
-# 编辑 config/config.env 文件，设置以下配置：
+# 编辑 .env 文件，设置以下配置：
 # LLM_PROVIDER=deepseek
 # DEEPSEEK_API_KEY=your_deepseek_api_key_here
 # OPENAI_API_KEY=your_openai_api_key_here  # 用于嵌入
 # SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here
+
+# 可选：自定义功能开关
+# 编辑 config/features.env 控制启用的功能模块
 ```
 
 #### 4. 前端设置
@@ -202,6 +215,12 @@ npm run dev
 ```bash
 # 运行健康检查脚本
 python scripts/health_check.py
+
+# 项目优化分析 ⭐ **新增**
+python scripts/optimize_project.py --action analyze
+
+# 生成优化报告
+python scripts/optimize_project.py --action report
 ```
 
 健康检查将验证：
@@ -213,6 +232,8 @@ python scripts/health_check.py
 - ✅ 核心模块导入
 - ✅ 性能基准测试
 - ✅ 数据目录创建
+- ✅ Docker 配置优化状态 ⭐ **新增**
+- ✅ 功能模块分析 ⭐ **新增**
 
 检查结果将保存到 `data/health_check_results.json`
 
@@ -284,7 +305,27 @@ python src/lit_review_agent/mcp_server.py
 #### 命令行界面
 
 ```bash
+# 使用 CLI 工具
+tsearch --help
+
+# 或直接运行
 python src/lit_review_agent/cli.py --help
+```
+
+#### 智能启动管理 ⭐ **新增**
+
+```bash
+# 查看功能状态
+python scripts/smart_start.py --mode status
+
+# Docker 开发环境
+python scripts/smart_start.py --mode docker --env development
+
+# Docker 生产环境
+python scripts/smart_start.py --mode docker --env production
+
+# 本地开发模式
+python scripts/smart_start.py --mode local
 ```
 
 ## 🔧 配置说明
@@ -299,6 +340,30 @@ python src/lit_review_agent/cli.py --help
 | `SEMANTIC_SCHOLAR_API_KEY` | Semantic Scholar API 密钥   | 否   | -          |
 | `MAX_PAPERS_DEFAULT`       | 默认最大论文数              | 否   | `20`       |
 | `ENABLE_FULL_TEXT`         | 启用全文提取                | 否   | `false`    |
+
+### 功能开关配置 ⭐ **新增**
+
+编辑 `config/features.env` 文件控制功能模块：
+
+| 功能开关                        | 描述                | 默认值  |
+| ------------------------------- | ------------------- | ------- |
+| `ENABLE_CORE_RETRIEVAL`         | 核心检索功能        | `true`  |
+| `ENABLE_CORE_PROCESSING`        | 核心处理功能        | `true`  |
+| `ENABLE_CORE_API`               | 核心 API 功能       | `true`  |
+| `ENABLE_TREND_ANALYSIS`         | 趋势分析功能        | `true`  |
+| `ENABLE_STREAMLIT_UI`           | Streamlit 界面      | `true`  |
+| `ENABLE_VUE_FRONTEND`           | Vue3 前端界面       | `true`  |
+| `ENABLE_MCP_SERVER`             | MCP 协议服务器      | `false` |
+| `ENABLE_PROMETHEUS`             | Prometheus 监控     | `false` |
+| `ENABLE_GRAFANA`                | Grafana 仪表板      | `false` |
+
+### Docker 配置 ⭐ **已优化**
+
+| 环境变量                   | 描述                | 默认值              |
+| -------------------------- | ------------------- | ------------------- |
+| `UVICORN_WORKERS`          | Uvicorn 工作进程数  | `1`                 |
+| `REDIS_MAXMEMORY`          | Redis 最大内存      | `256mb`             |
+| `GRAFANA_ADMIN_PASSWORD`   | Grafana 管理员密码  | `TsearchAdmin2024!` |
 
 ### 数据源配置
 
@@ -328,7 +393,9 @@ python src/lit_review_agent/cli.py --help
 ```
 Tsearch/
 ├── 📁 config/                    # 配置文件
-│   └── config.example.env
+│   ├── config.example.env       # 环境配置模板
+│   ├── features.env             # 功能开关配置 ⭐ **新增**
+│   └── optimization_plan.md     # 优化计划文档 ⭐ **新增**
 ├── 📁 data/                      # 数据存储
 │   ├── cache/                   # 缓存目录
 │   ├── chroma_db/               # 向量数据库
@@ -336,12 +403,16 @@ Tsearch/
 │   ├── reports/                 # 生成报告
 │   └── vector_store/            # 向量存储
 ├── 📁 docs/                      # 文档
-│   └── optimization_summary.md  # 优化总结
+│   ├── optimization_summary.md  # 优化总结
+│   ├── optimization_report.md   # 自动生成优化报告 ⭐ **新增**
+│   └── quick_start_guide.md     # 快速启动指南 ⭐ **新增**
 ├── 📁 frontend/                  # Vue3前端
 │   └── literature-review-frontend/
 ├── 📁 scripts/                   # 启动脚本
 │   ├── cleanup_project.py       # 项目清理
 │   ├── health_check.py          # 健康检查
+│   ├── optimize_project.py      # 项目优化工具 ⭐ **新增**
+│   ├── smart_start.py           # 智能启动工具 ⭐ **新增**
 │   ├── start_all.py            # 一键启动
 │   ├── start_backend_only.py   # 后端启动
 │   └── quick_start.py          # 快速启动
@@ -357,9 +428,10 @@ Tsearch/
 │       ├── retrieval/          # 文献检索
 │       └── utils/              # 工具函数 (含缓存和性能监控)
 ├── 📁 tests/                     # 测试代码
-├── � README.md                 # 项目说明
+├── 📄 README.md                 # 项目说明
 ├── 📄 pyproject.toml            # Python项目配置
-└── 📄 docker-compose.yml        # Docker配置
+├── 📄 Dockerfile               # Docker构建文件 (已优化)
+└── 📄 docker-compose.yml        # Docker配置 (已优化)
 ```
 
 ## 🛠️ 技术栈深度解析
@@ -388,11 +460,26 @@ Tsearch/
 ### 🔧 工程化体系
 
 - **代码质量** - 内置健康检查，自动化代码规范验证
-- **依赖管理** - pyproject.toml + npm，现代化依赖管理
+- **依赖管理** - pyproject.toml + npm，现代化依赖管理 ⭐ **已优化**
 - **性能监控** - 实时性能指标收集和分析
-- **部署策略** - 支持本地部署、Docker 容器化部署
+- **部署策略** - 支持本地部署、Docker 容器化部署 ⭐ **已优化**
+- **功能模块化** - 智能功能开关，灵活配置启用模块 ⭐ **新增**
+- **智能启动** - 根据配置自动选择服务组合 ⭐ **新增**
 
 ## 🆕 最新更新
+
+### v3.8.0 (2025-06-05) - 架构优化与部署改进版本 ⭐ **最新**
+
+- 🏗️ **依赖管理一致性** - 统一使用 pyproject.toml，修复 Dockerfile 依赖管理问题
+- 🐳 **Docker 配置优化** - 固定镜像版本，参数化配置，增强安全性
+- 🔐 **安全配置增强** - 强化密码策略，环境变量管理，敏感信息保护
+- 🎛️ **功能模块化管理** - 新增功能开关系统，支持选择性启用功能模块
+- 📊 **项目结构优化** - 分析非核心模块，采用"保留但优化"策略
+- 🛠️ **智能启动系统** - 新增智能启动工具，根据配置自动选择服务组合
+- 📋 **项目优化工具** - 新增项目分析和优化工具，自动生成优化报告
+- 🎯 **核心功能聚焦** - 明确区分核心功能和增强功能，提升部署灵活性
+- 📚 **文档完善** - 新增快速启动指南和详细的优化文档
+- ✅ **生产就绪** - 全面优化后的项目更适合生产环境部署
 
 ### v3.7.0 (2025-06-04) - 代码质量与性能优化版本
 

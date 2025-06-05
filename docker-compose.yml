@@ -11,9 +11,10 @@ services:
       - "8000:8000"
     environment:
       # 基础配置
-      - LOG_LEVEL=INFO
-      - DEBUG=false
-      - LLM_PROVIDER=deepseek
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEBUG=${DEBUG:-false}
+      - LLM_PROVIDER=${LLM_PROVIDER:-deepseek}
+      - UVICORN_WORKERS=${UVICORN_WORKERS:-1}
       
       # 数据库配置
       - CHROMA_PERSIST_DIRECTORY=/app/data/chroma_db
@@ -57,7 +58,7 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory ${REDIS_MAXMEMORY:-256mb} --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -69,7 +70,7 @@ services:
 
   # ChromaDB 向量数据库
   chromadb:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:0.4.20
     container_name: literature-review-chromadb
     ports:
       - "8001:8000"
@@ -109,7 +110,7 @@ services:
 
   # 监控服务 (可选)
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.48.0
     container_name: literature-review-prometheus
     ports:
       - "9090:9090"
@@ -129,7 +130,7 @@ services:
 
   # Grafana 仪表板 (可选)
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.2.0
     container_name: literature-review-grafana
     ports:
       - "3000:3000"
@@ -137,7 +138,7 @@ services:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-TsearchAdmin2024!}
       - GF_USERS_ALLOW_SIGN_UP=false
     depends_on:
       - prometheus
