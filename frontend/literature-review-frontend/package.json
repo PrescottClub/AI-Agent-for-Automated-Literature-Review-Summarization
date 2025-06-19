@@ -4,15 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node ./node_modules/vite/bin/vite.js",
-    "build": "node ./node_modules/npm-run-all2/bin/run-p/index.js type-check build-only",
-    "preview": "node ./node_modules/vite/bin/vite.js preview",
-    "test:unit": "node ./node_modules/vitest/vitest.mjs",
-    "test:e2e": "node ./node_modules/@playwright/test/cli.js test",
-    "build-only": "node ./node_modules/vite/bin/vite.js build",
-    "type-check": "node ./node_modules/vue-tsc/bin/vue-tsc.js --build",
-    "lint": "node ./node_modules/eslint/bin/eslint.js . --fix",
-    "format": "node ./node_modules/prettier/bin/prettier.cjs --write src/"
+    "dev": "vite",
+    "build": "run-p type-check build-only",
+    "preview": "vite preview",
+    "test:unit": "vitest",
+    "test:e2e": "playwright test",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "lint": "eslint . --fix",
+    "format": "prettier --write src/"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

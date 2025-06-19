@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tsearch - 前端测试页面</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+        .search-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        input {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+        .paper {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Tsearch - AI文献综述系统</h1>
+        
+        <div id="backend-status" class="status">
+            🔍 正在检查后端连接...
+        </div>
+        
+        <div class="search-form">
+            <h3>📚 文献搜索</h3>
+            <input type="text" id="query" placeholder="输入搜索查询，例如：machine learning" value="artificial intelligence">
+            <button onclick="searchPapers()">🔍 开始搜索</button>
+        </div>
+        
+        <div id="results" class="results">
+            <h3>📖 搜索结果</h3>
+            <div id="papers-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // 检查后端状态
+        async function checkBackend() {
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                const data = await response.json();
+                document.getElementById('backend-status').innerHTML = 
+                    `✅ 后端连接正常 - 状态: ${data.status}, Agent: ${data.agent_status}`;
+                document.getElementById('backend-status').className = 'status success';
+            } catch (error) {
+                document.getElementById('backend-status').innerHTML = 
+                    `❌ 后端连接失败: ${error.message}`;
+                document.getElementById('backend-status').className = 'status error';
+            }
+        }
+
+        // 搜索论文
+        async function searchPapers() {
+            const query = document.getElementById('query').value;
+            const resultsDiv = document.getElementById('results');
+            const papersList = document.getElementById('papers-list');
+            
+            if (!query.trim()) {
+                alert('请输入搜索查询');
+                return;
+            }
+            
+            resultsDiv.style.display = 'block';
+            papersList.innerHTML = '<div>🔍 正在搜索...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        max_papers: 5,
+                        sources: ['arxiv'],
+                        enable_ai_analysis: false
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.papers && data.papers.length > 0) {
+                    papersList.innerHTML = data.papers.map(paper => `
+                        <div class="paper">
+                            <h4>${paper.title}</h4>
+                            <p><strong>作者:</strong> ${paper.authors.join(', ')}</p>
+                            <p><strong>发布日期:</strong> ${paper.published_date}</p>
+                            <p><strong>来源:</strong> ${paper.source}</p>
+                            <p><strong>摘要:</strong> ${paper.summary.substring(0, 200)}...</p>
+                        </div>
+                    `).join('');
+                    
+                    papersList.innerHTML += `
+                        <div style="margin-top: 20px; text-align: center; color: #ccc;">
+                            找到 ${data.totalCount} 篇论文，处理时间: ${data.processingTime?.toFixed(2)}秒
+                        </div>
+                    `;
+                } else {
+                    papersList.innerHTML = '<div>❌ 未找到相关论文</div>';
+                }
+            } catch (error) {
+                papersList.innerHTML = `<div>❌ 搜索失败: ${error.message}</div>`;
+            }
+        }
+        
+        // 页面加载时检查后端
+        window.onload = checkBackend;
+    </script>
+</body>
+</html>

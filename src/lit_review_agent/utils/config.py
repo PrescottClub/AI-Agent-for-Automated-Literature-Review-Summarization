@@ -28,7 +28,8 @@ class Config(BaseSettings):
     llm_provider: Literal["openai", "deepseek", "ollama", "mock"] = Field(
         default="deepseek", validation_alias="LLM_PROVIDER"
     )  # Default to deepseek
-    llm_timeout_seconds: int = Field(default=60, validation_alias="LLM_TIMEOUT_SECONDS")
+    llm_timeout_seconds: int = Field(
+        default=60, validation_alias="LLM_TIMEOUT_SECONDS")
     llm_max_retries: int = Field(default=3, validation_alias="LLM_MAX_RETRIES")
     llm_rate_limit_delay: float = Field(
         default=5.0, validation_alias="LLM_RATE_LIMIT_DELAY"
@@ -41,7 +42,8 @@ class Config(BaseSettings):
     openai_api_key: Optional[str] = Field(
         default=None, validation_alias="OPENAI_API_KEY"
     )
-    openai_model: str = Field(default="gpt-3.5-turbo", validation_alias="OPENAI_MODEL")
+    openai_model: str = Field(default="gpt-3.5-turbo",
+                              validation_alias="OPENAI_MODEL")
     openai_embedding_model: str = Field(
         default="text-embedding-ada-002", validation_alias="OPENAI_EMBEDDING_MODEL"
     )
@@ -104,7 +106,8 @@ class Config(BaseSettings):
     arxiv_api_url: str = Field(
         default="http://export.arxiv.org/api/", validation_alias="ARXIV_API_URL"
     )
-    arxiv_max_results: int = Field(default=100, validation_alias="ARXIV_MAX_RESULTS")
+    arxiv_max_results: int = Field(
+        default=100, validation_alias="ARXIV_MAX_RESULTS")
     arxiv_query_prefix: Optional[str] = Field(
         default=None, validation_alias="ARXIV_QUERY_PREFIX"
     )
@@ -135,7 +138,7 @@ class Config(BaseSettings):
     # Advanced Settings & Defaults
     default_retrieval_sources: List[str] = Field(
         default_factory=lambda: ["arxiv", "semantic_scholar"],
-        validation_alias="DEFAULT_RETRIEVAL_SOURCES",
+        # validation_alias="DEFAULT_RETRIEVAL_SOURCES",  # Temporarily disabled
     )
 
     # Vector Database Configuration
@@ -147,8 +150,10 @@ class Config(BaseSettings):
     )
 
     # Application Configuration
-    log_file: str = Field(default="./logs/app.log", validation_alias="LOG_FILE")
-    max_chunk_size: int = Field(default=1000, validation_alias="MAX_CHUNK_SIZE")
+    log_file: str = Field(default="./logs/app.log",
+                          validation_alias="LOG_FILE")
+    max_chunk_size: int = Field(
+        default=1000, validation_alias="MAX_CHUNK_SIZE")
     chunk_overlap: int = Field(default=200, validation_alias="CHUNK_OVERLAP")
 
     # Rate Limiting
@@ -160,8 +165,10 @@ class Config(BaseSettings):
     )
 
     # Output Configuration
-    output_dir: str = Field(default="./data/outputs", validation_alias="OUTPUT_DIR")
-    report_format: str = Field(default="markdown", validation_alias="REPORT_FORMAT")
+    output_dir: str = Field(default="./data/outputs",
+                            validation_alias="OUTPUT_DIR")
+    report_format: str = Field(
+        default="markdown", validation_alias="REPORT_FORMAT")
 
     def __init__(self, **kwargs):
         """Initialize configuration, loading from .env file if it exists."""

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-AI Literature Review System - 统一启动脚本
-一键启动后端API服务器和前端开发服务器
+Tsearch - AI智能文献综述系统
+一键启动脚本：同时启动后端API服务器和前端开发服务器
 """
 
 import os
@@ -9,13 +9,14 @@ import sys
 import subprocess
 import time
 import webbrowser
+import threading
 from pathlib import Path
 
 # 获取项目根目录
 PROJECT_ROOT = Path(__file__).parent.parent
-# 修复：使用正确的后端文件路径
 BACKEND_FILE = PROJECT_ROOT / "src" / "lit_review_agent" / "api_server.py"
 FRONTEND_DIR = PROJECT_ROOT / "frontend" / "literature-review-frontend"
+
 
 class Colors:
     """终端颜色定义"""
@@ -29,9 +30,11 @@ class Colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 def print_colored(message, color=Colors.OKGREEN):
     """打印彩色消息"""
     print(f"{color}{message}{Colors.ENDC}")
+
 
 def print_header():
     """打印启动头部信息"""
@@ -40,6 +43,7 @@ def print_header():
     print_colored("   智能文献综述系统 - 统一启动器", Colors.HEADER)
     print_colored("=" * 60, Colors.HEADER)
     print()
+
 
 def check_requirements():
     """检查系统要求"""
@@ -50,11 +54,13 @@ def check_requirements():
     if python_version.major < 3 or (python_version.major == 3 and python_version.minor < 8):
         print_colored("❌ Python 3.8+ 是必需的", Colors.FAIL)
         return False
-    print_colored(f"✅ Python {python_version.major}.{python_version.minor}", Colors.OKGREEN)
+    print_colored(
+        f"✅ Python {python_version.major}.{python_version.minor}", Colors.OKGREEN)
 
     # 检查Node.js
     try:
-        result = subprocess.run(['node', '--version'], capture_output=True, text=True)
+        result = subprocess.run(['node', '--version'],
+                                capture_output=True, text=True)
         if result.returncode == 0:
             print_colored(f"✅ Node.js {result.stdout.strip()}", Colors.OKGREEN)
         else:
@@ -79,6 +85,7 @@ def check_requirements():
     print()
     return True
 
+
 def setup_virtual_environment():
     """设置虚拟环境"""
     venv_path = PROJECT_ROOT / "venv"
@@ -92,12 +99,14 @@ def setup_virtual_environment():
 
     return venv_path
 
+
 def get_venv_python(venv_path):
     """获取虚拟环境的Python路径"""
     if os.name == 'nt':  # Windows
         return venv_path / "Scripts" / "python.exe"
     else:  # Unix/Linux/macOS
         return venv_path / "bin" / "python"
+
 
 def install_dependencies():
     """安装依赖"""
@@ -110,7 +119,7 @@ def install_dependencies():
     # 检查Python依赖
     try:
         result = subprocess.run([str(venv_python), '-c', 'import fastapi, uvicorn'],
-                              capture_output=True, text=True)
+                                capture_output=True, text=True)
         if result.returncode == 0:
             print_colored("✅ Python 依赖已安装", Colors.OKGREEN)
         else:
@@ -118,9 +127,11 @@ def install_dependencies():
     except (ImportError, subprocess.CalledProcessError, FileNotFoundError):
         print_colored("📦 安装Python依赖...", Colors.WARNING)
         # 升级pip
-        subprocess.run([str(venv_python), '-m', 'pip', 'install', '--upgrade', 'pip'])
+        subprocess.run([str(venv_python), '-m', 'pip',
+                       'install', '--upgrade', 'pip'])
         # 安装依赖
-        subprocess.run([str(venv_python), '-m', 'pip', 'install', '-r', 'requirements.txt'])
+        subprocess.run([str(venv_python), '-m', 'pip',
+                       'install', '-r', 'requirements.txt'])
         print_colored("✅ Python 依赖安装完成", Colors.OKGREEN)
 
     # 检查Node.js依赖
@@ -136,6 +147,7 @@ def install_dependencies():
 
     print()
     return venv_python
+
 
 def start_backend(venv_python):
     """启动后端服务"""
@@ -159,9 +171,11 @@ def start_backend(venv_python):
                 # 进程仍在运行，检查是否可以连接
                 try:
                     import requests
-                    response = requests.get("http://localhost:8000/health", timeout=2)
+                    response = requests.get(
+                        "http://localhost:8000/health", timeout=2)
                     if response.status_code == 200:
-                        print_colored("✅ 后端服务启动成功 (http://localhost:8000)", Colors.OKGREEN)
+                        print_colored(
+                            "✅ 后端服务启动成功 (http://localhost:8000)", Colors.OKGREEN)
                         return process
                 except:
                     continue  # 继续等待
@@ -182,6 +196,7 @@ def start_backend(venv_python):
     except Exception as e:
         print_colored(f"❌ 后端启动错误: {e}", Colors.FAIL)
         return None
+
 
 def start_frontend():
     """启动前端服务"""
@@ -230,6 +245,7 @@ def start_frontend():
     finally:
         os.chdir(PROJECT_ROOT)
 
+
 def monitor_processes(backend_process, frontend_process):
     """监控进程状态"""
     print_colored("\n🎯 服务状态监控", Colors.OKBLUE)
@@ -262,6 +278,7 @@ def monitor_processes(backend_process, frontend_process):
             print_colored("✅ 前端服务已停止", Colors.OKGREEN)
 
         print_colored("👋 再见！", Colors.HEADER)
+
 
 def main():
     """主函数"""
@@ -306,6 +323,7 @@ def main():
 
     # 监控进程
     monitor_processes(backend_process, frontend_process)
+
 
 if __name__ == "__main__":
     main()
