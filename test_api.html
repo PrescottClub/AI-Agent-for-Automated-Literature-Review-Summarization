@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tsearch API 测试</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #007bff;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Tsearch API 测试界面</h1>
+        
+        <div id="status" class="status info">
+            正在检查API状态...
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 API健康检查</h3>
+            <button onclick="checkHealth()">检查健康状态</button>
+            <div id="healthResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔍 文献检索测试</h3>
+            <input type="text" id="queryInput" placeholder="输入研究查询，例如：machine learning in healthcare" value="artificial intelligence in drug discovery">
+            <br>
+            <label>最大论文数: <input type="number" id="maxPapers" value="2" min="1" max="10" style="width:80px;"></label>
+            <br>
+            <button onclick="searchLiterature()" id="searchBtn">开始检索</button>
+            <div id="searchResult" class="result" style="display:none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📈 系统信息</h3>
+            <div class="info">
+                <strong>后端API:</strong> http://localhost:8000<br>
+                <strong>API文档:</strong> <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a><br>
+                <strong>AI模型:</strong> DeepSeek-R1 推理模型<br>
+                <strong>数据源:</strong> arXiv + Semantic Scholar
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        
+        // 页面加载时检查API状态
+        window.onload = function() {
+            checkHealth();
+        };
+        
+        async function checkHealth() {
+            const statusDiv = document.getElementById('status');
+            const resultDiv = document.getElementById('healthResult');
+            
+            try {
+                statusDiv.className = 'status info';
+                statusDiv.textContent = '正在检查API状态...';
+                
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = `✅ API服务正常运行<br>版本: ${data.version}<br>时间: ${data.timestamp}`;
+                    
+                    resultDiv.style.display = 'block';
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ API连接失败: ${error.message}`;
+                
+                resultDiv.style.display = 'block';
+                resultDiv.textContent = `错误: ${error.message}`;
+            }
+        }
+        
+        async function searchLiterature() {
+            const query = document.getElementById('queryInput').value.trim();
+            const maxPapers = parseInt(document.getElementById('maxPapers').value);
+            const resultDiv = document.getElementById('searchResult');
+            const searchBtn = document.getElementById('searchBtn');
+            
+            if (!query) {
+                alert('请输入查询内容');
+                return;
+            }
+            
+            try {
+                searchBtn.disabled = true;
+                searchBtn.textContent = '检索中...';
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result loading';
+                resultDiv.textContent = '🔍 正在使用DeepSeek-R1推理模型进行文献检索和分析...\n这可能需要30-60秒，请耐心等待。';
+                
+                const response = await fetch(`${API_BASE}/api/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        rawQuery: query,
+                        maxPapers: maxPapers
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result';
+                    const papers = data.papers || [];
+                    const summary = data.summary || '';
+                    const actionPlan = data.action_plan || [];
+                    
+                    let resultText = `✅ 检索完成！\n\n`;
+                    resultText += `📊 找到 ${papers.length} 篇论文\n`;
+                    resultText += `🎯 生成 ${actionPlan.length} 步行动计划\n`;
+                    resultText += `📝 摘要长度: ${summary.length} 字符\n\n`;
+                    
+                    if (papers.length > 0) {
+                        resultText += `📚 论文列表:\n`;
+                        papers.forEach((paper, index) => {
+                            resultText += `${index + 1}. ${paper.title || 'No title'}\n`;
+                            resultText += `   作者: ${(paper.authors || []).slice(0, 3).join(', ')}${paper.authors && paper.authors.length > 3 ? '...' : ''}\n`;
+                            resultText += `   年份: ${paper.year || 'Unknown'}\n`;
+                            resultText += `   来源: ${paper.source || 'Unknown'}\n\n`;
+                        });
+                    }
+                    
+                    if (actionPlan.length > 0) {
+                        resultText += `📋 行动计划:\n`;
+                        actionPlan.forEach((step, index) => {
+                            resultText += `${index + 1}. ${step}\n`;
+                        });
+                        resultText += `\n`;
+                    }
+                    
+                    if (summary) {
+                        resultText += `📄 AI分析摘要:\n${summary.substring(0, 500)}${summary.length > 500 ? '...' : ''}`;
+                    }
+                    
+                    resultDiv.textContent = resultText;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${data.detail || '未知错误'}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result';
+                resultDiv.textContent = `❌ 检索失败: ${error.message}`;
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = '开始检索';
+            }
+        }
+    </script>
+</body>
+</html>

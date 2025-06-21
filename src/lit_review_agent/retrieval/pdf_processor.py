@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 import httpx
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from pdfminer.high_level import extract_text
 
 from ..utils.logger import LoggerMixin
@@ -52,7 +52,8 @@ class PDFProcessor(LoggerMixin):
                 Path(temp_path).unlink(missing_ok=True)
 
         except Exception as e:
-            self.logger.error(f"Error extracting text from PDF URL {pdf_url}: {e}")
+            self.logger.error(
+                f"Error extracting text from PDF URL {pdf_url}: {e}")
             return None
 
     async def extract_text_from_file(self, file_path: str) -> Optional[str]:
@@ -79,9 +80,10 @@ class PDFProcessor(LoggerMixin):
                     )
                     return cleaned_text
             except Exception as e:
-                self.logger.warning(f"pdfminer extraction failed: {e}, trying PyPDF2")
+                self.logger.warning(
+                    f"pdfminer extraction failed: {e}, trying pypdf")
 
-            # Fallback to PyPDF2 - also run in executor for async
+            # Fallback to pypdf - also run in executor for async
             try:
 
                 def _extract_with_pypdf2(file_path):
@@ -89,12 +91,12 @@ class PDFProcessor(LoggerMixin):
                         reader = PdfReader(file)
                         text = ""
 
-                        for page_num, page in enumerate(reader.pages):
+                        for page in reader.pages:
                             try:
                                 page_text = page.extract_text()
                                 if page_text:
                                     text += page_text + "\n"
-                            except Exception as e:
+                            except Exception:
                                 # Log but continue with other pages
                                 pass
                         return text
@@ -105,18 +107,20 @@ class PDFProcessor(LoggerMixin):
                 if text and text.strip():
                     cleaned_text = clean_text(text)
                     self.logger.info(
-                        f"Extracted {len(cleaned_text)} characters using PyPDF2"
+                        f"Extracted {len(cleaned_text)} characters using pypdf"
                     )
                     return cleaned_text
 
             except Exception as e:
-                self.logger.error(f"PyPDF2 extraction failed: {e}")
+                self.logger.error(f"pypdf extraction failed: {e}")
 
-            self.logger.error(f"All PDF extraction methods failed for: {file_path}")
+            self.logger.error(
+                f"All PDF extraction methods failed for: {file_path}")
             return None
 
         except Exception as e:
-            self.logger.error(f"Error extracting text from PDF file {file_path}: {e}")
+            self.logger.error(
+                f"Error extracting text from PDF file {file_path}: {e}")
             return None
 
     async def extract_text_from_bytes(self, pdf_bytes: bytes) -> Optional[str]:

@@ -330,7 +330,7 @@ import {
   Document
 } from '@element-plus/icons-vue'
 import PaperCard from '../components/PaperCard.vue'
-import type { Paper, SearchHistoryItem } from '@/types/paper'
+import type { Paper, SearchHistoryItem } from '../types/paper'
 
 // 路由
 const router = useRouter()
@@ -381,24 +381,35 @@ const startSearch = async () => {
   searchProgress.value = '正在连接服务器...'
 
   try {
-    // Simulating API call with dummy data for now
-    console.log(`Simulating search for: ${searchQuery.value}, Sources: ${selectedSources.value.join(', ')}, Max Papers: ${maxPapers.value}`);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // 调用真实的API
+    console.log(`Searching for: ${searchQuery.value}, Sources: ${selectedSources.value.join(', ')}, Max Papers: ${maxPapers.value}`);
 
-    actionPlan.value = [
-        '解析用户查询意图',
-        '构建关键词组合: [\"AI\", \"医疗诊断\", \"最新进展\"]',
-        '并行查询 arXiv, Semantic Scholar 数据库',
-        '初步筛选到 87 篇相关文献',
-        '根据摘要和关键词进行相关性排序',
-        '提取关键信息并生成摘要洞察'
-    ];
+    // 导入API函数
+    const { searchLiterature } = await import('../api/literature')
 
-    searchResults.value = [
-        { id: '1', title: 'AI在肿瘤早期诊断中的应用进展回顾', authors: ['张三', '李四'], publishedDate: '2023-10-15', source: 'arXiv', summary: '本文综述了人工智能技术，特别是深度学习，在多种癌症早期诊断中的最新应用和挑战...', keywords: ['AI', '癌症诊断', '深度学习'], url: '#', pdfUrl: '#', isFavorite: false },
-        { id: '2', title: '基于Transformer的医疗影像智能分析平台', authors: ['王五'], publishedDate: '2024-01-20', source: 'Semantic Scholar', summary: '提出了一种基于Transformer架构的医疗影像分析平台，能够有效提升多种疾病的诊断准确率...', keywords: ['Transformer', '医疗影像', '智能诊断'], url: '#', pdfUrl: '#', isFavorite: true },
-        { id: '3', title: '可解释AI在临床决策支持系统中的研究', authors: ['赵六', '孙七'], publishedDate: '2023-05-01', source: 'PubMed Central', summary: '探讨了可解释人工智能（XAI）在构建临床决策支持系统（CDSS）中的重要性及其实现方法...', keywords: ['XAI', '临床决策', '可解释性'], url: '#', pdfUrl: '#', isFavorite: false }
-    ];
+    // 调用真实API
+    const result = await searchLiterature({
+      rawQuery: searchQuery.value,
+      sources: selectedSources.value,
+      maxPapers: maxPapers.value,
+      retrieveFullText: retrieveFullText.value,
+      enableAIAnalysis: enableAIAnalysis.value
+    })
+
+    // 设置行动计划
+    actionPlan.value = result.actionPlan || [
+      '解析用户查询意图',
+      '构建关键词组合并优化搜索策略',
+      '并行查询多个学术数据库',
+      '使用AI模型进行相关性分析',
+      '生成智能摘要和洞察'
+    ]
+
+    // 设置搜索结果
+    searchResults.value = result.papers.map(paper => ({
+      ...paper,
+      isFavorite: false // 添加收藏状态
+    }))
 
     const historyItem: SearchHistoryItem = {
       query: searchQuery.value,

@@ -1,16 +1,11 @@
 """LLM manager for handling OpenAI API interactions."""
 
 import asyncio
-import re
-import time
 from typing import Any, Dict, List, Optional, Literal
 
-import openai
-from openai import OpenAI
 import httpx
 
 from ..utils.logger import LoggerMixin, get_logger
-from ..utils.helpers import estimate_tokens, truncate_text
 from ..utils.config import Config
 
 logger = get_logger(__name__)
@@ -70,7 +65,8 @@ class LLMManager(LoggerMixin):
                 f"Ollama provider configured. Ensure Ollama server is running at {self.base_url}"
             )
         elif self.provider == "mock":
-            self.logger.info("LLMManager configured with MOCK provider for testing.")
+            self.logger.info(
+                "LLMManager configured with MOCK provider for testing.")
             self.model_name = "mock_model"
         else:
             raise LLMManagerError(f"Unsupported LLM provider: {self.provider}")
@@ -105,22 +101,26 @@ class LLMManager(LoggerMixin):
                             url, headers=headers, params=payload
                         )  # params for GET
                     else:
-                        raise LLMManagerError(f"Unsupported HTTP method: {method}")
+                        raise LLMManagerError(
+                            f"Unsupported HTTP method: {method}")
 
                     response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
                     response_data = response.json()
-                    self.logger.debug(f"Received response from {url}: {response_data}")
+                    self.logger.debug(
+                        f"Received response from {url}: {response_data}")
                     return response_data
             except httpx.HTTPStatusError as e:
                 self.logger.error(
                     f"HTTP error {e.response.status_code} for {e.request.url}: {e.response.text}"
                 )
-                if e.response.status_code in [401, 403]:  # Unauthorized or Forbidden
+                # Unauthorized or Forbidden
+                if e.response.status_code in [401, 403]:
                     raise LLMManagerError(
                         f"Authentication error: {e.response.text}"
                     ) from e
                 if e.response.status_code == 429:  # Rate limit
-                    self.logger.warning("Rate limit exceeded. Retrying after delay...")
+                    self.logger.warning(
+                        "Rate limit exceeded. Retrying after delay...")
                     await asyncio.sleep(
                         self.config.llm_rate_limit_delay * (attempt + 1)
                     )
@@ -129,7 +129,8 @@ class LLMManager(LoggerMixin):
                         f"HTTP error after {self.max_retries} retries: {e}"
                     ) from e
                 else:
-                    await asyncio.sleep(1 * (attempt + 1))  # Basic exponential backoff
+                    # Basic exponential backoff
+                    await asyncio.sleep(1 * (attempt + 1))
             except httpx.RequestError as e:
                 self.logger.error(f"Request error for {url}: {e}")
                 if attempt == self.max_retries - 1:
@@ -169,7 +170,8 @@ class LLMManager(LoggerMixin):
             The LLM's response, typically a dictionary containing the completion.
         """
         if self.provider == "mock":
-            self.logger.info(f"Mocking chat completion for messages: {messages}")
+            self.logger.info(
+                f"Mocking chat completion for messages: {messages}")
             return {
                 "choices": [
                     {
@@ -226,7 +228,8 @@ class LLMManager(LoggerMixin):
             # For now, assume OpenAI-like structure for non-streaming
             return response_data
         except LLMManagerError as e:
-            self.logger.error(f"Failed to generate chat completion: {e}", exc_info=True)
+            self.logger.error(
+                f"Failed to generate chat completion: {e}", exc_info=True)
             raise
 
     async def generate_embedding(
@@ -243,10 +246,12 @@ class LLMManager(LoggerMixin):
             A list of embeddings (each embedding is a list of floats).
         """
         if self.provider == "mock":
-            self.logger.info(f"Mocking embeddings for texts: {input_texts[:2]}...")
+            self.logger.info(
+                f"Mocking embeddings for texts: {input_texts[:2]}...")
             # Return fixed-size dummy embeddings
             return [
-                [0.01 * i for i in range(self.config.embedding_dimension_mock or 128)]
+                [0.01 *
+                    i for i in range(self.config.embedding_dimension_mock or 128)]
                 for _ in input_texts
             ]
 
@@ -351,14 +356,16 @@ class LLMManager(LoggerMixin):
 
             # Standardize response for OpenAI-like embedding APIs
             if "data" in response_data and isinstance(response_data["data"], list):
-                embeddings = [item["embedding"] for item in response_data["data"]]
+                embeddings = [item["embedding"]
+                              for item in response_data["data"]]
                 return embeddings
             else:
                 raise LLMManagerError(
                     f"Unexpected embedding response format: {response_data}"
                 )
         except LLMManagerError as e:
-            self.logger.error(f"Failed to generate embeddings: {e}", exc_info=True)
+            self.logger.error(
+                f"Failed to generate embeddings: {e}", exc_info=True)
             raise
 
     async def extract_core_research_params(
@@ -404,7 +411,8 @@ Examples:
             )
 
             if not response_text:
-                self.logger.error("No response from LLM for parameter extraction")
+                self.logger.error(
+                    "No response from LLM for parameter extraction")
                 return {"topic": query, "time_limit": None, "focus": None}
 
             # Try to parse JSON response
@@ -432,7 +440,8 @@ Examples:
                     "focus": parsed_params.get("focus"),
                 }
 
-                self.logger.info(f"Successfully extracted parameters: {result}")
+                self.logger.info(
+                    f"Successfully extracted parameters: {result}")
                 return result
 
             except (json.JSONDecodeError, ValueError) as e:
@@ -481,7 +490,17 @@ Examples:
                 and response.get("choices")
                 and response["choices"][0].get("message")
             ):
-                return response["choices"][0]["message"].get("content", "").strip()
+                message = response["choices"][0]["message"]
+                content = message.get("content", "").strip()
+
+                # For deepseek-reasoner, also log the reasoning process
+                if self.model_name == "deepseek-reasoner" and message.get("reasoning_content"):
+                    reasoning = message.get("reasoning_content", "").strip()
+                    self.logger.debug(
+                        f"DeepSeek Reasoning Process: {reasoning[:200]}...")
+                    # Return the final answer, not the reasoning process
+
+                return content
             else:
                 self.logger.error(f"Invalid response format: {response}")
                 return None
@@ -508,12 +527,14 @@ if __name__ == "__main__":
         completion = await mock_llm.generate_chat_completion(
             messages=[{"role": "user", "content": "Hello Mock!"}]
         )
-        print(f"Mock Completion: {completion['choices'][0]['message']['content']}")
+        print(
+            f"Mock Completion: {completion['choices'][0]['message']['content']}")
 
         embeddings = await mock_llm.generate_embedding(
             input_texts=["Test text 1", "Test text 2"]
         )
-        print(f"Mock Embeddings (first item, first 5 dims): {embeddings[0][:5]}...")
+        print(
+            f"Mock Embeddings (first item, first 5 dims): {embeddings[0][:5]}...")
         print(f"Number of mock embeddings: {len(embeddings)}")
 
         # --- Test with OpenAI (requires OPENAI_API_KEY in .env or config) ---
@@ -556,7 +577,8 @@ if __name__ == "__main__":
                     print(
                         f"OpenAI Embeddings (first item, first 5 dims): {openai_embeddings[0][:5]}..."
                     )
-                    print(f"Number of OpenAI embeddings: {len(openai_embeddings)}")
+                    print(
+                        f"Number of OpenAI embeddings: {len(openai_embeddings)}")
                 except LLMManagerError as e:
                     print(f"OpenAI Embedding failed: {e}")
             else:
@@ -566,6 +588,7 @@ if __name__ == "__main__":
         except LLMManagerError as e:
             print(f"Could not initialize OpenAI LLMManager for test: {e}")
         except Exception as e:
-            print(f"An unexpected error occurred during OpenAI test setup: {e}")
+            print(
+                f"An unexpected error occurred during OpenAI test setup: {e}")
 
     asyncio.run(test_llm_manager())

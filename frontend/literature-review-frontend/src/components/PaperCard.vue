@@ -108,7 +108,7 @@
 import { ref } from 'vue'
 import { StarFilled, Star, User, Calendar, Link, Download, View, TrendCharts, Share } from '@element-plus/icons-vue'
 import type { PropType } from 'vue'
-import type { Paper } from '@/types/paper'
+import type { Paper } from '../types/paper'
 
 const props = defineProps({
   paper: {

@@ -1,10 +1,9 @@
 """Configuration management for the literature review agent."""
 
-import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Literal, List
 
-from pydantic import Field, ConfigDict, validator
+from pydantic import Field, ConfigDict
 from pydantic_settings import BaseSettings
 from loguru import logger
 
@@ -15,7 +14,7 @@ class Config(BaseSettings):
     model_config = ConfigDict(
         env_file=".env",
         case_sensitive=False,
-        extra="forbid",  # Prevent typos in environment variables
+        extra="allow",  # Allow extra fields for testing and flexibility
     )
 
     # Core Settings
@@ -172,7 +171,15 @@ class Config(BaseSettings):
 
     def __init__(self, **kwargs):
         """Initialize configuration, loading from .env file if it exists."""
+        # Store kwargs for later override
+        override_values = kwargs.copy()
+
         super().__init__(**kwargs)
+
+        # Override with explicitly passed values (for testing)
+        for key, value in override_values.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
         # Validate critical configuration
         if not self.deepseek_api_key and self.llm_provider == "deepseek":
@@ -219,7 +226,7 @@ class Config(BaseSettings):
     @property
     def is_development(self) -> bool:
         """Check if running in development mode."""
-        return str(self.log_level).upper() == "DEBUG"
+        return str(self.log_level).upper() == "DEBUG" or self.debug
 
     @property
     def chroma_settings(self) -> Dict[str, Any]:
