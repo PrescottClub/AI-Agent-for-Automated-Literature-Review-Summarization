@@ -1,4 +1,4 @@
-import './assets/main.css'
+import './style.css'
 import './assets/styles/base.css'
 import './assets/styles/animations.css'
 import './assets/styles/utilities.css'
@@ -13,6 +13,8 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
 
+console.log('🚀 Starting Tsearch application...')
+
 const app = createApp(App)
 
 // 注册 Element Plus 图标
@@ -25,3 +27,5 @@ app.use(router)
 app.use(ElementPlus)
 
 app.mount('#app')
+
+console.log('✅ Tsearch application mounted successfully')

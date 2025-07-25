@@ -15,10 +15,12 @@ const api = axios.create({
 // 请求拦截器
 api.interceptors.request.use(
   (config) => {
+    console.log('API Request:', config.method?.toUpperCase(), config.url, config.data)
     // 可以在这里添加认证 token
     return config
   },
   (error) => {
+    console.error('Request Error:', error)
     return Promise.reject(error)
   },
 )
@@ -26,10 +28,18 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   (response) => {
+    console.log('API Response:', response.status, response.config.url)
     return response
   },
   (error) => {
-    console.error('API Error:', error)
+    console.error('API Error Details:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method,
+    })
     return Promise.reject(error)
   },
 )
@@ -90,6 +100,19 @@ export const getSystemStatus = async () => {
     return response
   } catch (error) {
     console.error('Failed to get system status:', error)
+    throw error
+  }
+}
+
+// 测试API连接
+export const testApiConnection = async () => {
+  try {
+    console.log('Testing API connection to:', API_BASE_URL)
+    const response = await api.get('/health')
+    console.log('Health check successful:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('API connection test failed:', error)
     throw error
   }
 }

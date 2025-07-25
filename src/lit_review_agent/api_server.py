@@ -11,9 +11,11 @@ from pathlib import Path
 from typing import Dict, List, Optional
 import time
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
+from datetime import timedelta
 
 # 添加src目录到Python路径
 current_dir = Path(__file__).parent.parent.parent
@@ -27,6 +29,69 @@ except ImportError as e:
     print(f"Warning: Could not import modules: {e}")
     LiteratureAgent = None
     Config = None
+
+# 导入认证中间件
+try:
+    from src.lit_review_agent.middleware.auth import (
+        authenticate_user,
+        create_access_token,
+        users_db,
+        ACCESS_TOKEN_EXPIRE_MINUTES,
+        Token,
+        User as AuthUser,
+        get_current_active_user
+    )
+    print("Auth middleware imported successfully")
+except ImportError as e:
+    print(f"Warning: Could not import auth middleware: {e}")
+    authenticate_user = None
+    create_access_token = None
+    users_db = None
+    ACCESS_TOKEN_EXPIRE_MINUTES = 30
+    Token = None
+    AuthUser = None
+    get_current_active_user = None
+
+# 暂时禁用限流器
+limiter = None
+
+# 临时用户模型定义
+
+
+class User(BaseModel):
+    username: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    disabled: Optional[bool] = None
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+# 临时依赖函数
+
+
+async def get_current_active_user():
+    """临时用户依赖函数"""
+    return User(username="demo_user", email="demo@example.com")
+
+# 临时装饰器定义，直到实现真正的速率限制
+
+
+def rate_limit_auth(func):
+    """临时认证速率限制装饰器"""
+    return func
+
+
+def rate_limit_search(func):
+    """临时搜索速率限制装饰器"""
+    return func
+
+
+def rate_limit_api(func):
+    """临时API速率限制装饰器"""
+    return func
 
 
 @asynccontextmanager
@@ -82,7 +147,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 简化版本 - 移除复杂中间件
+# 添加安全中间件
+if limiter:
+    app.state.limiter = limiter
+
+# OAuth2 scheme for authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
 
 
 # 请求模型
@@ -237,6 +307,37 @@ async def root():
     }
 
 
+# 认证端点
+@app.post("/auth/token")
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    """用户登录获取访问token"""
+    if not authenticate_user:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Authentication not available"
+        )
+
+    user = authenticate_user(users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/auth/me", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    """获取当前用户信息"""
+    return current_user
+
+
 @app.get("/health")
 async def health_check():
     """健康检查端点"""
@@ -275,7 +376,11 @@ async def get_status():
 
 
 @app.post("/api/search", response_model=SearchResult)
-async def search_literature(request: SearchRequest):
+@rate_limit_search
+async def search_literature(
+    request: SearchRequest,
+    current_user: User = Depends(get_current_active_user)
+):
     """文献检索"""
     start_time = time.time()
 
@@ -340,41 +445,11 @@ async def search_literature(request: SearchRequest):
                 # Extract action plan from results
                 action_plan = results.get("action_plan", [])
         else:
-            # 使用模拟数据
-            await asyncio.sleep(1)  # 模拟处理时间
-            papers = [
-                Paper(
-                    title=f"人工智能在{query_to_use}领域的应用研究",
-                    authors=["张三", "李四", "王五"],
-                    publishedDate="2024-01-15",
-                    source="arxiv",
-                    summary=f"本文深入研究了人工智能技术在{query_to_use}领域的最新应用。",
-                    keywords=["人工智能", "机器学习", query_to_use],
-                    url="https://arxiv.org/abs/2401.12345",
-                    fullTextRetrieved=True,
-                ),
-                Paper(
-                    title=f"{query_to_use}中的机器学习方法综述",
-                    authors=["赵六", "钱七"],
-                    publishedDate="2023-12-20",
-                    source="semantic_scholar",
-                    summary=f"本综述分析了{query_to_use}领域中机器学习方法的发展现状。",
-                    keywords=["机器学习", "数据分析"],
-                    url="https://example.com/paper2",
-                    fullTextRetrieved=False,
-                ),
-            ]
-
-            # 生成模拟的行动计划
-            action_plan = [
-                f"🎯 确定研究主题：{query_to_use}",
-                "📚 选择数据源：arxiv、semantic_scholar",
-                f"🔎 执行检索策略：检索最多{request.maxPapers}篇相关论文",
-                "📊 分析论文元数据：标题、作者、摘要、引用数等",
-                "📈 识别研究趋势：发表时间分布、热点关键词",
-                "🤖 AI智能分析：生成综合性研究洞察",
-                "📝 生成最终报告：整理发现和建议",
-            ]
+            # Agent not available - return error instead of mock data
+            raise HTTPException(
+                status_code=503,
+                detail="Literature agent is not available. Please check system configuration and ensure all required services are running."
+            )
 
         processing_time = time.time() - start_time
 
@@ -394,41 +469,63 @@ async def search_literature(request: SearchRequest):
 
 
 @app.post("/api/generate-report")
-async def generate_report(request: ReportRequest):
+@rate_limit_api
+async def generate_report(
+    request: ReportRequest,
+    current_user: User = Depends(get_current_active_user)
+):
     """生成综述报告"""
     try:
         print(f"开始生成报告: {request.title}")
 
-        # 模拟报告生成
-        await asyncio.sleep(2)
+        agent = get_agent()
+        if not agent:
+            raise HTTPException(
+                status_code=503,
+                detail="Literature agent is not available for report generation"
+            )
 
-        report = f"""# {request.title}
+        # 使用真实的agent生成报告
+        try:
+            # 转换paper数据格式以便agent处理
+            papers_data = []
+            for paper in request.papers:
+                papers_data.append({
+                    "title": paper.title,
+                    "authors": paper.authors,
+                    "published_date": paper.publishedDate,
+                    "source": paper.source,
+                    "summary": paper.summary,
+                    "keywords": paper.keywords,
+                    "url": paper.url,
+                    "full_text_retrieved": paper.fullTextRetrieved
+                })
 
-## 摘要
+            # 调用agent的报告生成功能
+            report_result = await agent.generate_comprehensive_report(
+                papers_data=papers_data,
+                topic=request.title,
+                custom_prompt=getattr(request, 'customPrompt', None)
+            )
 
-本报告基于 {len(request.papers)} 篇相关文献，对研究主题进行了全面的综述分析。
+            report = report_result.get('report', '') if isinstance(
+                report_result, dict) else str(report_result)
 
-## 主要发现
+            if not report.strip():
+                raise HTTPException(
+                    status_code=500,
+                    detail="Generated report is empty"
+                )
 
-### 1. 研究现状
-- 共检索到 {len(request.papers)} 篇高质量相关文献
-- 研究涵盖了多个重要的技术方向和应用场景
+            print("报告生成完成")
+            return {"report": report}
 
-### 2. 技术趋势
-- 人工智能和机器学习技术的广泛应用
-- 跨学科融合成为重要发展方向
-
-## 结论
-
-通过对现有文献的深入分析，我们发现该领域正处于快速发展阶段。
-
----
-*报告生成时间: {datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')}*
-        """
-
-        print("报告生成完成")
-
-        return {"report": report}
+        except Exception as e:
+            print(f"Agent报告生成异常: {e}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Report generation failed: {str(e)}"
+            )
 
     except Exception as e:
         print(f"报告生成失败: {e}")

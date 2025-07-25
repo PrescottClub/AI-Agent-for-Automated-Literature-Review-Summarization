@@ -1,216 +1,138 @@
-# 🤖 Tsearch - AI 智能文献综述与摘要生成系统
+# 🔍 Tsearch - AI Literature Discovery Engine
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.0+-green.svg)](https://vuejs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-red.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![DeepSeek](https://img.shields.io/badge/Powered_by-DeepSeek-orange.svg)](https://platform.deepseek.com/)
-[![Status](https://img.shields.io/badge/Status-Production_Ready-green.svg)](#)
 
-> **🚀 Tsearch - 让学术研究更高效的 AI 智能助手** | **Created by Terence Qin | 由 Terence Qin 创建**
+> **AI-powered literature discovery and review generation platform** | **Created by Terence Qin**
 
-**Tsearch：重新定义学术研究的生产力边界。** 作为新一代 AI Native 的文献发现引擎，Tsearch 深度整合了多模态大语言模型、向量检索、知识图谱等前沿技术栈，构建了端到端的智能研究工作流。通过突破性的自然语言交互范式，彻底解决了传统文献检索中的"关键词依赖"、"信息茧房"、"认知负载"等核心痛点，为科研工作者打造了一个具备"理解-推理-生成"全链路能力的 AI Research Copilot。
+Tsearch is an intelligent literature discovery engine that leverages advanced AI technologies to streamline academic research. It combines natural language processing, vector search, and automated analysis to help researchers find, analyze, and synthesize academic literature efficiently.
 
-🎯 **技术护城河**：基于 Transformer 架构的多模态理解引擎 + RAG 增强的知识检索系统 + CoT 推理的智能决策链路，实现了从"被动检索"到"主动发现"的范式跃迁，让每一次查询都成为一次深度的学术洞察。
+## ✨ Key Features
 
-## 🎯 项目状态
+- **🔍 Smart Search**: Natural language queries with intelligent paper discovery
+- **🤖 AI Analysis**: Automated content analysis and trend identification
+- **📊 Report Generation**: One-click literature review and summary creation
+- **🌐 Multi-Source**: Integration with arXiv, Semantic Scholar, and more
+- **⚡ Real-time**: Fast, responsive web interface with live updates
 
-✅ **生产就绪** - 所有核心功能正常运行，可直接使用
-✅ **稳定可靠** - 经过全面测试，无已知关键 Bug
-✅ **持续维护** - 由 Terence Qin 积极维护和更新
-✅ **开箱即用** - 支持一键启动，快速部署
+## 🚀 Quick Start
 
-## 🚀 核心能力矩阵
+### Prerequisites
 
-### 🧠 **认知智能引擎**
+- Python 3.9+
+- Node.js 18+
+- API Keys: DeepSeek (required), OpenAI (for embeddings), Semantic Scholar (optional)
 
-- **多模态理解** - 基于 Transformer 架构的深度语义解析，支持中英文混合查询
-- **意图识别** - 端到端的 NLU 管道，自动提取研究主题、时间窗口、领域边界
-- **查询重写** - 智能 Query Rewriting，结合领域知识图谱优化检索策略
-- **上下文感知** - 支持多轮对话式交互，保持会话状态和语义连贯性
+### Installation
 
-### 🎯 **智能决策链路**
+1. **Clone the repository**
 
-- **CoT 推理** - Chain-of-Thought 推理机制，透明化 AI 决策过程
-- **动态规划** - 基于用户意图自适应生成执行计划，支持实时调优
-- **流程编排** - 可视化的任务 DAG，清晰展示每个执行节点和依赖关系
-- **异常处理** - 智能容错机制，自动回滚和重试策略
+   ```bash
+   git clone https://github.com/yourusername/tsearch.git
+   cd tsearch
+   ```
 
-### 🔍 **分布式检索架构**
+2. **Set up environment**
 
-- **多源融合** - 异构数据源统一接入，支持 arXiv、Semantic Scholar 等头部平台
-- **向量检索** - 基于 FAISS 的高性能相似度计算，毫秒级响应千万级文档库
-- **混合召回** - BM25 + Dense Retrieval 双路召回，精准率和召回率双重保障
-- **智能排序** - Learning-to-Rank 算法优化结果排序，个性化推荐机制
+   ```bash
+   # Copy configuration template
+   cp config/config.env .env
 
-### 🤖 **AI 原生分析**
+   # Edit .env file with your API keys
+   # DEEPSEEK_API_KEY=your-deepseek-api-key
+   # OPENAI_API_KEY=your-openai-api-key
+   ```
 
-- **文档理解** - 基于 BERT 系列模型的深度文本挖掘，自动提取关键信息
-- **趋势洞察** - 时序分析算法识别研究热点演进，预测技术发展方向
-- **质量评估** - 多维度论文质量评分模型，结合引用网络和内容质量
-- **知识抽取** - 实体识别和关系抽取，构建领域知识图谱
+3. **Install dependencies**
 
-### 📊 **智能内容生成**
+   ```bash
+   # Backend
+   pip install -r requirements.txt
 
-- **模板引擎** - 可配置的报告生成框架，支持多种学术写作规范
-- **数据可视化** - 基于 D3.js 的交互式图表生成，支持多种统计分析
-- **引用管理** - 自动化的参考文献格式化，支持 APA、MLA 等主流标准
-- **多格式输出** - 支持 Markdown、LaTeX、Word 等多种导出格式
+   # Frontend
+   cd frontend/literature-review-frontend
+   npm install
+   cd ../..
+   ```
 
-### 🎨 **极致用户体验**
+4. **Start the application**
 
-- **响应式架构** - 基于 Vue3 Composition API 的现代化前端，PWA 级别的用户体验
-- **实时通信** - WebSocket 长连接，毫秒级状态同步和进度推送
-- **离线能力** - Service Worker 缓存策略，支持弱网环境下的基础功能
-- **个性化** - 用户画像驱动的个性化推荐，智能记忆用户偏好
+   ```bash
+   # Option 1: Start both services
+   python scripts/start_all.py
 
-## 🏗️ 系统架构
+   # Option 2: Start individually
+   python scripts/start_backend_only.py  # Backend: http://localhost:8000
+   cd frontend/literature-review-frontend && npm run dev  # Frontend: http://localhost:5173
+   ```
 
-```mermaid
-graph TD
-    A[🎨 Vue3 前端<br/>• 响应式界面<br/>• 实时状态监控<br/>• 搜索历史管理]
-    B{⚡ FastAPI 后端<br/>• RESTful API<br/>• 数据验证<br/>• 错误处理}
-    C{🤖 AI 代理核心<br/>• 智能搜索<br/>• 文献分析<br/>• 报告生成}
-    D[🧮 LLM<br/>DeepSeek / OpenAI]
-    E[💾 向量数据库<br/>ChromaDB<br/>• 语义搜索]
-    F[🔍 学术API<br/>arXiv / Semantic Scholar]
+### Usage
 
-    A --> B
-    B --> C
-    C --> D
-    C --> E
-    C --> F
+1. Open http://localhost:5173 in your browser
+2. Enter your research query in natural language
+3. Review AI-generated literature analysis
+4. Export reports and summaries
 
-    style A fill:#f8fafc,stroke:#3b82f6,stroke-width:3px,color:#1e293b
-    style B fill:#fefefe,stroke:#6366f1,stroke-width:3px,color:#1e293b
-    style C fill:#f0fdf4,stroke:#10b981,stroke-width:3px,color:#1e293b
-    style D fill:#fffbeb,stroke:#f59e0b,stroke-width:3px,color:#1e293b
-    style E fill:#fef3f2,stroke:#ef4444,stroke-width:3px,color:#1e293b
-    style F fill:#f0f9ff,stroke:#06b6d4,stroke-width:3px,color:#1e293b
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Vue3 Frontend │    │  FastAPI Backend│    │   AI Core       │
+│                 │    │                 │    │                 │
+│ • Search UI     │◄──►│ • REST API      │◄──►│ • LLM Integration│
+│ • Results View  │    │ • Data Validation│    │ • Vector Search │
+│ • Report Export │    │ • Error Handling│    │ • Content Analysis│
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                        │
+                                               ┌────────▼────────┐
+                                               │  External APIs  │
+                                               │                 │
+                                               │ • arXiv         │
+                                               │ • Semantic      │
+                                               │   Scholar       │
+                                               │ • ChromaDB      │
+                                               └─────────────────┘
 ```
 
-## 🎯 目标用户
+## 🛠️ Tech Stack
 
-- **🎓 研究人员和学者** - 加速系统性综述和荟萃分析
-- **📚 研究生** - 快速了解研究领域现状
-- **🏢 研发团队** - 跟踪技术进展和市场趋势
-- **📈 市场分析师** - 追踪新兴技术和科学突破
-- **💼 咨询顾问** - 提供基于证据的洞察
+- **Frontend**: Vue 3, TypeScript, Tailwind CSS, Element Plus
+- **Backend**: FastAPI, Python 3.9+, Pydantic
+- **AI/ML**: DeepSeek API, OpenAI Embeddings, ChromaDB
+- **Data Sources**: arXiv API, Semantic Scholar API
+- **Deployment**: Docker, Docker Compose
 
-## 🚀 快速开始
+## 📝 API Documentation
 
-### 环境要求
+Once the backend is running, visit:
 
-- **Python**: 3.9 或更高版本
-- **Node.js**: 16.0 或更高版本
-- **npm**: 8.0 或更高版本
+- **Interactive API Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
 
-### 方式一：智能启动（推荐）⭐ **最新**
+## 🤝 Contributing
 
-```bash
-# 克隆项目
-git clone https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization.git
-cd AI-Agent-for-Automated-Literature-Review-Summarization
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-# 配置环境变量
-cp config/config.example.env .env
-# 编辑 .env 文件，添加您的 API 密钥
+## 📄 License
 
-# 查看功能状态
-python scripts/smart_start.py --mode status
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-# Docker 启动（推荐）
-python scripts/smart_start.py --mode docker --env development
+## 👨‍💻 Author
 
-# 或传统一键启动
-python scripts/start_all.py
-```
+**Terence Qin** - _Creator and Maintainer_
 
-### 方式二：手动设置
+## 🙏 Acknowledgments
 
-#### 1. 克隆项目
-
-```bash
-git clone https://github.com/PrescottClub/AI-Agent-for-Automated-Literature-Review-Summarization.git
-cd AI-Agent-for-Automated-Literature-Review-Summarization
-```
-
-#### 2. 后端设置
-
-```bash
-# 创建虚拟环境
-python -m venv venv
-
-# 激活虚拟环境
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
-
-# 安装依赖
-pip install -e .
-
-# 下载spaCy模型
-python -m spacy download en_core_web_sm
-```
-
-#### 3. 配置环境变量
-
-```bash
-# 复制环境变量模板
-cp config/config.example.env .env
-
-# 编辑 .env 文件，设置以下配置：
-# LLM_PROVIDER=deepseek
-# DEEPSEEK_API_KEY=your_deepseek_api_key_here
-# OPENAI_API_KEY=your_openai_api_key_here  # 用于嵌入
-# SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here
-
-# 可选：自定义功能开关
-# 编辑 config/features.env 控制启用的功能模块
-```
-
-#### 4. 前端设置
-
-```bash
-cd frontend/literature-review-frontend
-npm install
-```
-
-#### 5. 启动服务
-
-**启动后端 API 服务器**
-
-```bash
-# 在项目根目录
-python scripts/start_backend_only.py
-# 或者直接运行
-python src/lit_review_agent/api_server.py
-```
-
-服务器将在 `http://0.0.0.0:8000` 启动（可通过 http://localhost:8000 访问）
-
-**启动前端界面**
-
-```bash
-# 在frontend/literature-review-frontend目录
-cd frontend/literature-review-frontend
-npm run dev
-```
-
-前端将在 `http://localhost:5173` 启动
-
-### 🎉 验证安装
-
-启动成功后，您应该看到：
-
-- **后端**: 控制台显示 "✅ 文献代理初始化成功" 和 "Uvicorn running on http://0.0.0.0:8000"
-- **前端**: 控制台显示 "VITE v6.3.5 ready" 和 "Local: http://localhost:5173/"
-- **API 文档**: 访问 http://localhost:8000/docs 查看交互式 API 文档
-
-### 🏥 项目健康检查
-
-运行全面的项目健康检查，确保所有组件正常工作：
+- DeepSeek for providing powerful LLM capabilities
+- arXiv and Semantic Scholar for academic data access
+- The open-source community for excellent tools and libraries
 
 ```bash
 # 运行健康检查脚本
@@ -345,25 +267,25 @@ python scripts/smart_start.py --mode local
 
 编辑 `config/features.env` 文件控制功能模块：
 
-| 功能开关                        | 描述                | 默认值  |
-| ------------------------------- | ------------------- | ------- |
-| `ENABLE_CORE_RETRIEVAL`         | 核心检索功能        | `true`  |
-| `ENABLE_CORE_PROCESSING`        | 核心处理功能        | `true`  |
-| `ENABLE_CORE_API`               | 核心 API 功能       | `true`  |
-| `ENABLE_TREND_ANALYSIS`         | 趋势分析功能        | `true`  |
-| `ENABLE_STREAMLIT_UI`           | Streamlit 界面      | `true`  |
-| `ENABLE_VUE_FRONTEND`           | Vue3 前端界面       | `true`  |
-| `ENABLE_MCP_SERVER`             | MCP 协议服务器      | `false` |
-| `ENABLE_PROMETHEUS`             | Prometheus 监控     | `false` |
-| `ENABLE_GRAFANA`                | Grafana 仪表板      | `false` |
+| 功能开关                 | 描述            | 默认值  |
+| ------------------------ | --------------- | ------- |
+| `ENABLE_CORE_RETRIEVAL`  | 核心检索功能    | `true`  |
+| `ENABLE_CORE_PROCESSING` | 核心处理功能    | `true`  |
+| `ENABLE_CORE_API`        | 核心 API 功能   | `true`  |
+| `ENABLE_TREND_ANALYSIS`  | 趋势分析功能    | `true`  |
+| `ENABLE_STREAMLIT_UI`    | Streamlit 界面  | `true`  |
+| `ENABLE_VUE_FRONTEND`    | Vue3 前端界面   | `true`  |
+| `ENABLE_MCP_SERVER`      | MCP 协议服务器  | `false` |
+| `ENABLE_PROMETHEUS`      | Prometheus 监控 | `false` |
+| `ENABLE_GRAFANA`         | Grafana 仪表板  | `false` |
 
 ### Docker 配置 ⭐ **已优化**
 
-| 环境变量                   | 描述                | 默认值              |
-| -------------------------- | ------------------- | ------------------- |
-| `UVICORN_WORKERS`          | Uvicorn 工作进程数  | `1`                 |
-| `REDIS_MAXMEMORY`          | Redis 最大内存      | `256mb`             |
-| `GRAFANA_ADMIN_PASSWORD`   | Grafana 管理员密码  | `TsearchAdmin2024!` |
+| 环境变量                 | 描述               | 默认值              |
+| ------------------------ | ------------------ | ------------------- |
+| `UVICORN_WORKERS`        | Uvicorn 工作进程数 | `1`                 |
+| `REDIS_MAXMEMORY`        | Redis 最大内存     | `256mb`             |
+| `GRAFANA_ADMIN_PASSWORD` | Grafana 管理员密码 | `TsearchAdmin2024!` |
 
 ### 数据源配置
 

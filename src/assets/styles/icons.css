@@ -1,0 +1,69 @@
+/* 图标增强样式 */
+.icon-enhanced {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.icon-enhanced:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(79, 70, 229, 0.5));
+}
+
+.icon-brain {
+  color: var(--neon-blue);
+  animation: pulse-tech 3s infinite;
+}
+
+.icon-search {
+  color: var(--tech-primary);
+}
+
+.icon-document {
+  color: var(--tech-secondary);
+}
+
+.icon-star {
+  color: var(--tech-warning);
+}
+
+.icon-download {
+  color: var(--tech-success);
+}
+
+.icon-settings {
+  color: var(--tech-accent);
+}
+
+/* 图标容器 */
+.icon-container {
+  width: 48px;
+  height: 48px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: var(--glass-backdrop);
+}
+
+.icon-container:hover {
+  background: rgba(79, 70, 229, 0.1);
+  border-color: var(--tech-primary);
+  transform: scale(1.05);
+}
+
+.icon-container-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+}
+
+.icon-container-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+} 
