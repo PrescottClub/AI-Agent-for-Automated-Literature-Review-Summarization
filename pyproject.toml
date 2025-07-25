@@ -62,7 +62,6 @@ dependencies = [
     # Web frameworks
     "fastapi>=0.100.0",
     "uvicorn>=0.23.0",
-    "streamlit>=1.25.0",
     "mcp[cli]>=1.9.1",
     
     # Caching

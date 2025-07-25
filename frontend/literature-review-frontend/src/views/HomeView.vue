@@ -155,7 +155,7 @@
               <div class="absolute inset-0 bg-gradient-to-br from-warning-50 to-warning-100 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div class="relative bg-white/80 backdrop-blur-sm border border-neutral-200 rounded-2xl p-8 text-center shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1">
                 <div class="text-4xl mb-4">⚡</div>
-                <div class="text-3xl font-bold text-warning-600 mb-2">2.3s</div>
+                <div class="text-3xl font-bold text-warning-600 mb-2">{{ processingTime }}s</div>
                 <div class="text-neutral-500 font-medium">平均响应时间</div>
               </div>
             </div>
@@ -213,7 +213,7 @@
                       <span>字符数: {{ searchQuery.length }}/2000</span>
                     </div>
                   </div>
-                  
+
                   <el-input
                     v-model="searchQuery"
                     type="textarea"
@@ -224,10 +224,10 @@
                     @keyup.enter.ctrl="startSearch"
                     @input="handleSearchInput"
                   />
-                  
+
                   <!-- AI智能提示浮层 -->
                   <div class="absolute inset-x-0 top-full mt-2 z-10">
-                    <div v-if="searchQuery.length > 20 && aiSuggestions.length > 0" 
+                    <div v-if="searchQuery.length > 20 && aiSuggestions.length > 0"
                          class="bg-white/95 backdrop-blur-md border border-primary-200/50 rounded-2xl p-4 shadow-large">
                       <div class="flex items-center space-x-2 mb-3">
                         <div class="w-5 h-5 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center">
@@ -249,10 +249,10 @@
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- 输入框装饰和功能按钮 -->
                   <div class="absolute top-16 right-4 flex items-center space-x-3">
-                    <button v-if="searchQuery.length > 0" 
+                    <button v-if="searchQuery.length > 0"
                             @click="clearSearch"
                             class="p-1.5 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -638,32 +638,32 @@ const generateAISuggestions = (query: string) => {
     aiSuggestions.value = []
     return
   }
-  
+
   // 基于关键词的智能建议生成
   const suggestions = []
-  
+
   if (query.includes('深度学习') || query.includes('机器学习')) {
     suggestions.push('建议添加时间范围：如"2020年以来"或"最近5年"')
     suggestions.push('可以指定应用领域：如"在医疗领域"、"在计算机视觉中"')
     suggestions.push('考虑添加技术细节：如"基于CNN"、"使用Transformer架构"')
   }
-  
+
   if (query.includes('医疗') || query.includes('诊断')) {
     suggestions.push('建议明确医疗子领域：如"影像诊断"、"病理分析"、"药物发现"')
     suggestions.push('可以关注临床应用：如"FDA批准"、"临床试验结果"')
   }
-  
+
   if (query.includes('最新') || query.includes('进展')) {
     suggestions.push('建议指定时间窗口：如"2023-2024年"、"近两年内"')
     suggestions.push('可以关注顶会论文：如"NIPS"、"ICLR"、"Nature"期刊')
   }
-  
+
   if (suggestions.length === 0) {
     suggestions.push('尝试添加更多具体细节来提高检索精度')
     suggestions.push('可以包含研究方法、应用场景或技术关键词')
     suggestions.push('建议指定发表时间范围以获取最新研究')
   }
-  
+
   aiSuggestions.value = suggestions.slice(0, 3)
 }
 
@@ -672,7 +672,8 @@ const handleSearchInput = (value: string) => {
 }
 
 const applySuggestion = (suggestion: string) => {
-  // 简单的建议应用逻辑，实际可以更智能
+  // 应用AI建议到搜索框
+  searchQuery.value = suggestion
   ElMessage.success('AI建议已应用，请根据提示完善您的查询')
   aiSuggestions.value = []
 }
@@ -711,6 +712,7 @@ const handleLogin = async (username: string, password: string) => {
     showLogin.value = false
     return true
   } catch (error) {
+    console.error('Login error:', error)
     ElMessage.error('登录失败，请检查用户名和密码')
     return false
   }
@@ -721,11 +723,11 @@ const handleLoginForm = async () => {
     ElMessage.warning('请输入用户名和密码')
     return
   }
-  
+
   isLoggingIn.value = true
   const success = await handleLogin(loginForm.value.username, loginForm.value.password)
   isLoggingIn.value = false
-  
+
   if (success) {
     // 登录成功后可以自动重新执行之前的操作
   }
@@ -782,7 +784,7 @@ const startSearch = async () => {
     }
 
     const data = await response.json()
-    
+
     // 处理返回的数据
     actionPlan.value = data.actionPlan || []
     searchResults.value = data.papers || []
@@ -824,14 +826,14 @@ const generateReport = async () => {
     ElMessage.warning('没有可用的论文数据生成报告')
     return
   }
-  
+
   if (!isAuthenticated()) {
     ElMessage.error('需要登录才能生成报告')
     return
   }
-  
+
   isGeneratingReport.value = true
-  
+
   try {
     const response = await fetch('http://localhost:8000/api/generate-report', {
       method: 'POST',
@@ -976,7 +978,7 @@ watch(searchHistory, (newHistory) => {
   line-height: 1.7 !important;
   resize: none !important;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 
+  box-shadow:
     0 0 0 1px rgba(14, 165, 233, 0.1),
     0 8px 32px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
@@ -985,7 +987,7 @@ watch(searchHistory, (newHistory) => {
 
 .search-input-ai-enhanced :deep(.el-textarea__inner):focus {
   background: rgba(255, 255, 255, 1) !important;
-  box-shadow: 
+  box-shadow:
     0 0 0 2px rgba(14, 165, 233, 0.2),
     0 0 0 4px rgba(14, 165, 233, 0.1),
     0 12px 40px rgba(14, 165, 233, 0.15) !important;
