@@ -380,43 +380,38 @@ class LLMManager(LoggerMixin):
         Returns:
             Dictionary containing extracted parameters: topic, time_limit, focus
         """
-        system_prompt = """You are an expert research assistant. Your task is to extract key parameters from a user's research query.
+        system_prompt = """Extract research parameters and translate Chinese to English. Return only JSON.
 
-The parameters to extract are:
-1. 'topic': The main subject of the research.
-2. 'time_limit': Any specified time constraint (e.g., "last year", "since 2020", "recent"). If not specified, return null.
-3. 'focus': Specific sub-topics, keywords, or aspects the user wants to concentrate on. If not specified, return null.
-
-Return the output as a JSON object with keys "topic", "time_limit", and "focus".
-If a parameter is not found, its value should be null.
+Parameters:
+- topic: main subject (English)
+- time_limit: time constraint (English)
+- focus: specific aspects (English)
 
 Examples:
-- Query: "machine learning in healthcare applications from 2020 to 2023"
-  Output: {"topic": "machine learning in healthcare applications", "time_limit": "2020 to 2023", "focus": null}
+"machine learning in healthcare 2020-2023" → {"topic": "machine learning in healthcare", "time_limit": "2020 to 2023", "focus": null}
+"quantum computing cryptography since 2020" → {"topic": "quantum computing in cryptography", "time_limit": "since 2020", "focus": null}
+"深度学习最新研究" → {"topic": "deep learning", "time_limit": "recent", "focus": null}
+"量子计算在密码学中的应用" → {"topic": "quantum computing in cryptography", "time_limit": null, "focus": "applications"}"""
 
-- Query: "recent advances in natural language processing, focusing on transformer architectures"
-  Output: {"topic": "natural language processing", "time_limit": "recent", "focus": "transformer architectures"}
-
-- Query: "quantum computing"
-  Output: {"topic": "quantum computing", "time_limit": null, "focus": null}"""
-
-        user_prompt = f'User Query: "{query}"\n\nJSON Output:'
+        user_prompt = f'"{query}" → '
 
         try:
             response_text = await self.generate_completion(
                 prompt=user_prompt,
                 system_prompt=system_prompt,
-                max_tokens=200,
+                max_tokens=500,
                 temperature=0.1,
             )
 
             if not response_text:
                 self.logger.error(
                     "No response from LLM for parameter extraction")
-                return {"topic": query, "time_limit": None, "focus": None}
+                # Use fallback translation
+                return self._fallback_chinese_translation(query)
 
             # Try to parse JSON response
             import json
+            import re
 
             try:
                 # Clean the response to extract JSON
@@ -426,6 +421,11 @@ Examples:
                 if response_text.endswith("```"):
                     response_text = response_text[:-3]
                 response_text = response_text.strip()
+
+                # Try to extract JSON from response using regex as backup
+                json_match = re.search(r'\{[^{}]*\}', response_text)
+                if json_match:
+                    response_text = json_match.group()
 
                 parsed_params = json.loads(response_text)
 
@@ -448,13 +448,54 @@ Examples:
                 self.logger.warning(
                     f"Failed to parse JSON response: {e}. Response: {response_text}"
                 )
-                # Fallback: use the original query as topic
-                return {"topic": query, "time_limit": None, "focus": None}
+                # Fallback: simple pattern matching for Chinese queries
+                return self._fallback_chinese_translation(query)
 
         except Exception as e:
             self.logger.error(f"Error extracting research parameters: {e}")
-            # Fallback: use the original query as topic
-            return {"topic": query, "time_limit": None, "focus": None}
+            # Fallback: simple pattern matching for Chinese queries
+            return self._fallback_chinese_translation(query)
+
+    def _fallback_chinese_translation(self, query: str) -> Dict[str, Optional[str]]:
+        """Simple pattern matching for common Chinese research queries."""
+        import re
+        query_lower = query.lower()
+        
+        # Time patterns
+        time_limit = None
+        if "2020" in query:
+            if "以来" in query or "since" in query_lower:
+                time_limit = "since 2020"
+            elif "2021" in query or "2022" in query or "2023" in query or "2024" in query:
+                # Extract year range if present
+                years = re.findall(r'20\d{2}', query)
+                if len(years) >= 2:
+                    time_limit = f"{years[0]} to {years[-1]}"
+                else:
+                    time_limit = "since 2020"
+        elif "最新" in query or "recent" in query_lower:
+            time_limit = "recent"
+        
+        # Topic translation
+        topic = query
+        if "量子计算" in query and "密码" in query:
+            topic = "quantum computing in cryptography"
+        elif "深度学习" in query:
+            topic = "deep learning"
+        elif "机器学习" in query:
+            topic = "machine learning"
+        elif "人工智能" in query:
+            topic = "artificial intelligence"
+        elif "区块链" in query:
+            topic = "blockchain"
+        elif "神经网络" in query:
+            topic = "neural networks"
+        # Add the time constraint to topic if present
+        if time_limit and time_limit not in topic:
+            if "since" in time_limit:
+                topic += f" {time_limit.replace('since', 'from')}"
+        
+        return {"topic": topic, "time_limit": time_limit, "focus": None}
 
     async def generate_completion(
         self,

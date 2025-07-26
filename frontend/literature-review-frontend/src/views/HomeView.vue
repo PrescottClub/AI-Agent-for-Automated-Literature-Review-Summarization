@@ -343,7 +343,7 @@
                   <label class="block text-sm font-semibold text-neutral-700 mb-3">数据源</label>
                   <el-select v-model="selectedSources" multiple placeholder="选择数据源" class="w-full">
                     <el-option label="arXiv" value="arxiv" />
-                    <el-option label="Semantic Scholar" value="semantic_scholar" />
+                    <!-- Semantic Scholar removed - using ArXiv only -->
                   </el-select>
                   <p class="text-xs text-neutral-500">选择要搜索的学术数据库</p>
                 </div>
@@ -477,7 +477,7 @@
           <label class="block text-sm font-semibold text-neutral-700 mb-3">默认数据源</label>
           <el-select v-model="defaultSources" multiple placeholder="选择默认数据源" class="w-full">
             <el-option label="arXiv" value="arxiv" />
-            <el-option label="Semantic Scholar" value="semantic_scholar" />
+            <!-- Semantic Scholar removed - using ArXiv only -->
           </el-select>
           <p class="text-xs text-neutral-500 mt-2">设置默认使用的学术数据库</p>
         </div>
@@ -586,7 +586,7 @@ const router = useRouter()
 
 // 响应式数据
 const searchQuery = ref('')
-const selectedSources = ref(['arxiv', 'semantic_scholar'])
+const selectedSources = ref(['arxiv'])  // Only ArXiv supported
 const maxPapers = ref(20)
 const retrieveFullText = ref(false)
 const enableAIAnalysis = ref(true)
@@ -612,7 +612,7 @@ const loginForm = ref({
 const isLoggingIn = ref(false)
 
 // 设置
-const defaultSources = ref(['arxiv', 'semantic_scholar'])
+const defaultSources = ref(['arxiv'])  // Only ArXiv supported
 const defaultMaxPapers = ref(20)
 const language = ref('zh')
 
@@ -906,10 +906,47 @@ onMounted(() => {
   const savedSettings = localStorage.getItem('literatureReviewSettings');
   if (savedSettings) {
     const settings = JSON.parse(savedSettings);
-    defaultSources.value = settings.defaultSources || ['arxiv', 'semantic_scholar'];
+    // 过滤掉不支持的数据源，只保留 arxiv
+    const filteredSources = (settings.defaultSources || ['arxiv']).filter((source: string) => source === 'arxiv');
+    defaultSources.value = filteredSources.length > 0 ? filteredSources : ['arxiv'];
     defaultMaxPapers.value = settings.defaultMaxPapers || 20;
     language.value = settings.language || 'zh';
+
+    // 同时更新当前选择的数据源，确保不包含不支持的源
+    selectedSources.value = [...defaultSources.value];
   }
+
+  // 清理可能存在的旧的搜索设置
+  const savedSearchSettings = localStorage.getItem('searchSettings');
+  if (savedSearchSettings) {
+    try {
+      const searchSettings = JSON.parse(savedSearchSettings);
+      if (searchSettings.sources) {
+        // 过滤掉不支持的数据源
+        const filteredSources = searchSettings.sources.filter((source: string) => source === 'arxiv');
+        selectedSources.value = filteredSources.length > 0 ? filteredSources : ['arxiv'];
+      }
+    } catch (e) {
+      console.warn('Failed to parse saved search settings:', e);
+    }
+  }
+
+  // 强制清理任何可能包含 semantic_scholar 的本地存储
+  console.log('🧹 Cleaning up old semantic_scholar references from localStorage...');
+
+  // 清理并重新保存设置，确保不包含 semantic_scholar
+  const cleanedSettings = {
+    defaultSources: ['arxiv'],
+    defaultMaxPapers: defaultMaxPapers.value,
+    language: language.value
+  };
+  localStorage.setItem('literatureReviewSettings', JSON.stringify(cleanedSettings));
+
+  // 确保当前选择也是干净的
+  selectedSources.value = ['arxiv'];
+
+  console.log('✅ localStorage cleaned, only ArXiv is supported');
+
   const savedHistory = localStorage.getItem('searchHistory');
   if (savedHistory) {
     searchHistory.value = JSON.parse(savedHistory);

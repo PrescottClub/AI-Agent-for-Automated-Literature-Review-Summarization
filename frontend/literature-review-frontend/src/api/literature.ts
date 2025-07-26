@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // API 基础配置
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 30000
+const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT) || 120000  // 增加到2分钟
 
 const api = axios.create({
   baseURL: API_BASE_URL,

@@ -26,7 +26,12 @@ from rich.align import Align
 from rich.logging import RichHandler
 
 # Global console instance for consistent formatting
-console = Console()
+# Fix Windows Unicode encoding issues
+import platform
+if platform.system() == 'Windows':
+    console = Console(force_terminal=True, legacy_windows=False)
+else:
+    console = Console()
 
 
 class LiteratureReviewDisplay:
@@ -48,10 +53,11 @@ class LiteratureReviewDisplay:
         else:
             header_content = title
 
-        # Create panel with border
+        # Create panel with border - use safe characters for Windows
+        title_emoji = "[blue]🔬[/blue]" if platform.system() != 'Windows' else "[blue]*[/blue]"
         panel = Panel(
             Align.center(header_content),
-            title="🔬 Literature Review Agent",
+            title=f"{title_emoji} Literature Review Agent",
             title_align="center",
             border_style="bright_blue",
             padding=(1, 2),
@@ -70,15 +76,18 @@ class LiteratureReviewDisplay:
 
     def print_warning(self, message: str) -> None:
         """Print a warning message."""
-        self.console.print(f"[bold yellow]⚠️  Warning:[/bold yellow] {message}")
+        warning_icon = "⚠️" if platform.system() != 'Windows' else "!"
+        self.console.print(f"[bold yellow]{warning_icon} Warning:[/bold yellow] {message}")
 
     def print_error(self, message: str) -> None:
         """Print an error message."""
-        self.console.print(f"[bold red]❌ Error:[/bold red] {message}")
+        error_icon = "❌" if platform.system() != 'Windows' else "X"
+        self.console.print(f"[bold red]{error_icon} Error:[/bold red] {message}")
 
     def print_success(self, message: str) -> None:
         """Print a success message."""
-        self.console.print(f"[bold green]✅ Success:[/bold green] {message}")
+        success_icon = "✅" if platform.system() != 'Windows' else "+"
+        self.console.print(f"[bold green]{success_icon} Success:[/bold green] {message}")
 
     def create_progress_bar(
         self, description: str, total: Optional[int] = None
@@ -88,18 +97,28 @@ class LiteratureReviewDisplay:
         if self.current_progress:
             self.current_progress.stop()
 
-        self.current_progress = Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            BarColumn(bar_width=40),
-            MofNCompleteColumn(),
-            TextColumn("•"),
-            TimeElapsedColumn(),
-            TextColumn("•"),
-            TimeRemainingColumn(),
-            console=self.console,
-            transient=False,
-        )
+        # Use simpler progress bar for Windows to avoid Unicode issues
+        if platform.system() == 'Windows':
+            self.current_progress = Progress(
+                TextColumn("[progress.description]{task.description}"),
+                TextColumn("-"),
+                TimeElapsedColumn(),
+                console=self.console,
+                transient=False,
+            )
+        else:
+            self.current_progress = Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(bar_width=40),
+                MofNCompleteColumn(),
+                TextColumn("•"),
+                TimeElapsedColumn(),
+                TextColumn("•"),
+                TimeRemainingColumn(),
+                console=self.console,
+                transient=False,
+            )
 
         if total:
             self.current_task = self.current_progress.add_task(description, total=total)
@@ -329,22 +348,35 @@ display = LiteratureReviewDisplay()
 # Convenience functions for direct use
 def print_status(message: str, style: str = "bold green") -> None:
     """Print a status message."""
-    display.print_status(message, style)
+    try:
+        display.print_status(message, style)
+    except UnicodeEncodeError:
+        # Fallback to plain print for Windows encoding issues
+        print(f"[STATUS] {message}")
 
 
 def print_warning(message: str) -> None:
     """Print a warning message."""
-    display.print_warning(message)
+    try:
+        display.print_warning(message)
+    except UnicodeEncodeError:
+        print(f"[WARNING] {message}")
 
 
 def print_error(message: str) -> None:
     """Print an error message."""
-    display.print_error(message)
+    try:
+        display.print_error(message)
+    except UnicodeEncodeError:
+        print(f"[ERROR] {message}")
 
 
 def print_success(message: str) -> None:
     """Print a success message."""
-    display.print_success(message)
+    try:
+        display.print_success(message)
+    except UnicodeEncodeError:
+        print(f"[SUCCESS] {message}")
 
 
 def get_rich_handler() -> RichHandler:

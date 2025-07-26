@@ -3,9 +3,9 @@ import { ref, watch } from 'vue'
 import type { AppSettings } from '@/types/paper'
 
 export const useSettingsStore = defineStore('settings', () => {
-  // 默认设置
+  // 默认设置 - 只使用ArXiv
   const defaultSettings: AppSettings = {
-    defaultSources: ['arxiv', 'semantic_scholar'],
+    defaultSources: ['arxiv'],
     defaultMaxPapers: 20,
     language: 'zh',
     theme: 'auto',

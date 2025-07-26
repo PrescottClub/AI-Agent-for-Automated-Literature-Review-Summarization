@@ -14,13 +14,13 @@ const searchSuggestions = [
   '生物信息学中的大数据分析方法与工具',
 ]
 
-// 数据源选项
+// 数据源选项 - 只支持ArXiv
 const sourceOptions = [
   { label: 'arXiv', value: 'arxiv', description: '物理学、数学、计算机科学等预印本' },
-  { label: 'Semantic Scholar', value: 'semantic_scholar', description: '跨学科学术论文搜索' },
-  { label: 'PubMed', value: 'pubmed', description: '生物医学文献数据库' },
-  { label: 'IEEE Xplore', value: 'ieee', description: '工程技术和计算机科学' },
-  { label: 'ACM Digital Library', value: 'acm', description: '计算机科学专业数据库' },
+  // 其他数据源暂不支持
+  // { label: 'PubMed', value: 'pubmed', description: '生物医学文献数据库' },
+  // { label: 'IEEE Xplore', value: 'ieee', description: '工程技术和计算机科学' },
+  // { label: 'ACM Digital Library', value: 'acm', description: '计算机科学专业数据库' },
 ]
 
 // 搜索进度步骤
@@ -39,9 +39,9 @@ export function useSearch() {
   const searchProgress = ref('')
   const currentProgressStep = ref(0)
 
-  // 搜索参数
+  // 搜索参数 - 只使用ArXiv
   const searchParams = ref<SearchParams>({
-    sources: ['arxiv', 'semantic_scholar'],
+    sources: ['arxiv'],
     maxPapers: 20,
     retrieveFullText: false,
     enableAIAnalysis: true,

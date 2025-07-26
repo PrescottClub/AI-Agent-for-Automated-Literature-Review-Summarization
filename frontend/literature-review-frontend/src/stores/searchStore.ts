@@ -22,7 +22,7 @@ export const useSearchStore = defineStore('search', () => {
   // 当前搜索查询
   const currentQuery = ref('')
   const searchParams = ref<SearchParams>({
-    sources: ['arxiv', 'semantic_scholar'],
+    sources: ['arxiv'], // 只使用ArXiv
     maxPapers: 20,
     retrieveFullText: false,
     enableAIAnalysis: true,

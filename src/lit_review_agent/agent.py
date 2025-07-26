@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import re
+import platform
 
 from .ai_core.llm_manager import LLMManager
 from .processing.text_processor import TextProcessor
@@ -12,13 +13,18 @@ from .processing.vector_store import VectorStore
 from .retrieval.arxiv_client import ArxivClient
 from .retrieval.base_retriever import LiteratureItem
 from .retrieval.pdf_processor import PDFProcessor
-from .retrieval.semantic_scholar_client import SemanticScholarClient
+# Semantic Scholar removed - using ArXiv only
 from .utils.config import Config
 from .utils.logger import LoggerMixin, get_logger, setup_logger
 from .utils.display import display, print_status, print_error, print_success
 from .ai_core.summarizer import Summarizer
 
 logger = get_logger(__name__)
+
+
+def get_emoji_safe(emoji: str, fallback: str = "*") -> str:
+    """Get emoji or fallback character for Windows compatibility."""
+    return emoji if platform.system() != 'Windows' else fallback
 
 
 class LiteratureAgent(LoggerMixin):
@@ -54,9 +60,11 @@ class LiteratureAgent(LoggerMixin):
 
         self.pdf_processor = PDFProcessor()
 
-        self.semantic_scholar_client = SemanticScholarClient(config=self.config)
+        # Semantic Scholar removed - using ArXiv only
+        # self.semantic_scholar_client = SemanticScholarClient(config=self.config)
 
-        self.summarizer = Summarizer(llm_manager=self.llm_manager, config=self.config)
+        self.summarizer = Summarizer(
+            llm_manager=self.llm_manager, config=self.config)
 
         self.logger.info("Initialized Literature Agent")
 
@@ -83,7 +91,7 @@ class LiteratureAgent(LoggerMixin):
         retrieve_full_text = params.get("retrieve_full_text", False)
 
         # Generate plan steps
-        plan.append(f"🎯 确定研究主题：{topic}")
+        plan.append(f"{get_emoji_safe('🎯', '1.')} 确定研究主题：{topic}")
 
         # Time constraint step
         if time_limit or year_start or year_end:
@@ -94,31 +102,31 @@ class LiteratureAgent(LoggerMixin):
                 time_desc = f"{year_start}年至今"
             elif time_limit:
                 time_desc = time_limit
-            plan.append(f"📅 设定时间范围：{time_desc}")
+            plan.append(f"{get_emoji_safe('📅', '2.')} 设定时间范围：{time_desc}")
 
         # Focus area step
         if focus:
-            plan.append(f"🔍 重点关注领域：{focus}")
+            plan.append(f"{get_emoji_safe('🔍', '3.')} 重点关注领域：{focus}")
 
         # Data sources step
         sources_str = "、".join(sources) if sources else "默认数据源"
-        plan.append(f"📚 选择数据源：{sources_str}")
+        plan.append(f"{get_emoji_safe('📚', '4.')} 选择数据源：{sources_str}")
 
         # Search strategy step
         search_strategy = f"检索最多{max_papers}篇相关论文"
         if retrieve_full_text:
             search_strategy += "，并获取全文内容"
-        plan.append(f"🔎 执行检索策略：{search_strategy}")
+        plan.append(f"{get_emoji_safe('🔎', '5.')} 执行检索策略：{search_strategy}")
 
         # Processing steps
-        plan.append("📊 分析论文元数据：标题、作者、摘要、引用数等")
-        plan.append("📈 识别研究趋势：发表时间分布、热点关键词")
+        plan.append(f"{get_emoji_safe('📊', '6.')} 分析论文元数据：标题、作者、摘要、引用数等")
+        plan.append(f"{get_emoji_safe('📈', '7.')} 识别研究趋势：发表时间分布、热点关键词")
 
         if retrieve_full_text:
-            plan.append("📄 处理全文内容：提取关键信息和核心观点")
+            plan.append(f"{get_emoji_safe('📄', '8.')} 处理全文内容：提取关键信息和核心观点")
 
-        plan.append("🤖 AI智能分析：生成综合性研究洞察")
-        plan.append("📝 生成最终报告：整理发现和建议")
+        plan.append(f"{get_emoji_safe('🤖', '9.')} AI智能分析：生成综合性研究洞察")
+        plan.append(f"{get_emoji_safe('📝', '10.')} 生成最终报告：整理发现和建议")
 
         return plan
 
@@ -183,7 +191,8 @@ class LiteratureAgent(LoggerMixin):
                     year_end = current_year
                 elif "since" in time_limit.lower():
                     # Try to extract year from "since YYYY"
-                    year_match = re.search(r"since\s+(\d{4})", time_limit.lower())
+                    year_match = re.search(
+                        r"since\s+(\d{4})", time_limit.lower())
                     if year_match:
                         year_start = int(year_match.group(1))
                         year_end = current_year
@@ -200,7 +209,8 @@ class LiteratureAgent(LoggerMixin):
             if focus:
                 # Enhance the research topic with focus keywords
                 research_topic = f"{research_topic} {focus}"
-                print_status(f"Enhanced search query with focus: {research_topic}")
+                print_status(
+                    f"Enhanced search query with focus: {research_topic}")
 
         elif research_topic and not raw_query:
             # Legacy mode - use research_topic directly
@@ -215,7 +225,8 @@ class LiteratureAgent(LoggerMixin):
             f"Max Papers: {max_papers} | Full Text: {'Yes' if retrieve_full_text else 'No'}",
         )
 
-        self.logger.info(f"Starting literature review for topic: '{research_topic}'")
+        self.logger.info(
+            f"Starting literature review for topic: '{research_topic}'")
         self.logger.debug(
             f"Parameters: max_papers={max_papers}, sources={sources}, retrieve_full_text={retrieve_full_text}, "
             f"year_start={year_start}, year_end={year_end}"
@@ -240,11 +251,12 @@ class LiteratureAgent(LoggerMixin):
         )
 
         # Display action plan
-        print_status("📋 生成的行动计划:")
+        print_status(f"{get_emoji_safe('📋', 'Plan:')} 生成的行动计划:")
         for i, step in enumerate(action_plan, 1):
             print(f"  {i}. {step}")
 
-        self.logger.info(f"Generated action plan with {len(action_plan)} steps")
+        self.logger.info(
+            f"Generated action plan with {len(action_plan)} steps")
 
         if sources is None:
             sources = self.config.default_retrieval_sources
@@ -255,7 +267,8 @@ class LiteratureAgent(LoggerMixin):
 
         # Ensure sources is a list, even if it's from config as a string
         if isinstance(sources, str):
-            sources = [s.strip().lower() for s in sources.split(",") if s.strip()]
+            sources = [s.strip().lower()
+                       for s in sources.split(",") if s.strip()]
 
         retrieved_items: List[LiteratureItem] = []
         processed_papers = []
@@ -263,8 +276,7 @@ class LiteratureAgent(LoggerMixin):
         active_sources_count = 0
         if "arxiv" in sources and self.arxiv_client:
             active_sources_count += 1
-        if "semantic_scholar" in sources and self.semantic_scholar_client:
-            active_sources_count += 1
+        # Semantic Scholar removed - using ArXiv only
         # Add other sources here when they are implemented
 
         papers_per_source = (
@@ -283,7 +295,8 @@ class LiteratureAgent(LoggerMixin):
         )
 
         # Create progress bar for retrieval
-        total_steps = len([s for s in sources if s in ["arxiv", "semantic_scholar"]])
+        total_steps = len([s for s in sources if s in [
+                          "arxiv", "semantic_scholar"]])
         if retrieve_full_text:
             total_steps += 1  # Add step for full text processing
         total_steps += 1  # Add step for AI processing
@@ -296,7 +309,8 @@ class LiteratureAgent(LoggerMixin):
         try:
             if "arxiv" in sources and self.arxiv_client:
                 try:
-                    display.update_progress(description="🔍 Searching arXiv...")
+                    display.update_progress(
+                        description=f"{get_emoji_safe('🔍', '>')} Searching arXiv...")
                     print_status(
                         f"Retrieving up to {papers_per_source} papers from arXiv..."
                     )
@@ -321,41 +335,10 @@ class LiteratureAgent(LoggerMixin):
                         f"Error retrieving from arXiv: {e}", exc_info=True
                     )
 
-            if "semantic_scholar" in sources and self.semantic_scholar_client:
-                try:
-                    display.update_progress(
-                        description="🔍 Searching Semantic Scholar..."
-                    )
-                    print_status(
-                        f"Retrieving up to {papers_per_source} papers from Semantic Scholar..."
-                    )
-                    self.logger.info(
-                        f"Retrieving up to {papers_per_source} papers from Semantic Scholar for topic: '{research_topic}'"
-                    )
-
-                    s2_papers_items = await self.semantic_scholar_client.search(
-                        query=research_topic,
-                        max_results=papers_per_source,
-                        year_start=year_start,
-                        year_end=year_end,
-                    )
-                    # Will deduplicate later
-                    retrieved_items.extend(s2_papers_items)
-                    print_success(
-                        f"Retrieved {len(s2_papers_items)} items from Semantic Scholar"
-                    )
-                    self.logger.info(
-                        f"Retrieved {len(s2_papers_items)} items from Semantic Scholar (pre-deduplication)."
-                    )
-                    display.update_progress(advance=1)
-                except Exception as e:
-                    print_error(f"Error retrieving from Semantic Scholar: {e}")
-                    self.logger.error(
-                        f"Error retrieving from Semantic Scholar: {e}", exc_info=True
-                    )
+            # Semantic Scholar removed - using ArXiv only
 
             display.update_progress(
-                description="🔄 Processing and deduplicating results..."
+                description=f"{get_emoji_safe('🔄', '>')} Processing and deduplicating results..."
             )
             print_status(
                 f"Total items retrieved from all sources: {len(retrieved_items)}"
@@ -387,7 +370,8 @@ class LiteratureAgent(LoggerMixin):
                     seen_ids_for_dedup.add(unique_id)
                 temp_deduped_items_by_id.append(item)
             retrieved_items = temp_deduped_items_by_id
-            print_status(f"{len(retrieved_items)} items after ID-based deduplication")
+            print_status(
+                f"{len(retrieved_items)} items after ID-based deduplication")
             self.logger.info(
                 f"{len(retrieved_items)} items after ID-based deduplication (DOI/ArXiv ID)."
             )
@@ -435,7 +419,7 @@ class LiteratureAgent(LoggerMixin):
 
             if retrieve_full_text:
                 display.update_progress(
-                    description="📄 Retrieving full text content..."
+                    description=f"{get_emoji_safe('📄', '>')} Retrieving full text content..."
                 )
                 print_status(
                     f"Attempting to retrieve full text for {len(retrieved_items)} items..."
@@ -447,7 +431,7 @@ class LiteratureAgent(LoggerMixin):
                 success_count = 0
                 for i, item in enumerate(retrieved_items):
                     display.update_progress(
-                        description=f"📄 Processing PDF {i+1}/{len(retrieved_items)}: {item.title[:25]}..."
+                        description=f"{get_emoji_safe('📄', '>')} Processing PDF {i+1}/{len(retrieved_items)}: {item.title[:25]}..."
                     )
 
                     if item.pdf_url:
@@ -487,12 +471,14 @@ class LiteratureAgent(LoggerMixin):
                 display.update_progress(advance=1)
 
             # AI Processing stage
-            display.update_progress(description="🤖 Processing with AI...")
-            print_status(f"Starting AI processing for {len(retrieved_items)} papers...")
+            display.update_progress(
+                description=f"{get_emoji_safe('🤖', '>')} Processing with AI...")
+            print_status(
+                f"Starting AI processing for {len(retrieved_items)} papers...")
 
             for i, item in enumerate(retrieved_items):
                 display.update_progress(
-                    description=f"🤖 AI processing {i+1}/{len(retrieved_items)}: {item.title[:25]}..."
+                    description=f"{get_emoji_safe('🤖', '>')} AI processing {i+1}/{len(retrieved_items)}: {item.title[:25]}..."
                 )
                 self.logger.debug(
                     f"Final processing stage for item: '{item.title}' (ID: {item.id})"
@@ -543,7 +529,7 @@ class LiteratureAgent(LoggerMixin):
                         "published_date": (
                             item.publication_date.isoformat()
                             if item.publication_date
-                            else None
+                            else ""
                         ),
                         "url": item.url,
                         "pdf_url": item.pdf_url,
@@ -551,7 +537,8 @@ class LiteratureAgent(LoggerMixin):
                         "ai_enhanced_summary": ai_summary,
                         "full_text_retrieved": bool(item.full_text),
                         "full_text_snippet": (
-                            item.full_text[:200] + "..." if item.full_text else None
+                            item.full_text[:200] +
+                            "..." if item.full_text else None
                         ),
                         "keywords": keywords,
                         "source": item.source,
@@ -563,7 +550,8 @@ class LiteratureAgent(LoggerMixin):
 
         except Exception as e:
             print_error(f"Error during literature review: {e}")
-            self.logger.error(f"Error during literature review: {e}", exc_info=True)
+            self.logger.error(
+                f"Error during literature review: {e}", exc_info=True)
         finally:
             display.finish_progress()
 
@@ -577,13 +565,21 @@ class LiteratureAgent(LoggerMixin):
         }
 
         # Show summary panel
-        summary_panel = display.create_summary_panel(results)
-        display.console.print(summary_panel)
+        try:
+            summary_panel = display.create_summary_panel(results)
+            display.console.print(summary_panel)
+        except UnicodeEncodeError:
+            print(
+                f"[SUMMARY] Literature review completed for: {research_topic}")
+            print(f"Papers processed: {len(processed_papers)}")
 
         # Show papers table
         if processed_papers:
-            papers_table = display.create_papers_table(processed_papers)
-            display.console.print(papers_table)
+            try:
+                papers_table = display.create_papers_table(processed_papers)
+                display.console.print(papers_table)
+            except UnicodeEncodeError:
+                print("[PAPERS] Paper list display skipped due to encoding issues")
 
         print_success(
             f"Literature review completed! Processed {len(processed_papers)} papers"
@@ -610,7 +606,8 @@ class LiteratureAgent(LoggerMixin):
         try:
             self.logger.info(f"Searching for similar papers: {query}")
 
-            results = self.vector_store.search_similar(query=query, n_results=n_results)
+            results = self.vector_store.search_similar(
+                query=query, n_results=n_results)
 
             self.logger.info(f"Found {len(results)} similar papers")
             return results
@@ -633,7 +630,8 @@ class LiteratureAgent(LoggerMixin):
             Generated summary or None if failed
         """
         try:
-            self.logger.info(f"Generating custom summary for {len(paper_ids)} papers")
+            self.logger.info(
+                f"Generating custom summary for {len(paper_ids)} papers")
 
             # Retrieve papers from vector store
             paper_texts = []
@@ -643,7 +641,8 @@ class LiteratureAgent(LoggerMixin):
                     paper_texts.append(paper_data["document"])
 
             if not paper_texts:
-                self.logger.warning("No paper texts found for summary generation")
+                self.logger.warning(
+                    "No paper texts found for summary generation")
                 return None
 
             # Combine texts
@@ -683,7 +682,8 @@ class LiteratureAgent(LoggerMixin):
             if not output_file:
                 from datetime import timezone
 
-                timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+                timestamp = datetime.now(
+                    timezone.utc).strftime("%Y%m%d_%H%M%S")
                 topic_safe = "".join(
                     c
                     for c in results.get("topic", "review")
@@ -756,7 +756,8 @@ class LiteratureAgent(LoggerMixin):
             report_data = await report_generator.generate_comprehensive_report(
                 papers=papers, topic=topic, output_format=output_format
             )
-            self.logger.info(f"Successfully generated full report for topic '{topic}'.")
+            self.logger.info(
+                f"Successfully generated full report for topic '{topic}'.")
             return report_data
         except Exception as e:
             self.logger.error(f"Error generating full report: {e}")
@@ -788,7 +789,8 @@ class LiteratureAgent(LoggerMixin):
         """Generate a markdown report from results."""
         lines = []
 
-        lines.append(f"# Literature Review: {results.get('topic', 'Unknown Topic')}")
+        lines.append(
+            f"# Literature Review: {results.get('topic', 'Unknown Topic')}")
         lines.append(f"\nGenerated on: {results.get('timestamp', 'Unknown')}")
         lines.append("\n---\n")
 
@@ -934,7 +936,8 @@ if __name__ == "__main__":
 
         topic = "transformers in natural language processing"
         print_status(f"Starting literature review for: '{topic}'")
-        print_status(f"Using sources: {custom_config.default_retrieval_sources}")
+        print_status(
+            f"Using sources: {custom_config.default_retrieval_sources}")
 
         # The conduct_literature_review method now handles all the display automatically
         review_results = await agent.conduct_literature_review(

@@ -1,6 +1,7 @@
 """ArXiv API client for literature retrieval."""
 
 import asyncio
+import re
 from datetime import datetime
 from typing import List, Optional
 
@@ -12,6 +13,51 @@ from .base_retriever import BaseRetriever, LiteratureItem
 class ArxivClient(BaseRetriever, LoggerMixin):
     """Client for retrieving literature from arXiv."""
 
+    # 中文关键词到英文的映射
+    CHINESE_TO_ENGLISH = {
+        # 基础术语
+        "深度学习": "deep learning",
+        "机器学习": "machine learning",
+        "人工智能": "artificial intelligence",
+        "神经网络": "neural network",
+        "卷积神经网络": "convolutional neural network",
+        "循环神经网络": "recurrent neural network",
+        "transformer": "transformer",
+        "注意力机制": "attention mechanism",
+        "自然语言处理": "natural language processing",
+        "计算机视觉": "computer vision",
+        "强化学习": "reinforcement learning",
+
+        # 优化相关
+        "优化算法": "optimization algorithm",
+        "梯度下降": "gradient descent",
+        "反向传播": "backpropagation",
+        "损失函数": "loss function",
+        "正则化": "regularization",
+        "批量归一化": "batch normalization",
+        "学习率": "learning rate",
+
+        # 应用领域
+        "医疗": "medical",
+        "诊断": "diagnosis",
+        "图像识别": "image recognition",
+        "语音识别": "speech recognition",
+        "推荐系统": "recommendation system",
+        "自动驾驶": "autonomous driving",
+
+        # 研究相关
+        "最新研究": "recent research",
+        "综述": "survey",
+        "算法": "algorithm",
+        "模型": "model",
+        "方法": "method",
+        "技术": "technique",
+        "应用": "application",
+        "性能": "performance",
+        "准确率": "accuracy",
+        "效果": "effectiveness"
+    }
+
     def __init__(self, max_results: int = 100, **kwargs):
         """
         Initialize the ArXiv client.
@@ -22,14 +68,67 @@ class ArxivClient(BaseRetriever, LoggerMixin):
         """
         super().__init__(**kwargs)
         self.max_results = max_results
-        self.client = arxiv.Client()
+
+        # Configure ArXiv client with better timeout and retry settings
+        self.client = arxiv.Client(
+            page_size=100,  # Fetch more results per request
+            delay_seconds=3,  # Respect rate limits
+            num_retries=3  # Retry failed requests
+        )
 
         self.logger.info(
-            f"Initialized ArXiv client with max_results={max_results}")
+            f"Initialized ArXiv client with max_results={max_results}, "
+            f"page_size=100, delay=3s, retries=3")
 
     def get_source_name(self) -> str:
         """Get the source name."""
         return "arxiv"
+
+    def translate_chinese_query(self, query: str) -> str:
+        """
+        将中文查询翻译为英文查询
+
+        Args:
+            query: 原始查询字符串
+
+        Returns:
+            翻译后的英文查询字符串
+        """
+        if not query or not isinstance(query, str):
+            return query
+
+        # 检查是否包含中文字符
+        has_chinese = any('\u4e00' <= char <= '\u9fff' for char in query)
+        if not has_chinese:
+            return query
+
+        # 记录原始查询
+        self.logger.info(f"Translating Chinese query: '{query}'")
+
+        # 简单的关键词替换翻译
+        translated_query = query
+        for chinese, english in self.CHINESE_TO_ENGLISH.items():
+            if chinese in translated_query:
+                translated_query = translated_query.replace(chinese, english)
+                self.logger.info(f"Replaced '{chinese}' with '{english}'")
+
+        # 移除常见的中文连接词和标点
+        chinese_stopwords = ["的", "在", "中", "与", "和", "或", "关于", "对于", "基于", "通过", "使用", "采用", "研究", "分析", "方法", "技术", "算法",
+                             "模型", "系统", "应用", "实现", "设计", "开发", "提出", "改进", "优化", "评估", "实验", "结果", "效果", "性能", "比较", "分析", "讨论", "总结", "结论"]
+        for stopword in chinese_stopwords:
+            translated_query = translated_query.replace(stopword, " ")
+
+        # 清理多余的空格
+        translated_query = " ".join(translated_query.split())
+
+        # 如果翻译后为空或只有标点，使用默认查询
+        if not translated_query.strip() or len(translated_query.strip()) < 3:
+            translated_query = "machine learning"
+            self.logger.warning(
+                f"Translation resulted in empty query, using default: '{translated_query}'")
+
+        self.logger.info(f"Final translated query: '{translated_query}'")
+        return translated_query
 
     async def search(
         self,
@@ -53,9 +152,21 @@ class ArxivClient(BaseRetriever, LoggerMixin):
             List of literature items
         """
         try:
-            self.logger.info(
-                f"Searching ArXiv: query='{query}', max_results={max_results}"
-            )
+            # 处理中文查询
+            original_query = query
+            if isinstance(query, str):
+                # 自动翻译中文查询
+                query = self.translate_chinese_query(query)
+
+                # 记录查询信息
+                if original_query != query:
+                    self.logger.info(
+                        f"Searching ArXiv: original_query='{original_query}' -> translated_query='{query}', max_results={max_results}"
+                    )
+                else:
+                    self.logger.info(
+                        f"Searching ArXiv: query='{query}', max_results={max_results}"
+                    )
 
             # Create search object
             search = arxiv.Search(
@@ -65,10 +176,18 @@ class ArxivClient(BaseRetriever, LoggerMixin):
                 sort_order=sort_order,
             )
 
-            # Execute search asynchronously
+            # Execute search with timeout
+            def search_arxiv():
+                try:
+                    return list(self.client.results(search))
+                except Exception as e:
+                    self.logger.error(f"ArXiv API error: {e}")
+                    return []
+
             loop = asyncio.get_event_loop()
-            results = await loop.run_in_executor(
-                None, lambda: list(self.client.results(search))
+            results = await asyncio.wait_for(
+                loop.run_in_executor(None, search_arxiv),
+                timeout=45  # 45秒超时，给ArXiv API足够时间
             )
 
             # Convert to LiteratureItem objects
@@ -81,12 +200,12 @@ class ArxivClient(BaseRetriever, LoggerMixin):
                 f"Retrieved {len(literature_items)} papers from ArXiv")
             return literature_items
 
+        except asyncio.TimeoutError:
+            self.logger.error("ArXiv search timed out")
+            raise Exception("ArXiv search timed out after 45 seconds")
         except Exception as e:
             self.logger.error(f"Error searching ArXiv: {e}")
-            # 如果网络失败，返回模拟数据以确保系统可用
-            self.logger.warning(
-                "Falling back to mock data due to network issues")
-            return self._generate_mock_data(query, max_results)
+            raise Exception(f"ArXiv search failed: {e}")
 
     async def get_by_id(self, item_id: str) -> Optional[LiteratureItem]:
         """
